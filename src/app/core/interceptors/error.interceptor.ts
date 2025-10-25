@@ -38,7 +38,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
             localStorage.removeItem('USER');
 
             // Redirigir al login
-            router.navigate(['/auth/login']);
+            router.navigate(['/login']);
             break;
 
           case 403:

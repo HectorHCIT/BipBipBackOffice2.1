@@ -21,6 +21,7 @@ import { IntercomService } from './intercom.service';
 import { NavigationCacheService } from './navigation-cache.service';
 import { NavigationService } from './navigation.service';
 import { DataService } from './data.service';
+import { GlobalDataService } from './global-data.service';
 import { environment } from '../../../environments/environment';
 
 /**
@@ -46,6 +47,7 @@ export class AuthService {
   private readonly navigationCache = inject(NavigationCacheService);
   private readonly navigationService = inject(NavigationService);
   private readonly dataService = inject(DataService);
+  private readonly globalDataService = inject(GlobalDataService);
 
   // Constants
   private readonly JWT_TOKEN = 'JWT_TOKEN';
@@ -187,6 +189,9 @@ export class AuthService {
         if (currentUserId) {
           this.navigationService.connectChatNotifications(currentUserId);
         }
+
+        // 🌍 Cargar datos globales después del login
+        this.globalDataService.loadAll();
       },
       error: (error) => {
         console.error('Error cargando rutas completas:', error);
@@ -199,6 +204,9 @@ export class AuthService {
         if (currentUserId) {
           this.navigationService.connectChatNotifications(currentUserId);
         }
+
+        // 🌍 Cargar datos globales incluso si hay error en rutas
+        this.globalDataService.loadAll();
       }
     });
   }
@@ -219,6 +227,9 @@ export class AuthService {
 
     // Limpiar suscripciones de Firebase
     this.navigationService.cleanup();
+
+    // 🌍 Limpiar datos globales
+    this.globalDataService.clearAll();
 
     this.doLogoutUser();
     this.goBackToLogin();
@@ -404,7 +415,7 @@ export class AuthService {
   // ============================================================================
 
   goBackToLogin(): void {
-    this.router.navigate(['/auth/login']);
+    this.router.navigate(['/login']);
   }
 
   /**
