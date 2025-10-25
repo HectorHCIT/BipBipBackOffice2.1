@@ -32,6 +32,11 @@ export const routes: Routes = [
       {
         path: 'maintenance',
         loadChildren: () => import('./features/maintenance/maintenance.routes').then(m => m.MAINTENANCE_ROUTES)
+      },
+      // Contabilidad (Accounting)
+      {
+        path: 'accounting',
+        loadChildren: () => import('./features/accounting/accounting.routes').then(m => m.ACCOUNTING_ROUTES)
       }
       // TODO: Agregar más módulos padre aquí (SAC, App Clientes, Drivers, etc.)
     ]

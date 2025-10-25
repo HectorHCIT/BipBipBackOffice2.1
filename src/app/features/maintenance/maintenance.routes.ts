@@ -6,17 +6,21 @@ import { Routes } from '@angular/router';
  * Este archivo agrupa todas las rutas de los submódulos de Mantenimiento:
  * - Brands (Marcas) ✅
  * - Currencies and Countries (Monedas y Países) ✅
+ * - Prices per Kilometer Delivery (Precios por Kilómetro) ✅
  * - App Configs (Configuraciones de App) - TODO
  * - Automatic Assignment (Asignación Automática) - TODO
  * - Credentials and Permissions (Credenciales y Permisos) - TODO
- * - Prices per Kilometer (Precios por Kilómetro) - TODO
  * - Differentiated Payment (Pagos Diferenciados) - TODO
  *
  * Estructura:
  * /maintenance/brands -> BrandsComponent
  * /maintenance/currencies -> CurrenciesComponent
+ * /maintenance/prices-per-kilometer-delivery -> PricesComponent
  * /maintenance/app-configuration -> AppConfigsComponent (futuro)
  * ...etc
+ *
+ * IMPORTANTE: Las rutas deben mantener la nomenclatura original del backend
+ * para que coincidan con los permisos que se reciben en el login.
  */
 export const MAINTENANCE_ROUTES: Routes = [
   {
@@ -33,6 +37,11 @@ export const MAINTENANCE_ROUTES: Routes = [
     path: 'currencies',
     loadChildren: () => import('./currencies/currencies.routes').then(m => m.CURRENCIES_ROUTES),
     title: 'Gestión de Monedas y Países'
+  },
+  {
+    path: 'prices-per-kilometer-delivery',
+    loadChildren: () => import('./prices-per-kilometer/prices.routes').then(m => m.PRICES_ROUTES),
+    title: 'Precios por Kilómetro'
   }
   // TODO: Agregar más submódulos de mantenimiento aquí
   /*
@@ -50,11 +59,6 @@ export const MAINTENANCE_ROUTES: Routes = [
     path: 'credentials-and-permissions',
     loadChildren: () => import('./credentials-and-permissions/credentials.routes').then(m => m.CREDENTIALS_ROUTES),
     title: 'Credenciales y Permisos'
-  },
-  {
-    path: 'prices-per-kilometer-delivery',
-    loadChildren: () => import('./prices-per-kilometer/prices.routes').then(m => m.PRICES_ROUTES),
-    title: 'Precios por Kilómetro'
   },
   {
     path: 'differentiated-payment',

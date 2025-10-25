@@ -1,0 +1,176 @@
+<!-- Toast para notificaciones -->
+<p-toast />
+
+<!-- Header -->
+<div class="mb-6">
+  <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+    Tipos de Documento
+  </h1>
+  <p class="text-gray-600 dark:text-gray-400">
+    Gestión de tipos de documento para facturación
+  </p>
+</div>
+
+<!-- Toolbar: Filtros + Búsqueda + Botón Crear -->
+<div class="mb-6 space-y-4">
+  <!-- Filtros de estado -->
+  <div class="flex flex-wrap gap-2">
+    @for (filter of statusFilters(); track filter.idStatus) {
+      <button
+        type="button"
+        [class]="
+          'px-4 py-2 rounded-lg font-medium transition-all ' +
+          (activeStatusFilter().idStatus === filter.idStatus
+            ? 'bg-brand-red-default text-white'
+            : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700')
+        "
+        (click)="onStatusFilterChange(filter)"
+      >
+        {{ filter.label }}
+        <span class="ml-2 font-semibold">({{ filter.qty }})</span>
+      </button>
+    }
+  </div>
+
+  <!-- Búsqueda + Botón Crear -->
+  <div class="flex flex-col sm:flex-row gap-3">
+    <!-- Input de búsqueda con iconos -->
+    <div class="flex-1">
+      <p-iconfield iconPosition="left">
+        <p-inputicon>
+          <i class="pi pi-search"></i>
+        </p-inputicon>
+        <input
+          type="text"
+          pInputText
+          [(ngModel)]="searchInput"
+          (keyup.enter)="onSearch()"
+          placeholder="Buscar por nombre..."
+          class="w-full"
+        />
+      </p-iconfield>
+    </div>
+
+    <!-- Botón Crear (Primary = Rojo de marca) -->
+    <p-button
+      label="Crear Tipo de Documento"
+      icon="pi pi-plus"
+      (onClick)="openCreateDrawer()"
+    />
+  </div>
+</div>
+
+<!-- Tabla -->
+<div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+  <p-table
+    [value]="documentTypes()"
+    [loading]="isLoading()"
+    [paginator]="true"
+    [rows]="pageSize()"
+    [totalRecords]="totalRecords()"
+    [lazy]="true"
+    (onLazyLoad)="onPageChange($event)"
+    [first]="currentPage() * pageSize()"
+    [rowsPerPageOptions]="[5, 10, 20]"
+    [showCurrentPageReport]="true"
+    currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} registros"
+    styleClass="p-datatable-sm p-datatable-striped"
+    responsiveLayout="scroll"
+  >
+    <!-- Loading template -->
+    <ng-template pTemplate="loadingbody">
+      <tr>
+        <td colspan="5" class="text-center py-8">
+          <i class="pi pi-spin pi-spinner text-3xl text-gray-400"></i>
+          <p class="mt-2 text-gray-500">Cargando...</p>
+        </td>
+      </tr>
+    </ng-template>
+
+    <!-- Empty template -->
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="5" class="text-center py-8">
+          <i class="pi pi-inbox text-4xl text-gray-400"></i>
+          <p class="mt-2 text-gray-500">No se encontraron tipos de documento</p>
+        </td>
+      </tr>
+    </ng-template>
+
+    <!-- Header -->
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="docTypeNumb">
+          <div class="flex items-center gap-2">
+            Código
+            <p-sortIcon field="docTypeNumb" />
+          </div>
+        </th>
+        <th pSortableColumn="docTypeName">
+          <div class="flex items-center gap-2">
+            Nombre
+            <p-sortIcon field="docTypeName" />
+          </div>
+        </th>
+        <th class="text-center">Estado</th>
+        <th class="text-center">Acciones</th>
+      </tr>
+    </ng-template>
+
+    <!-- Body -->
+    <ng-template pTemplate="body" let-documentType>
+      <tr>
+        <!-- Código -->
+        <td>
+          <span class="font-semibold text-gray-900 dark:text-white">
+            {{ documentType.docTypeNumb }}
+          </span>
+        </td>
+
+        <!-- Nombre -->
+        <td>
+          <span class="text-gray-700 dark:text-gray-300">
+            {{ documentType.docTypeName }}
+          </span>
+        </td>
+
+        <!-- Estado con toggle -->
+        <td class="text-center">
+          <div class="flex items-center justify-center gap-3">
+            <p-tag
+              [value]="documentType.isActive ? 'Activo' : 'Inactivo'"
+              [severity]="getStatusSeverity(documentType.isActive)"
+            />
+            <p-toggleSwitch
+              [ngModel]="documentType.isActive"
+              (ngModelChange)="onStatusToggle(documentType)"
+            />
+          </div>
+        </td>
+
+        <!-- Acciones -->
+        <td class="text-center">
+          <p-button
+            icon="pi pi-pencil"
+            severity="secondary"
+            [outlined]="true"
+            size="small"
+            [rounded]="true"
+            (onClick)="openEditDrawer(documentType)"
+            pTooltip="Editar"
+            tooltipPosition="top"
+          />
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<!-- Drawer de formulario -->
+@if (showDrawer()) {
+  <app-document-type-form
+    [documentTypeId]="selectedDocumentTypeId()"
+    (onClose)="closeDrawer()"
+    (onSave)="onSaveSuccess()"
+  />
+}
