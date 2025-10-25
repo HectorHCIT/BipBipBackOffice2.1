@@ -1,0 +1,133 @@
+<div class="login-container">
+  <!-- Animated floating circles background -->
+  <div class="floating-circles-container">
+    <div class="floating-circle circle-1"></div>
+    <div class="floating-circle circle-2"></div>
+    <div class="floating-circle circle-3"></div>
+    <div class="floating-circle circle-4"></div>
+    <div class="floating-circle circle-5"></div>
+    <div class="floating-circle circle-6"></div>
+    <div class="floating-circle circle-7"></div>
+    <div class="floating-circle circle-8"></div>
+  </div>
+
+  <!-- Logo and title -->
+  <div class="login-header" [class.fade-in]="fadeInState() === 'visible'">
+    <img src="assets/img/loginLogo.png" alt="BipBip Logo" class="logo">
+    <h2 class="title">Inicio de sesión</h2>
+  </div>
+
+  <!-- Login form card -->
+  <div class="login-card-wrapper" [class.slide-in]="slideInState() === 'visible'">
+    <p-card>
+      <!-- Loading overlay -->
+      @if (isLoading()) {
+        <div class="loading-overlay">
+          <div class="loading-content">
+            <!-- Custom BipBip Loader -->
+            <div class="bip-logo-loader"></div>
+
+            <!-- Loading text with animation -->
+            <span class="loading-text">{{ loadingMessage() }}</span>
+
+            <!-- Progress dots -->
+            <div class="progress-dots">
+              <div class="dot"></div>
+              <div class="dot" style="animation-delay: 0.1s"></div>
+              <div class="dot" style="animation-delay: 0.2s"></div>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Form -->
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+        <!-- Email field -->
+        <div class="field">
+          <label for="email">Correo electrónico</label>
+          <input
+            pInputText
+            id="email"
+            formControlName="userName"
+            placeholder="Ingrese su correo electrónico"
+            [disabled]="isLoading()"
+            class="w-full"
+          />
+          @if (userName?.invalid && userName?.touched) {
+            <small class="p-error">
+              @if (userName?.errors?.['required']) {
+                El correo electrónico es requerido
+              }
+              @if (userName?.errors?.['email']) {
+                Ingrese un correo electrónico válido
+              }
+            </small>
+          }
+        </div>
+
+        <!-- Password field -->
+        <div class="field">
+          <label for="password">Contraseña</label>
+          <p-password
+            formControlName="password"
+            [toggleMask]="true"
+            [feedback]="false"
+            placeholder="Ingrese su contraseña"
+            [disabled]="isLoading()"
+            styleClass="w-full"
+            [inputStyleClass]="'w-full'"
+          />
+          @if (password?.invalid && password?.touched) {
+            <small class="p-error">
+              @if (password?.errors?.['required']) {
+                La contraseña es requerida
+              }
+              @if (password?.errors?.['minlength']) {
+                La contraseña debe tener al menos 6 caracteres
+              }
+            </small>
+          }
+        </div>
+
+        <!-- Remember me and forgot password -->
+        <div class="options-row">
+          <div class="remember-me">
+            <p-checkbox
+              [(ngModel)]="rememberMe"
+              [ngModelOptions]="{standalone: true}"
+              [binary]="true"
+              inputId="remember"
+              [disabled]="isLoading()"
+            />
+            <label for="remember" class="ml-2">Recuérdame</label>
+          </div>
+
+          <a
+            href="#"
+            class="forgot-password"
+            [class.disabled]="isLoading()"
+          >
+            ¿Olvidaste la contraseña?
+          </a>
+        </div>
+
+        <!-- Submit button -->
+        <p-button
+          type="submit"
+          label="{{ isLoading() ? 'Iniciando sesión...' : 'Ingresar' }}"
+          [loading]="isLoading()"
+          [disabled]="!isFormValid() || isLoading()"
+          styleClass="w-full"
+          severity="danger"
+        />
+
+        <!-- Form validation message -->
+        @if (!isFormValid() && (userName?.touched || password?.touched)) {
+          <div class="validation-message">
+            <small class="text-muted">Complete todos los campos para continuar</small>
+          </div>
+        }
+      </form>
+    </p-card>
+  </div>
+</div>

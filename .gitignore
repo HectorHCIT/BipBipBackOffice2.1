@@ -41,3 +41,14 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+
+# Environment files (generated automatically from .env)
+# DO NOT commit environment.ts - it contains secrets!
+src/environments/environment.ts
+src/environments/environment.prod.ts
+
+
+old/
+
+.env
+.env.prod

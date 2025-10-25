@@ -1,0 +1,14 @@
+{
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "filesystem",
+    "firebase",
+    "Figma Dev Mode MCP",
+    "primeng"
+  ],
+  "permissions": {
+    "allow": [
+      "Bash(npm run generate:env:*)"
+    ]
+  }
+}

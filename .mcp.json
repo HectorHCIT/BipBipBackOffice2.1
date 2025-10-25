@@ -1,0 +1,28 @@
+{
+  "mcpServers": {
+       "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/Users/henri",
+        "D:"
+      ],
+      "type": "stdio"
+    },
+    "firebase": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "firebase-tools@latest", "experimental:mcp"]
+    },
+    "Figma Dev Mode MCP": {
+      "type": "http",
+      "url": "http://127.0.0.1:3845/sse"
+    },
+    "primeng": {
+      "comment": "OPCIÓN 1: Modo Producción (Requiere npm run build primero)",
+      "command": "node",
+      "args": ["C:\\Users\\henri\\CIT\\primeng-mcp-server\\dist\\index.js"]
+    }
+  }
+}
