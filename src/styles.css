@@ -2,3 +2,11 @@
 @import "tailwindcss";
 
 @import "primeicons/primeicons.css";
+
+/* Configure Tailwind dark mode to use class strategy */
+@variant dark (&.dark, .dark &);
+
+/* Ensure dark mode works with html element */
+html.dark {
+  color-scheme: dark;
+}

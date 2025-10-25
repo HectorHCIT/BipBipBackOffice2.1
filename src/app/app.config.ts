@@ -1,6 +1,6 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { providePrimeNG } from 'primeng/config';
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
@@ -11,6 +11,7 @@ import { definePreset } from '@primeuix/themes';
 import { BipBipPreset } from '../styles/primeng-preset';
 import { routes } from './app.routes';
 import { environment } from '../environments/environment';
+import { authInterceptor, errorInterceptor } from './core/interceptors';
 
 const BipBipTheme = definePreset(Aura, BipBipPreset);
 
@@ -21,15 +22,14 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideAnimationsAsync(),
     provideHttpClient(
-      // TODO: Agregar interceptors cuando estén migrados
-      // withInterceptors([apiKeyInterceptor, errorInterceptor])
+      withInterceptors([authInterceptor, errorInterceptor])
     ),
     providePrimeNG({
       theme: {
         preset: BipBipTheme,
         options: {
           prefix: 'p',
-          darkModeSelector: 'system',
+          darkModeSelector: '.dark',
           cssLayer: false
         }
       }

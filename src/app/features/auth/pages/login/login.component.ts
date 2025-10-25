@@ -1,5 +1,5 @@
 import { Component, signal, computed, inject } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
@@ -28,6 +28,7 @@ import { AuthService } from '@core/services/auth.service';
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    FormsModule,
     ButtonModule,
     InputTextModule,
     PasswordModule,
@@ -50,6 +51,7 @@ export class LoginComponent {
   readonly slideInState = signal('hidden');
   readonly rememberMe = signal(false);
   readonly currentMessageIndex = signal(0);
+  readonly isFormValid = signal(false);
 
   // Form
   readonly loginForm: FormGroup;
@@ -67,15 +69,21 @@ export class LoginComponent {
     return this.loadingMessages[this.currentMessageIndex()];
   });
 
-  readonly isFormValid = computed(() => {
-    return this.loginForm.valid;
-  });
-
   constructor() {
     // Initialize form
     this.loginForm = this.fb.group({
-      userName: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]]
+      userName: ['', [Validators.required]], // Sin validación de email, solo required
+      password: ['', [Validators.required]]
+    });
+
+    // Subscribe to form changes to update isFormValid signal
+    this.loginForm.valueChanges.subscribe(() => {
+      this.isFormValid.set(this.loginForm.valid);
+    });
+
+    // Subscribe to form status changes (for when form is enabled/disabled)
+    this.loginForm.statusChanges.subscribe(() => {
+      this.isFormValid.set(this.loginForm.valid);
     });
 
     // Trigger animations after init
@@ -97,7 +105,7 @@ export class LoginComponent {
     this.startLoading();
 
     this.authService.login(this.loginForm.value).subscribe({
-      next: (response) => {
+      next: (response: any) => {
         this.stopLoading();
         if (response) {
           console.log('✅ Login exitoso');
@@ -110,7 +118,7 @@ export class LoginComponent {
           // TODO: Mostrar toast de error con PrimeNG
         }
       },
-      error: (error) => {
+      error: (error: any) => {
         this.stopLoading();
         console.error('❌ Error de conexión:', error);
         // TODO: Mostrar toast de error con PrimeNG

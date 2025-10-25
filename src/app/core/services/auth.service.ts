@@ -19,6 +19,8 @@ import type {
 
 import { IntercomService } from './intercom.service';
 import { NavigationCacheService } from './navigation-cache.service';
+import { NavigationService } from './navigation.service';
+import { DataService } from './data.service';
 import { environment } from '../../../environments/environment';
 
 /**
@@ -42,14 +44,14 @@ export class AuthService {
   // private readonly firestore = inject(Firestore);
   private readonly intercom = inject(IntercomService);
   private readonly navigationCache = inject(NavigationCacheService);
-
-  // TODO: Inyectar GetDataService cuando esté migrado
-  // private readonly dataService = inject(GetDataService);
+  private readonly navigationService = inject(NavigationService);
+  private readonly dataService = inject(DataService);
 
   // Constants
   private readonly JWT_TOKEN = 'JWT_TOKEN';
   private readonly REFRESH_TOKEN = 'REFRESH_TOKEN';
   private readonly USER = 'USER';
+  private readonly ROUTES_BACKEND = 'ROUTES_BACKEND';
 
   // 🔥 SIGNALS - Estado reactivo
   readonly routesAllow = signal<NavigationItem[]>([]);
@@ -82,6 +84,7 @@ export class AuthService {
 
   constructor() {
     this.initializeCache();
+    this.loadRoutesFromCache();
   }
 
   // ============================================================================
@@ -92,19 +95,33 @@ export class AuthService {
     try {
       const isAvailable = await this.navigationCache.isCacheAvailable();
       if (isAvailable) {
-        const deletedCount = await this.navigationCache.cleanOldCache();
-        if (deletedCount > 0) {
-          console.log(`🧹 Cleaned ${deletedCount} old cache entries`);
-        }
+        await this.navigationCache.cleanOldCache();
+      }
+    } catch (error) {
+      console.error('Error initializing navigation cache:', error);
+    }
+  }
 
-        // Log cache stats in development
-        if (this.isDevelopment()) {
-          const stats = await this.navigationCache.getCacheStats();
-          console.log('📊 Cache stats:', stats);
+  /**
+   * Cargar rutas desde localStorage al inicializar
+   * Esto previene perder las rutas al refrescar la página
+   */
+  private loadRoutesFromCache(): void {
+    try {
+      const cachedRoutes = localStorage.getItem(this.ROUTES_BACKEND);
+      if (cachedRoutes && this.isLoggedIn()) {
+        const routes: Route[] = JSON.parse(cachedRoutes);
+
+        this.routeBackend.set(routes);
+        this.navigationService.loadNavigation(routes);
+
+        const currentUserId = this.getUserId();
+        if (currentUserId) {
+          this.navigationService.connectChatNotifications(currentUserId);
         }
       }
     } catch (error) {
-      console.error('❌ Error initializing navigation cache:', error);
+      console.error('Error cargando rutas desde cache:', error);
     }
   }
 
@@ -118,13 +135,12 @@ export class AuthService {
   login(credentials: Login): Observable<Tokens | null> {
     return this.http.post<Tokens>(`${environment.apiURL}Access/Login`, credentials).pipe(
       tap(async (result) => {
-        // 🧹 Limpiar storage ANTES de guardar nueva data
-        console.log('🧹 Limpiando storage antes del login...');
+        // Limpiar storage ANTES de guardar nueva data
         await this.clearStorageOnLogin();
 
         // Guardar datos de autenticación
         this.routeBackend.set(result.modules);
-        this.routesAllow.set(result.modules as any); // Convertir después
+        this.routesAllow.set(result.modules as any);
         this.authSave(result);
 
         // Cache routes for the user
@@ -139,19 +155,52 @@ export class AuthService {
           );
         }
 
-        // TODO: Descomentar cuando GetDataService esté migrado
-        // this.dataService.getDataFromApis();
-
         this.tokensData.set(result);
         this.currentUser.set(this.getUser());
 
-        console.log('✅ Login completado con data limpia');
+        // Obtener rutas completas del servidor (con todos los niveles)
+        this.loadCompleteRoutes(result.modules);
       }),
       catchError((error) => {
-        console.error('❌ Error en login:', error);
+        console.error('Error en login:', error);
         return of(null);
       })
     );
+  }
+
+  /**
+   * Carga las rutas completas desde el servidor usando DataService
+   * Esto incluye todos los niveles de submodules
+   */
+  private loadCompleteRoutes(allowedRoutes: Route[]): void {
+    this.dataService.get$<Route[]>('Access/modules').subscribe({
+      next: (completeRoutes) => {
+        // Almacenar las rutas en el signal Y localStorage
+        this.routeBackend.set(completeRoutes);
+        localStorage.setItem(this.ROUTES_BACKEND, JSON.stringify(completeRoutes));
+
+        // Cargar navegación con rutas completas
+        this.navigationService.loadNavigation(completeRoutes);
+
+        // Conectar notificaciones de Firebase
+        const currentUserId = this.getUserId();
+        if (currentUserId) {
+          this.navigationService.connectChatNotifications(currentUserId);
+        }
+      },
+      error: (error) => {
+        console.error('Error cargando rutas completas:', error);
+
+        // Fallback: usar las rutas del login
+        this.routeBackend.set(allowedRoutes);
+        this.navigationService.loadNavigation(allowedRoutes);
+
+        const currentUserId = this.getUserId();
+        if (currentUserId) {
+          this.navigationService.connectChatNotifications(currentUserId);
+        }
+      }
+    });
   }
 
   /**
@@ -163,11 +212,13 @@ export class AuthService {
     if (userId) {
       try {
         await this.navigationCache.deleteUserRoutes(userId);
-        console.log('✅ User cache cleared from IndexedDB');
       } catch (error) {
-        console.error('❌ Error clearing user cache:', error);
+        console.error('Error clearing user cache:', error);
       }
     }
+
+    // Limpiar suscripciones de Firebase
+    this.navigationService.cleanup();
 
     this.doLogoutUser();
     this.goBackToLogin();
@@ -188,6 +239,9 @@ export class AuthService {
 
     // Clear sessionStorage routes
     sessionStorage.removeItem('routesAllow');
+
+    // Clear routes cache from localStorage
+    localStorage.removeItem(this.ROUTES_BACKEND);
 
     // Clear cached data from localStorage
     const keysToRemove: string[] = [
@@ -217,8 +271,6 @@ export class AuthService {
     }
 
     sessionStorage.clear();
-
-    console.log('🧹 Logout completo: localStorage y sessionStorage limpiados');
   }
 
   // ============================================================================
@@ -363,7 +415,6 @@ export class AuthService {
       const oldUserId = this.getUserId();
       if (oldUserId) {
         await this.navigationCache.deleteUserRoutes(oldUserId);
-        console.log('🗑️ Cache del usuario anterior eliminado');
       }
 
       sessionStorage.clear();
@@ -380,18 +431,9 @@ export class AuthService {
       ];
 
       keysToRemove.forEach(key => localStorage.removeItem(key));
-
-      console.log(`🧹 Storage limpiado: ${keysToRemove.length} items removidos`);
     } catch (error) {
-      console.error('❌ Error limpiando storage en login:', error);
+      console.error('Error limpiando storage en login:', error);
     }
   }
 
-  /**
-   * Verificar si estamos en desarrollo
-   */
-  private isDevelopment(): boolean {
-    return window.location.hostname === 'localhost' ||
-           window.location.hostname === '127.0.0.1';
-  }
 }

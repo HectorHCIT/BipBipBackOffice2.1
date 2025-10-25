@@ -76,11 +76,18 @@ export interface Module {
 export interface NavigationItem {
   id: number | string;
   routeId?: number;
-  title: string;
+  title?: string;
   type?: 'basic' | 'collapsable' | 'divider';
   link?: string;
   svgIcon?: string;
   icon?: string;
   children?: NavigationItem[];
   unfolded?: boolean;
+  exactMatch?: boolean;
+  data?: any[];
+  disabled?: boolean;
+  externalLink?: boolean;
+  hidden?: (item: NavigationItem) => boolean;
+  badge?: string | number;
+  badgeSeverity?: 'success' | 'info' | 'warn' | 'danger';
 }
