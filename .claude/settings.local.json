@@ -1,14 +1,16 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(npm run generate:env:*)",
+      "Bash(tree:*)",
+      "Bash(find:*)"
+    ]
+  },
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "filesystem",
     "firebase",
     "Figma Dev Mode MCP",
     "primeng"
-  ],
-  "permissions": {
-    "allow": [
-      "Bash(npm run generate:env:*)"
-    ]
-  }
+  ]
 }

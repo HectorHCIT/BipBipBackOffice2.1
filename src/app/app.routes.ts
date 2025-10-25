@@ -27,8 +27,13 @@ export const routes: Routes = [
         path: 'dashboard',
         redirectTo: 'home',
         pathMatch: 'full'
+      },
+      // Mantenimiento (Maintenance)
+      {
+        path: 'maintenance',
+        loadChildren: () => import('./features/maintenance/maintenance.routes').then(m => m.MAINTENANCE_ROUTES)
       }
-      // TODO: Agregar más rutas aquí (SAC, App Clientes, Drivers, etc.)
+      // TODO: Agregar más módulos padre aquí (SAC, App Clientes, Drivers, etc.)
     ]
   },
 
