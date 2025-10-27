@@ -1,0 +1,293 @@
+<p-drawer
+  [visible]="true"
+  position="right"
+  [style]="{ width: '40rem' }"
+  (onHide)="handleClose()"
+>
+  <ng-template pTemplate="header">
+    <div class="flex items-center justify-between w-full">
+      <h2 class="text-xl font-bold text-gray-900 dark:text-white">
+        {{ isEditMode() ? 'Editar Correlativo Fiscal' : 'Nuevo Correlativo Fiscal' }}
+      </h2>
+    </div>
+  </ng-template>
+
+  <ng-template pTemplate="content">
+    @if (isLoading()) {
+      <div class="flex items-center justify-center py-12">
+        <i class="pi pi-spin pi-spinner text-4xl text-primary"></i>
+      </div>
+    } @else {
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6">
+        <!-- Empresa -->
+        <div class="flex flex-col gap-2">
+          <label for="codCompany" class="font-medium text-gray-900 dark:text-white">
+            Empresa <span class="text-red-500">*</span>
+          </label>
+          <p-select
+            id="codCompany"
+            formControlName="codCompany"
+            [options]="companies()"
+            optionLabel="companyName"
+            optionValue="companyId"
+            placeholder="Seleccione una empresa"
+            [filter]="true"
+            filterPlaceholder="Buscar empresa..."
+            [showClear]="true"
+            [class.ng-invalid]="hasError('codCompany')"
+            [class.ng-dirty]="hasError('codCompany')"
+            class="w-full"
+          />
+          @if (hasError('codCompany')) {
+            <small class="text-red-500">{{ getErrorMessage('codCompany') }}</small>
+          }
+        </div>
+
+        <!-- País -->
+        <div class="flex flex-col gap-2">
+          <label for="codCountry" class="font-medium text-gray-900 dark:text-white">
+            País <span class="text-red-500">*</span>
+          </label>
+          <p-select
+            id="codCountry"
+            formControlName="codCountry"
+            [options]="countries()"
+            optionLabel="countryName"
+            optionValue="countryId"
+            placeholder="Seleccione un país"
+            [filter]="true"
+            filterPlaceholder="Buscar país..."
+            [showClear]="true"
+            [class.ng-invalid]="hasError('codCountry')"
+            [class.ng-dirty]="hasError('codCountry')"
+            class="w-full"
+          >
+            <ng-template let-country pTemplate="item">
+              <div class="flex items-center gap-2">
+                @if (country.countryUrlFlag) {
+                  <img
+                    [src]="country.countryUrlFlag"
+                    [alt]="country.countryName"
+                    class="w-6 h-4 object-cover rounded"
+                  />
+                }
+                <span>{{ country.countryName }}</span>
+              </div>
+            </ng-template>
+          </p-select>
+          @if (hasError('codCountry')) {
+            <small class="text-red-500">{{ getErrorMessage('codCountry') }}</small>
+          }
+        </div>
+
+        <!-- Establecimiento -->
+        <div class="flex flex-col gap-2">
+          <label for="codEstablishment" class="font-medium text-gray-900 dark:text-white">
+            Establecimiento <span class="text-red-500">*</span>
+          </label>
+          <p-select
+            id="codEstablishment"
+            formControlName="codEstablishment"
+            [options]="establishments()"
+            optionLabel="establishmentsName"
+            optionValue="establishmentsId"
+            placeholder="Seleccione un establecimiento"
+            [filter]="true"
+            filterPlaceholder="Buscar establecimiento..."
+            [showClear]="true"
+            [class.ng-invalid]="hasError('codEstablishment')"
+            [class.ng-dirty]="hasError('codEstablishment')"
+            class="w-full"
+          />
+          @if (hasError('codEstablishment')) {
+            <small class="text-red-500">{{ getErrorMessage('codEstablishment') }}</small>
+          }
+        </div>
+
+        <!-- Punto de Emisión -->
+        <div class="flex flex-col gap-2">
+          <label for="emissionPoint" class="font-medium text-gray-900 dark:text-white">
+            Punto de Emisión <span class="text-red-500">*</span>
+          </label>
+          <p-select
+            id="emissionPoint"
+            formControlName="emissionPoint"
+            [options]="emissionPoints()"
+            optionLabel="emissionPointName"
+            optionValue="emissionPointId"
+            placeholder="Seleccione un punto de emisión"
+            [filter]="true"
+            filterPlaceholder="Buscar punto de emisión..."
+            [showClear]="true"
+            [class.ng-invalid]="hasError('emissionPoint')"
+            [class.ng-dirty]="hasError('emissionPoint')"
+            class="w-full"
+          />
+          @if (hasError('emissionPoint')) {
+            <small class="text-red-500">{{ getErrorMessage('emissionPoint') }}</small>
+          }
+        </div>
+
+        <!-- Tipo de Documento -->
+        <div class="flex flex-col gap-2">
+          <label for="documentType" class="font-medium text-gray-900 dark:text-white">
+            Tipo de Documento <span class="text-red-500">*</span>
+          </label>
+          <p-select
+            id="documentType"
+            formControlName="documentType"
+            [options]="documentTypes()"
+            optionLabel="docTypeName"
+            optionValue="docTypeId"
+            placeholder="Seleccione un tipo de documento"
+            [filter]="true"
+            filterPlaceholder="Buscar tipo de documento..."
+            [showClear]="true"
+            [class.ng-invalid]="hasError('documentType')"
+            [class.ng-dirty]="hasError('documentType')"
+            class="w-full"
+          />
+          @if (hasError('documentType')) {
+            <small class="text-red-500">{{ getErrorMessage('documentType') }}</small>
+          }
+        </div>
+
+        <!-- CAI -->
+        <div class="flex flex-col gap-2">
+          <label for="cai" class="font-medium text-gray-900 dark:text-white">
+            CAI (Código de Autorización) <span class="text-red-500">*</span>
+          </label>
+          <input
+            id="cai"
+            type="text"
+            pInputText
+            formControlName="cai"
+            placeholder="Ingrese el CAI"
+            [class.ng-invalid]="hasError('cai')"
+            [class.ng-dirty]="hasError('cai')"
+            class="w-full"
+          />
+          @if (hasError('cai')) {
+            <small class="text-red-500">{{ getErrorMessage('cai') }}</small>
+          }
+        </div>
+
+        <!-- Fechas -->
+        <div class="grid grid-cols-2 gap-4">
+          <!-- Fecha Inicio -->
+          <div class="flex flex-col gap-2">
+            <label for="dateFrom" class="font-medium text-gray-900 dark:text-white">
+              Fecha Inicio <span class="text-red-500">*</span>
+            </label>
+            <p-datepicker
+              id="dateFrom"
+              formControlName="dateFrom"
+              placeholder="Seleccione fecha"
+              dateFormat="dd/mm/yy"
+              [showIcon]="true"
+              [iconDisplay]="'input'"
+              [class.ng-invalid]="hasError('dateFrom')"
+              [class.ng-dirty]="hasError('dateFrom')"
+              styleClass="w-full"
+            />
+            @if (hasError('dateFrom')) {
+              <small class="text-red-500">{{ getErrorMessage('dateFrom') }}</small>
+            }
+          </div>
+
+          <!-- Fecha Límite -->
+          <div class="flex flex-col gap-2">
+            <label for="dateUntil" class="font-medium text-gray-900 dark:text-white">
+              Fecha Límite <span class="text-red-500">*</span>
+            </label>
+            <p-datepicker
+              id="dateUntil"
+              formControlName="dateUntil"
+              placeholder="Seleccione fecha"
+              dateFormat="dd/mm/yy"
+              [showIcon]="true"
+              [iconDisplay]="'input'"
+              [class.ng-invalid]="hasError('dateUntil')"
+              [class.ng-dirty]="hasError('dateUntil')"
+              styleClass="w-full"
+            />
+            @if (hasError('dateUntil')) {
+              <small class="text-red-500">{{ getErrorMessage('dateUntil') }}</small>
+            }
+          </div>
+        </div>
+
+        <!-- Números -->
+        <div class="grid grid-cols-2 gap-4">
+          <!-- Número Inicial -->
+          <div class="flex flex-col gap-2">
+            <label for="initialNumber" class="font-medium text-gray-900 dark:text-white">
+              Número Inicial <span class="text-red-500">*</span>
+            </label>
+            <p-inputnumber
+              id="initialNumber"
+              formControlName="initialNumber"
+              placeholder="0"
+              [useGrouping]="false"
+              [min]="0"
+              [class.ng-invalid]="hasError('initialNumber')"
+              [class.ng-dirty]="hasError('initialNumber')"
+              styleClass="w-full"
+            />
+            @if (hasError('initialNumber')) {
+              <small class="text-red-500">{{ getErrorMessage('initialNumber') }}</small>
+            }
+          </div>
+
+          <!-- Número Final -->
+          <div class="flex flex-col gap-2">
+            <label for="finalNumber" class="font-medium text-gray-900 dark:text-white">
+              Número Final <span class="text-red-500">*</span>
+            </label>
+            <p-inputnumber
+              id="finalNumber"
+              formControlName="finalNumber"
+              placeholder="0"
+              [useGrouping]="false"
+              [min]="1"
+              [class.ng-invalid]="hasError('finalNumber')"
+              [class.ng-dirty]="hasError('finalNumber')"
+              styleClass="w-full"
+            />
+            @if (hasError('finalNumber')) {
+              <small class="text-red-500">{{ getErrorMessage('finalNumber') }}</small>
+            }
+          </div>
+        </div>
+
+        <!-- Estado Activo -->
+        <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-lg dark:bg-gray-700">
+          <p-toggleswitch
+            id="active"
+            formControlName="active"
+          />
+          <label for="active" class="font-medium text-gray-900 dark:text-white cursor-pointer">
+            Estado Activo
+          </label>
+        </div>
+      </form>
+    }
+  </ng-template>
+
+  <ng-template pTemplate="footer">
+    <div class="flex gap-3 justify-end">
+      <p-button
+        label="Cancelar"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="handleClose()"
+        [disabled]="isSaving()"
+      />
+      <p-button
+        [label]="isEditMode() ? 'Actualizar' : 'Crear'"
+        [loading]="isSaving()"
+        (onClick)="onSubmit()"
+      />
+    </div>
+  </ng-template>
+</p-drawer>
