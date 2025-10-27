@@ -1,0 +1,167 @@
+<div class="p-6 space-y-6">
+  <!-- Toast para notificaciones -->
+  <p-toast />
+
+  <!-- Header con título y botón de crear -->
+  <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Establecimientos</h1>
+      <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+        Gestión de establecimientos y sucursales
+      </p>
+    </div>
+    <p-button
+      label="Nuevo Establecimiento"
+      icon="pi pi-plus"
+      (onClick)="openCreateDrawer()"
+    />
+  </div>
+
+  <!-- Filtros y búsqueda -->
+  <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+    <!-- Filtros de estado -->
+    <div class="flex flex-wrap gap-2">
+      @for (filter of statusFilters(); track filter.idStatus) {
+        <p-button
+          [label]="filter.label + ' (' + filter.qty + ')'"
+          [severity]="activeStatusFilter().idStatus === filter.idStatus ? undefined : 'secondary'"
+          [outlined]="activeStatusFilter().idStatus !== filter.idStatus"
+          size="small"
+          (onClick)="onStatusFilterChange(filter)"
+        />
+      }
+    </div>
+
+    <!-- Barra de búsqueda -->
+    <p-iconfield iconPosition="left" class="w-full lg:w-80">
+      <p-inputicon styleClass="pi pi-search" />
+      <input
+        type="text"
+        pInputText
+        placeholder="Buscar establecimiento..."
+        [value]="searchTerm()"
+        (input)="onSearch($event)"
+        class="w-full"
+      />
+    </p-iconfield>
+  </div>
+
+  <!-- Tabla de establecimientos -->
+  <div class="bg-white rounded-lg shadow dark:bg-gray-800">
+    <p-table
+      [value]="establishments()"
+      [loading]="isLoading()"
+      [paginator]="true"
+      [rows]="pageSize()"
+      [totalRecords]="totalRecords()"
+      [lazy]="true"
+      [first]="currentPage() * pageSize()"
+      (onLazyLoad)="onPageChange($event)"
+      [rowsPerPageOptions]="[5, 10, 20]"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} establecimientos"
+      styleClass="p-datatable-sm"
+      [tableStyle]="{ 'min-width': '60rem' }"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th class="font-semibold">Número</th>
+          <th class="font-semibold">Nombre</th>
+          <th class="font-semibold">Punto de Emisión</th>
+          <th class="font-semibold">Dirección</th>
+          <th class="text-center font-semibold">Estado</th>
+          <th class="text-center font-semibold">Acciones</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-establishment>
+        <tr>
+          <!-- Número -->
+          <td>
+            <span class="font-medium text-gray-900 dark:text-white">
+              {{ establishment.establishmentsNumb }}
+            </span>
+          </td>
+
+          <!-- Nombre -->
+          <td>
+            <span class="font-medium text-gray-900 dark:text-white">
+              {{ establishment.establishmentsName }}
+            </span>
+          </td>
+
+          <!-- Punto de Emisión -->
+          <td>
+            <span class="text-gray-600 dark:text-gray-400">
+              {{ establishment.emissionPointName }}
+            </span>
+          </td>
+
+          <!-- Dirección (truncada con tooltip) -->
+          <td>
+            <span
+              class="text-gray-600 dark:text-gray-400"
+              [pTooltip]="establishment.establishmentsAddress"
+              tooltipPosition="top"
+            >
+              {{
+                establishment.establishmentsAddress.length > 30
+                  ? (establishment.establishmentsAddress | slice: 0:30) + '...'
+                  : establishment.establishmentsAddress
+              }}
+            </span>
+          </td>
+
+          <!-- Estado con toggle -->
+          <td class="text-center">
+            <div class="flex items-center justify-center gap-3">
+              <p-tag
+                [value]="establishment.establishmentsActive ? 'Activo' : 'Inactivo'"
+                [severity]="establishment.establishmentsActive ? 'success' : 'secondary'"
+              />
+              <p-toggleswitch
+                [ngModel]="establishment.establishmentsActive"
+                (ngModelChange)="onToggleStatus(establishment)"
+              />
+            </div>
+          </td>
+
+          <!-- Acciones -->
+          <td class="text-center">
+            <div class="flex items-center justify-center gap-2">
+              <p-button
+                icon="pi pi-pencil"
+                [text]="true"
+                [rounded]="true"
+                severity="secondary"
+                (onClick)="openEditDrawer(establishment.establishmentsId)"
+                pTooltip="Editar"
+                tooltipPosition="top"
+              />
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="6" class="text-center">
+            <div class="py-8 text-gray-500 dark:text-gray-400">
+              <i class="pi pi-inbox text-4xl"></i>
+              <p class="mt-2">No se encontraron establecimientos</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+  <!-- Drawer para crear/editar establecimiento -->
+  @if (isDrawerOpen()) {
+    <app-establishment-form
+      [establishmentId]="selectedEstablishmentId()"
+      (onClose)="closeDrawer()"
+      (onSave)="onEstablishmentSaved()"
+    />
+  }
+</div>

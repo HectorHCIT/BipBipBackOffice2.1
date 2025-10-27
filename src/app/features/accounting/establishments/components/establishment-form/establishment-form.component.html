@@ -1,0 +1,126 @@
+<p-drawer
+  [visible]="true"
+  position="right"
+  [style]="{ width: '600px' }"
+  (onHide)="handleClose()"
+  [header]="isEditMode() ? 'Editar Establecimiento' : 'Crear Establecimiento'"
+>
+  <p-toast />
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6">
+    <!-- Nombre del Establecimiento -->
+    <div class="flex flex-col gap-2">
+      <label for="establishmentsName" class="font-medium text-gray-900 dark:text-white">
+        Nombre del Establecimiento
+        <span class="text-red-500">*</span>
+      </label>
+      <input
+        id="establishmentsName"
+        type="text"
+        pInputText
+        formControlName="establishmentsName"
+        placeholder="Ingrese el nombre del establecimiento"
+        [class.ng-invalid]="hasError('establishmentsName')"
+        [class.ng-dirty]="hasError('establishmentsName')"
+      />
+      @if (hasError('establishmentsName')) {
+        <small class="text-red-500">{{ getErrorMessage('establishmentsName') }}</small>
+      }
+    </div>
+
+    <!-- Número del Establecimiento -->
+    <div class="flex flex-col gap-2">
+      <label for="establishmentsNumb" class="font-medium text-gray-900 dark:text-white">
+        Número del Establecimiento
+        <span class="text-red-500">*</span>
+      </label>
+      <input
+        id="establishmentsNumb"
+        type="text"
+        pInputText
+        formControlName="establishmentsNumb"
+        placeholder="Ingrese el número del establecimiento"
+        [class.ng-invalid]="hasError('establishmentsNumb')"
+        [class.ng-dirty]="hasError('establishmentsNumb')"
+      />
+      @if (hasError('establishmentsNumb')) {
+        <small class="text-red-500">{{ getErrorMessage('establishmentsNumb') }}</small>
+      }
+    </div>
+
+    <!-- Punto de Emisión -->
+    <div class="flex flex-col gap-2">
+      <label for="codEmissionPoint" class="font-medium text-gray-900 dark:text-white">
+        Punto de Emisión
+        <span class="text-red-500">*</span>
+      </label>
+      <p-select
+        id="codEmissionPoint"
+        formControlName="codEmissionPoint"
+        [options]="emissionPoints()"
+        optionLabel="emissionPointName"
+        optionValue="emissionPointId"
+        placeholder="Seleccione un punto de emisión"
+        [filter]="true"
+        filterPlaceholder="Buscar punto de emisión"
+        [showClear]="true"
+        styleClass="w-full"
+        [class.ng-invalid]="hasError('codEmissionPoint')"
+        [class.ng-dirty]="hasError('codEmissionPoint')"
+      />
+      @if (hasError('codEmissionPoint')) {
+        <small class="text-red-500">{{ getErrorMessage('codEmissionPoint') }}</small>
+      }
+    </div>
+
+    <!-- Dirección -->
+    <div class="flex flex-col gap-2">
+      <label for="establishmentsAddress" class="font-medium text-gray-900 dark:text-white">
+        Dirección
+        <span class="text-red-500">*</span>
+      </label>
+      <textarea
+        id="establishmentsAddress"
+        pInputText
+        formControlName="establishmentsAddress"
+        placeholder="Ingrese la dirección"
+        rows="3"
+        [class.ng-invalid]="hasError('establishmentsAddress')"
+        [class.ng-dirty]="hasError('establishmentsAddress')"
+      ></textarea>
+      @if (hasError('establishmentsAddress')) {
+        <small class="text-red-500">{{ getErrorMessage('establishmentsAddress') }}</small>
+      }
+    </div>
+
+    <!-- Estado Activo (solo en edición) -->
+    @if (isEditMode()) {
+      <div class="flex items-center gap-3">
+        <label for="establishmentsActive" class="font-medium text-gray-900 dark:text-white">
+          Estado Activo
+        </label>
+        <p-toggleswitch
+          id="establishmentsActive"
+          formControlName="establishmentsActive"
+        />
+      </div>
+    }
+
+    <!-- Botones de acción -->
+    <div class="flex justify-end gap-3 pt-4">
+      <p-button
+        type="button"
+        label="Cancelar"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="handleClose()"
+      />
+      <p-button
+        type="submit"
+        label="Guardar"
+        severity="success"
+        [loading]="isLoading()"
+      />
+    </div>
+  </form>
+</p-drawer>

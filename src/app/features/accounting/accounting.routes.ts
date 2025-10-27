@@ -4,10 +4,10 @@ import { Routes } from '@angular/router';
  * ACCOUNTING_ROUTES - Rutas consolidadas del módulo de Contabilidad
  *
  * Este archivo agrupa todas las rutas de los submódulos de Contabilidad:
- * - Companies (Empresas) - Ya migrado con Signals
+ * - Companies (Empresas) ✅
  * - Document Types (Tipos de Documento) ✅
- * - Establishments (Establecimientos) - TODO
- * - Emission Points (Puntos de Emisión) - TODO
+ * - Emission Points (Puntos de Emisión) ✅
+ * - Establishments (Establecimientos) ✅
  * - Fiscal Correlatives (Correlativos Fiscales) - TODO
  * - Invoices (Facturas) - TODO
  * - Settlements (Liquidaciones) - TODO
@@ -17,7 +17,8 @@ import { Routes } from '@angular/router';
  * Estructura:
  * /accounting/companies -> CompaniesComponent
  * /accounting/document-types -> DocumentTypesComponent
- * /accounting/establishments -> EstablishmentsComponent (futuro)
+ * /accounting/emission-points -> EmissionPointsComponent
+ * /accounting/establishments -> EstablishmentsComponent
  * ...etc
  *
  * IMPORTANTE: Las rutas deben mantener la nomenclatura original del backend
@@ -26,21 +27,28 @@ import { Routes } from '@angular/router';
 export const ACCOUNTING_ROUTES: Routes = [
   {
     path: '',
-    redirectTo: 'document-types',
+    redirectTo: 'companies',
     pathMatch: 'full'
   },
-  // TODO: Descomentar cuando se migre el módulo de Companies
-  /*
   {
     path: 'companies',
     loadChildren: () => import('./companies/companies.routes').then(m => m.COMPANIES_ROUTES),
-    title: 'Gestión de Empresas'
+    title: 'Empresas'
   },
-  */
   {
     path: 'document-types',
     loadChildren: () => import('./document-types/document-types.routes').then(m => m.DOCUMENT_TYPES_ROUTES),
     title: 'Tipos de Documento'
+  },
+  {
+    path: 'emission-points',
+    loadChildren: () => import('./emission-points/emission-points.routes').then(m => m.EMISSION_POINTS_ROUTES),
+    title: 'Puntos de Emisión'
+  },
+  {
+    path: 'establishments',
+    loadChildren: () => import('./establishments/establishments.routes').then(m => m.ESTABLISHMENTS_ROUTES),
+    title: 'Establecimientos'
   }
   // TODO: Agregar más submódulos de contabilidad aquí
   /*

@@ -1,0 +1,185 @@
+<p-drawer
+  [visible]="true"
+  position="right"
+  [style]="{ width: '600px' }"
+  (onHide)="handleClose()"
+  [header]="isEditMode() ? 'Editar Empresa' : 'Crear Empresa'"
+>
+  <p-toast />
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6">
+    <!-- Nombre de Empresa -->
+    <div class="flex flex-col gap-2">
+      <label for="companyName" class="font-medium text-gray-900 dark:text-white">
+        Nombre de Empresa
+        <span class="text-red-500">*</span>
+      </label>
+      <input
+        id="companyName"
+        type="text"
+        pInputText
+        formControlName="companyName"
+        placeholder="Ingrese el nombre de la empresa"
+        [class.ng-invalid]="hasError('companyName')"
+        [class.ng-dirty]="hasError('companyName')"
+      />
+      @if (hasError('companyName')) {
+        <small class="text-red-500">{{ getErrorMessage('companyName') }}</small>
+      }
+    </div>
+
+    <!-- Razón Social -->
+    <div class="flex flex-col gap-2">
+      <label for="socialReasonName" class="font-medium text-gray-900 dark:text-white">
+        Razón Social
+        <span class="text-red-500">*</span>
+      </label>
+      <input
+        id="socialReasonName"
+        type="text"
+        pInputText
+        formControlName="socialReasonName"
+        placeholder="Ingrese la razón social"
+        [class.ng-invalid]="hasError('socialReasonName')"
+        [class.ng-dirty]="hasError('socialReasonName')"
+      />
+      @if (hasError('socialReasonName')) {
+        <small class="text-red-500">{{ getErrorMessage('socialReasonName') }}</small>
+      }
+    </div>
+
+    <!-- País -->
+    <div class="flex flex-col gap-2">
+      <label for="countryId" class="font-medium text-gray-900 dark:text-white">
+        País
+        <span class="text-red-500">*</span>
+      </label>
+      <p-select
+        id="countryId"
+        formControlName="countryId"
+        [options]="countries()"
+        optionLabel="countryName"
+        optionValue="countryId"
+        placeholder="Seleccione un país"
+        [filter]="true"
+        filterPlaceholder="Buscar país"
+        [showClear]="true"
+        styleClass="w-full"
+        [class.ng-invalid]="hasError('countryId')"
+        [class.ng-dirty]="hasError('countryId')"
+      />
+      @if (hasError('countryId')) {
+        <small class="text-red-500">{{ getErrorMessage('countryId') }}</small>
+      }
+    </div>
+
+    <!-- RTN -->
+    <div class="flex flex-col gap-2">
+      <label for="companyRTN" class="font-medium text-gray-900 dark:text-white">
+        RTN
+        <span class="text-red-500">*</span>
+      </label>
+      <input
+        id="companyRTN"
+        type="text"
+        pInputText
+        formControlName="companyRTN"
+        placeholder="Ingrese el RTN"
+        [class.ng-invalid]="hasError('companyRTN')"
+        [class.ng-dirty]="hasError('companyRTN')"
+      />
+      @if (hasError('companyRTN')) {
+        <small class="text-red-500">{{ getErrorMessage('companyRTN') }}</small>
+      }
+    </div>
+
+    <!-- Email -->
+    <div class="flex flex-col gap-2">
+      <label for="companyEmail" class="font-medium text-gray-900 dark:text-white">
+        Correo Electrónico
+        <span class="text-red-500">*</span>
+      </label>
+      <input
+        id="companyEmail"
+        type="email"
+        pInputText
+        formControlName="companyEmail"
+        placeholder="correo@empresa.com"
+        [class.ng-invalid]="hasError('companyEmail')"
+        [class.ng-dirty]="hasError('companyEmail')"
+      />
+      @if (hasError('companyEmail')) {
+        <small class="text-red-500">{{ getErrorMessage('companyEmail') }}</small>
+      }
+    </div>
+
+    <!-- Teléfono -->
+    <div class="flex flex-col gap-2">
+      <label for="companyPhone" class="font-medium text-gray-900 dark:text-white">
+        Teléfono
+        <span class="text-red-500">*</span>
+      </label>
+      <input
+        id="companyPhone"
+        type="tel"
+        pInputText
+        formControlName="companyPhone"
+        placeholder="Ingrese el teléfono"
+        [class.ng-invalid]="hasError('companyPhone')"
+        [class.ng-dirty]="hasError('companyPhone')"
+      />
+      @if (hasError('companyPhone')) {
+        <small class="text-red-500">{{ getErrorMessage('companyPhone') }}</small>
+      }
+    </div>
+
+    <!-- Dirección -->
+    <div class="flex flex-col gap-2">
+      <label for="companyAddress" class="font-medium text-gray-900 dark:text-white">
+        Dirección
+        <span class="text-red-500">*</span>
+      </label>
+      <textarea
+        id="companyAddress"
+        pInputText
+        formControlName="companyAddress"
+        placeholder="Ingrese la dirección"
+        rows="3"
+        [class.ng-invalid]="hasError('companyAddress')"
+        [class.ng-dirty]="hasError('companyAddress')"
+      ></textarea>
+      @if (hasError('companyAddress')) {
+        <small class="text-red-500">{{ getErrorMessage('companyAddress') }}</small>
+      }
+    </div>
+
+    <!-- Estado Activo (solo en edición) -->
+    @if (isEditMode()) {
+      <div class="flex items-center gap-3">
+        <label for="companyActive" class="font-medium text-gray-900 dark:text-white">
+          Estado Activo
+        </label>
+        <p-toggleswitch
+          id="companyActive"
+          formControlName="companyActive"
+        />
+      </div>
+    }
+
+    <!-- Botones de acción -->
+    <div class="flex justify-end gap-3 pt-4">
+      <p-button
+        type="button"
+        label="Cancelar"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="handleClose()"
+      />
+      <p-button
+        type="submit"
+        label="Guardar"
+        [loading]="isLoading()"
+      />
+    </div>
+  </form>
+</p-drawer>

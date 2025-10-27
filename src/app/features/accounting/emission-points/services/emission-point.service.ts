@@ -2,26 +2,26 @@ import { Injectable, signal, computed, inject } from '@angular/core';
 import { DataService } from '@core/services/data.service';
 import { Observable, tap } from 'rxjs';
 import {
-  DocumentType,
-  DocumentTypeDetail,
-  DocumentTypeListResponse,
-  CreateDocumentTypeRequest,
-  UpdateDocumentTypeRequest,
+  EmissionPoint,
+  EmissionPointDetail,
+  EmissionPointListResponse,
+  CreateEmissionPointRequest,
+  UpdateEmissionPointRequest,
   StatusFilter
-} from '../models/document-type.model';
+} from '../models/emission-point.model';
 
 /**
- * DocumentTypeService - Servicio para gestión de tipos de documento
+ * EmissionPointService - Servicio para gestión de puntos de emisión
  *
  * Patrón: Signals para estado reactivo + DataService para HTTP
  * NO hacemos transformaciones de datos
  */
 @Injectable({ providedIn: 'root' })
-export class DocumentTypeService {
+export class EmissionPointService {
   private readonly dataService = inject(DataService);
 
   // Estado reactivo con Signals
-  readonly documentTypes = signal<DocumentType[]>([]);
+  readonly emissionPoints = signal<EmissionPoint[]>([]);
   readonly totalRecords = signal<number>(0);
   readonly currentPage = signal<number>(0);
   readonly pageSize = signal<number>(5);
@@ -44,19 +44,19 @@ export class DocumentTypeService {
   });
 
   /**
-   * Obtiene la lista de tipos de documento con paginación
-   * Endpoint: DocumentType/DocumentTypesList
+   * Obtiene la lista de puntos de emisión con paginación
+   * Endpoint: EmissionPoint/PointsEmissionList
    */
-  getDocumentTypes(
+  getEmissionPoints(
     page: number = 0,
     pageSize: number = 5,
     status: string | null = null,
     filter: string = ''
-  ): Observable<DocumentTypeListResponse> {
+  ): Observable<EmissionPointListResponse> {
     this.isLoading.set(true);
 
     // Construir query params
-    let url = `DocumentType/DocumentTypesList?pageNumber=${page + 1}&pageSize=${pageSize}`;
+    let url = `EmissionPoint/PointsEmissionList?pageNumber=${page + 1}&pageSize=${pageSize}`;
 
     if (status) {
       url += `&status=${status}`;
@@ -66,10 +66,10 @@ export class DocumentTypeService {
       url += `&filter=${encodeURIComponent(filter)}`;
     }
 
-    return this.dataService.get$<DocumentTypeListResponse>(url).pipe(
+    return this.dataService.get$<EmissionPointListResponse>(url).pipe(
       tap((response) => {
         // Actualizar Signals directamente con la respuesta
-        this.documentTypes.set(response.data);
+        this.emissionPoints.set(response.data);
         this.totalRecords.set(response.metadata.totalCount);
         this.currentPage.set(page);
         this.pageSize.set(pageSize);
@@ -87,47 +87,38 @@ export class DocumentTypeService {
   }
 
   /**
-   * Obtiene los detalles completos de un tipo de documento
-   * Endpoint: DocumentType/DocumentTypesDetail
+   * Obtiene los detalles completos de un punto de emisión
+   * Endpoint: EmissionPoint/PointEmissionDetail
    */
-  getDocumentTypeById(id: number): Observable<DocumentTypeDetail> {
-    return this.dataService.get$<DocumentTypeDetail>(
-      `DocumentType/DocumentTypesDetail?id=${id}`
+  getEmissionPointById(id: number): Observable<EmissionPointDetail> {
+    return this.dataService.get$<EmissionPointDetail>(
+      `EmissionPoint/PointEmissionDetail?idPoint=${id}`
     );
   }
 
   /**
-   * Crea un nuevo tipo de documento
-   * Endpoint: DocumentType/CreateDocumentType
+   * Crea un nuevo punto de emisión
+   * Endpoint: EmissionPoint/CreateEmissionPoint
    */
-  createDocumentType(request: CreateDocumentTypeRequest): Observable<any> {
-    return this.dataService.post$('DocumentType/CreateDocumentType', request);
+  createEmissionPoint(request: CreateEmissionPointRequest): Observable<any> {
+    return this.dataService.post$('EmissionPoint/CreateEmissionPoint', request);
   }
 
   /**
-   * Actualiza un tipo de documento existente
-   * Endpoint: DocumentType/EditDocumentType
+   * Actualiza un punto de emisión existente
+   * Endpoint: EmissionPoint/EditEmissionPoint
    */
-  updateDocumentType(id: number, request: UpdateDocumentTypeRequest): Observable<any> {
-    return this.dataService.put$(`DocumentType/EditDocumentType?idDocumentType=${id}`, request);
+  updateEmissionPoint(id: number, request: UpdateEmissionPointRequest): Observable<any> {
+    return this.dataService.put$(`EmissionPoint/EditEmissionPoint?idPoint=${id}`, request);
   }
 
   /**
-   * Cambia el estado (activo/inactivo) de un tipo de documento
-   * Endpoint: DocumentType/{id}/status
-   *
-   * @param id ID del tipo de documento
-   * @param currentStatus Estado actual (antes del cambio)
-   * @returns Observable con la respuesta del API
-   *
-   * NOTA: El API espera recibir el NUEVO estado deseado, por lo que
-   * invertimos el estado actual para enviar el estado opuesto.
+   * Cambia el estado (activo/inactivo) de un punto de emisión
+   * Endpoint: EmissionPoint/ActiveEmissionPoint
    */
-  changeStatus(id: number, currentStatus: boolean): Observable<any> {
-    // Invertir: si está activo (true), enviar false para desactivar
-    const newStatus = !currentStatus;
+  changeStatus(id: number): Observable<any> {
     return this.dataService.put$(
-      `DocumentType/${id}/status?status=${newStatus}`,
+      `EmissionPoint/ActiveEmissionPoint?idPoint=${id}`,
       null
     );
   }
@@ -153,7 +144,7 @@ export class DocumentTypeService {
    * Reinicia el estado del servicio
    */
   resetState(): void {
-    this.documentTypes.set([]);
+    this.emissionPoints.set([]);
     this.totalRecords.set(0);
     this.currentPage.set(0);
     this.searchTerm.set('');

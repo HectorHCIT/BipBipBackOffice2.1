@@ -1,4 +1,41 @@
 /* You can add global styles to this file, and also import other style files */
+
+/* ============================================
+   POPPINS FONT - Self-Hosted
+   Fuente principal del proyecto
+   ============================================ */
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 100;
+  font-display: swap;
+  src: url('/fonts/Poppins-Thin.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/Poppins-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/Poppins-Medium.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/Poppins-Bold.ttf') format('truetype');
+}
+
 @import "tailwindcss";
 
 @import "primeicons/primeicons.css";
@@ -6,7 +43,166 @@
 /* Configure Tailwind dark mode to use class strategy */
 @variant dark (&.dark, .dark &);
 
+/* ============================================
+   PRIMENG COLOR CUSTOMIZATION
+   Colores personalizados para mantener consistencia
+   con el proyecto anterior
+   ============================================ */
+
+:root {
+  /* Colores de Marca */
+  --brand-red-default: #FB0021;
+  --brand-red-light: #FF4548;
+  --brand-red-dark: #E9001C;
+
+  /* PrimeNG Primary = Rojo de Marca */
+  --p-primary-50: #FEE5E9;
+  --p-primary-100: #FCBCC6;
+  --p-primary-200: #FA8D9F;
+  --p-primary-300: #F85D78;
+  --p-primary-400: #F7395B;
+  --p-primary-500: #FB0021;    /* Color principal - Rojo de marca */
+  --p-primary-600: #E9001C;    /* Hover/Active */
+  --p-primary-700: #D10019;
+  --p-primary-800: #B80016;
+  --p-primary-900: #8F0011;
+
+  /* PrimeNG Success = Verde */
+  --p-success-50: #E5FCF2;
+  --p-success-100: #BEF8DE;
+  --p-success-200: #92F4C9;
+  --p-success-300: #66F0B4;
+  --p-success-400: #34ED9F;
+  --p-success-500: #01EB7B;    /* Verde principal */
+  --p-success-600: #00D470;
+  --p-success-700: #00BD64;
+  --p-success-800: #00A659;
+  --p-success-900: #008744;
+
+  /* PrimeNG Danger = Rojo Error */
+  --p-danger-50: #FEE5E5;
+  --p-danger-100: #FCBEBE;
+  --p-danger-200: #FA9393;
+  --p-danger-300: #F86868;
+  --p-danger-400: #F64747;
+  --p-danger-500: #E7001E;     /* Rojo error */
+  --p-danger-600: #D1001B;
+  --p-danger-700: #BB0018;
+  --p-danger-800: #A50015;
+  --p-danger-900: #7F0011;
+
+  /* PrimeNG Warning = Amarillo */
+  --p-warning-50: #FEFAED;
+  --p-warning-100: #FDF2D1;
+  --p-warning-200: #FBE9B3;
+  --p-warning-300: #FAE195;
+  --p-warning-400: #F9D97E;
+  --p-warning-500: #F8D65D;    /* Amarillo */
+  --p-warning-600: #F0C955;
+  --p-warning-700: #E7BA4B;
+  --p-warning-800: #DFAB42;
+  --p-warning-900: #D19232;
+
+  /* PrimeNG Secondary = Gris con borde negro */
+  --p-secondary-50: #F9F9F9;
+  --p-secondary-100: #F0F0F0;
+  --p-secondary-200: #E8E8E8;
+  --p-secondary-300: #E2E2E2;
+  --p-secondary-400: #DADADA;
+  --p-secondary-500: #D2D5DA;   /* Gris principal */
+  --p-secondary-600: #BDBDBD;
+  --p-secondary-700: #A8A8A8;
+  --p-secondary-800: #939393;
+  --p-secondary-900: #6E6E6E;
+
+  /* Colores de Texto */
+  --p-text-color: #262626;
+  --p-text-muted-color: #555555;
+  --p-surface-0: #FFFFFF;
+  --p-surface-50: #F9F9F9;
+  --p-surface-100: #F0F0F0;
+}
+
 /* Ensure dark mode works with html element */
 html.dark {
   color-scheme: dark;
+
+  /* Dark Mode - PrimeNG Colors */
+  --p-primary-50: #8F0011;
+  --p-primary-100: #B80016;
+  --p-primary-200: #D10019;
+  --p-primary-300: #E9001C;
+  --p-primary-400: #FB0021;
+  --p-primary-500: #FB0021;    /* Mantener igual en dark */
+  --p-primary-600: #FF4548;
+  --p-primary-700: #FF6B6E;
+  --p-primary-800: #FF9194;
+  --p-primary-900: #FFB7BA;
+
+  --p-success-500: #01EB7B;
+  --p-danger-500: #E7001E;
+  --p-warning-500: #F8D65D;
+  --p-secondary-500: #E2E2E2;
+
+  --p-text-color: #FFFFFF;
+  --p-text-muted-color: #D2D5DA;
+  --p-surface-0: #1E1E1E;
+  --p-surface-50: #2A2A2A;
+  --p-surface-100: #363636;
+}
+
+/* ============================================
+   GLOBAL FONT CONFIGURATION
+   Aplicar Poppins como fuente por defecto
+   ============================================ */
+body {
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================
+   PRIMENG DARK MODE FIXES
+   Estilos para mejorar visibilidad en dark mode
+   ============================================ */
+html.dark {
+  /* Inputs, Textareas y Selects - Texto blanco en dark mode */
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="number"],
+  input[type="password"],
+  textarea,
+  .p-inputtext,
+  .p-select,
+  .p-select-label {
+    color: #FFFFFF !important;
+  }
+
+  /* Placeholder en dark mode */
+  input::placeholder,
+  textarea::placeholder,
+  .p-inputtext::placeholder {
+    color: #9CA3AF !important;
+  }
+
+  /* Dropdown items en dark mode */
+  .p-select-overlay .p-select-option {
+    color: #FFFFFF !important;
+  }
+
+  .p-select-overlay .p-select-option:hover {
+    background-color: #374151 !important;
+  }
+
+  /* Tabla en dark mode */
+  .p-datatable .p-datatable-tbody > tr {
+    background-color: #1E1E1E;
+    color: #FFFFFF;
+  }
+
+  .p-datatable .p-datatable-tbody > tr:hover {
+    background-color: #2A2A2A;
+  }
 }

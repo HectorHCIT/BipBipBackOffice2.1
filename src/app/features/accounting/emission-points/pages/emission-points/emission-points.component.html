@@ -4,10 +4,10 @@
 <!-- Header -->
 <div class="mb-6">
   <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-    Tipos de Documento
+    Puntos de Emisión
   </h1>
   <p class="text-gray-600 dark:text-gray-400">
-    Gestión de tipos de documento para facturación
+    Gestión de puntos de emisión para facturación
   </p>
 </div>
 
@@ -47,7 +47,7 @@
 
     <!-- Botón Crear (Primary = Rojo de marca) -->
     <p-button
-      label="Crear Tipo de Documento"
+      label="Crear Punto de Emisión"
       icon="pi pi-plus"
       (onClick)="openCreateDrawer()"
     />
@@ -57,7 +57,7 @@
 <!-- Tabla -->
 <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
   <p-table
-    [value]="documentTypes()"
+    [value]="emissionPoints()"
     [loading]="isLoading()"
     [paginator]="true"
     [rows]="pageSize()"
@@ -86,7 +86,7 @@
       <tr>
         <td colspan="5" class="text-center py-8">
           <i class="pi pi-inbox text-4xl text-gray-400"></i>
-          <p class="mt-2 text-gray-500">No se encontraron tipos de documento</p>
+          <p class="mt-2 text-gray-500">No se encontraron puntos de emisión</p>
         </td>
       </tr>
     </ng-template>
@@ -94,16 +94,22 @@
     <!-- Header -->
     <ng-template pTemplate="header">
       <tr>
-        <th pSortableColumn="docTypeNumb">
+        <th pSortableColumn="emissionPointNumb">
           <div class="flex items-center gap-2">
-            Código
-            <p-sortIcon field="docTypeNumb" />
+            Número
+            <p-sortIcon field="emissionPointNumb" />
           </div>
         </th>
-        <th pSortableColumn="docTypeName">
+        <th pSortableColumn="emissionPointName">
           <div class="flex items-center gap-2">
             Nombre
-            <p-sortIcon field="docTypeName" />
+            <p-sortIcon field="emissionPointName" />
+          </div>
+        </th>
+        <th pSortableColumn="emissionPointAddress">
+          <div class="flex items-center gap-2">
+            Dirección
+            <p-sortIcon field="emissionPointAddress" />
           </div>
         </th>
         <th class="text-center">Estado</th>
@@ -112,19 +118,34 @@
     </ng-template>
 
     <!-- Body -->
-    <ng-template pTemplate="body" let-documentType>
+    <ng-template pTemplate="body" let-emissionPoint>
       <tr>
-        <!-- Código -->
+        <!-- Número -->
         <td>
           <span class="font-semibold text-gray-900 dark:text-white">
-            {{ documentType.docTypeNumb }}
+            {{ emissionPoint.emissionPointNumb }}
           </span>
         </td>
 
         <!-- Nombre -->
         <td>
           <span class="text-gray-700 dark:text-gray-300">
-            {{ documentType.docTypeName }}
+            {{ emissionPoint.emissionPointName }}
+          </span>
+        </td>
+
+        <!-- Dirección -->
+        <td>
+          <span
+            class="text-gray-600 dark:text-gray-400"
+            [pTooltip]="emissionPoint.emissionPointAddress"
+            tooltipPosition="top"
+          >
+            {{
+              emissionPoint.emissionPointAddress.length > 20
+                ? (emissionPoint.emissionPointAddress | slice: 0:20) + '...'
+                : emissionPoint.emissionPointAddress
+            }}
           </span>
         </td>
 
@@ -132,12 +153,12 @@
         <td class="text-center">
           <div class="flex items-center justify-center gap-3">
             <p-tag
-              [value]="documentType.isActive ? 'Activo' : 'Inactivo'"
-              [severity]="getStatusSeverity(documentType.isActive)"
+              [value]="emissionPoint.emissionPointEnabled ? 'Activo' : 'Inactivo'"
+              [severity]="getStatusSeverity(emissionPoint.emissionPointEnabled)"
             />
             <p-toggleSwitch
-              [ngModel]="documentType.isActive"
-              (ngModelChange)="onStatusToggle(documentType)"
+              [ngModel]="emissionPoint.emissionPointEnabled"
+              (ngModelChange)="onStatusToggle(emissionPoint)"
             />
           </div>
         </td>
@@ -150,7 +171,7 @@
             [outlined]="true"
             size="small"
             [rounded]="true"
-            (onClick)="openEditDrawer(documentType)"
+            (onClick)="openEditDrawer(emissionPoint)"
             pTooltip="Editar"
             tooltipPosition="top"
           />
@@ -162,8 +183,8 @@
 
 <!-- Drawer de formulario -->
 @if (showDrawer()) {
-  <app-document-type-form
-    [documentTypeId]="selectedDocumentTypeId()"
+  <app-emission-point-form
+    [emissionPointId]="selectedEmissionPointId()"
     (onClose)="closeDrawer()"
     (onSave)="onSaveSuccess()"
   />

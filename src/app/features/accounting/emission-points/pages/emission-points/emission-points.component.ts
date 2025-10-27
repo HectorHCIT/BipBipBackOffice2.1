@@ -12,14 +12,15 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { ToastModule } from 'primeng/toast';
+import { TooltipModule } from 'primeng/tooltip';
 
 // Models & Services
-import { DocumentType, StatusFilter } from '../../models/document-type.model';
-import { DocumentTypeService } from '../../services/document-type.service';
-import { DocumentTypeFormComponent } from '../../components/document-type-form/document-type-form.component';
+import { EmissionPoint, StatusFilter } from '../../models/emission-point.model';
+import { EmissionPointService } from '../../services/emission-point.service';
+import { EmissionPointFormComponent } from '../../components/emission-point-form/emission-point-form.component';
 
 /**
- * DocumentTypesComponent - Lista de tipos de documento con CRUD
+ * EmissionPointsComponent - Lista de puntos de emisión con CRUD
  *
  * Features:
  * - Tabla con paginación server-side
@@ -29,7 +30,7 @@ import { DocumentTypeFormComponent } from '../../components/document-type-form/d
  * - Drawer para crear/editar
  */
 @Component({
-  selector: 'app-document-types',
+  selector: 'app-emission-points',
   standalone: true,
   imports: [
     CommonModule,
@@ -42,29 +43,30 @@ import { DocumentTypeFormComponent } from '../../components/document-type-form/d
     InputIconModule,
     ToggleSwitchModule,
     ToastModule,
-    DocumentTypeFormComponent
+    TooltipModule,
+    EmissionPointFormComponent
   ],
-  templateUrl: './document-types.component.html',
+  templateUrl: './emission-points.component.html',
   providers: [MessageService],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DocumentTypesComponent implements OnInit {
-  private readonly documentTypeService = inject(DocumentTypeService);
+export class EmissionPointsComponent implements OnInit {
+  private readonly emissionPointService = inject(EmissionPointService);
   private readonly messageService = inject(MessageService);
 
   // Estado local del componente
   readonly showDrawer = signal<boolean>(false);
-  readonly selectedDocumentTypeId = signal<number | null>(null);
+  readonly selectedEmissionPointId = signal<number | null>(null);
   readonly searchInput = signal<string>('');
 
   // Referencias a Signals del servicio
-  readonly documentTypes = this.documentTypeService.documentTypes;
-  readonly statusFilters = this.documentTypeService.statusFilters;
-  readonly isLoading = this.documentTypeService.isLoading;
-  readonly currentPage = this.documentTypeService.currentPage;
-  readonly pageSize = this.documentTypeService.pageSize;
-  readonly totalRecords = this.documentTypeService.totalRecords;
-  readonly selectedStatus = this.documentTypeService.selectedStatus;
+  readonly emissionPoints = this.emissionPointService.emissionPoints;
+  readonly statusFilters = this.emissionPointService.statusFilters;
+  readonly isLoading = this.emissionPointService.isLoading;
+  readonly currentPage = this.emissionPointService.currentPage;
+  readonly pageSize = this.emissionPointService.pageSize;
+  readonly totalRecords = this.emissionPointService.totalRecords;
+  readonly selectedStatus = this.emissionPointService.selectedStatus;
 
   // Computed: Filtro de estado activo
   readonly activeStatusFilter = computed(() => {
@@ -73,15 +75,15 @@ export class DocumentTypesComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.loadDocumentTypes();
+    this.loadEmissionPoints();
   }
 
   /**
-   * Carga los tipos de documento
+   * Carga los puntos de emisión
    */
-  loadDocumentTypes(): void {
-    this.documentTypeService
-      .getDocumentTypes(
+  loadEmissionPoints(): void {
+    this.emissionPointService
+      .getEmissionPoints(
         this.currentPage(),
         this.pageSize(),
         this.selectedStatus(),
@@ -92,7 +94,7 @@ export class DocumentTypesComponent implements OnInit {
           this.messageService.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'Error al cargar los tipos de documento',
+            detail: 'Error al cargar los puntos de emisión',
             life: 3000
           });
         }
@@ -104,25 +106,25 @@ export class DocumentTypesComponent implements OnInit {
    */
   onPageChange(event: any): void {
     const page = event.first / event.rows;
-    this.loadDocumentTypes();
+    this.loadEmissionPoints();
   }
 
   /**
    * Handler de cambio de filtro de estado
    */
   onStatusFilterChange(filter: StatusFilter): void {
-    this.documentTypeService.selectedStatus.set(filter.filter);
-    this.documentTypeService.currentPage.set(0); // Reset a primera página
-    this.loadDocumentTypes();
+    this.emissionPointService.selectedStatus.set(filter.filter);
+    this.emissionPointService.currentPage.set(0); // Reset a primera página
+    this.loadEmissionPoints();
   }
 
   /**
    * Handler de búsqueda
    */
   onSearch(): void {
-    this.documentTypeService.searchTerm.set(this.searchInput());
-    this.documentTypeService.currentPage.set(0); // Reset a primera página
-    this.loadDocumentTypes();
+    this.emissionPointService.searchTerm.set(this.searchInput());
+    this.emissionPointService.currentPage.set(0); // Reset a primera página
+    this.loadEmissionPoints();
   }
 
   /**
@@ -130,24 +132,24 @@ export class DocumentTypesComponent implements OnInit {
    */
   clearSearch(): void {
     this.searchInput.set('');
-    this.documentTypeService.searchTerm.set('');
-    this.documentTypeService.currentPage.set(0);
-    this.loadDocumentTypes();
+    this.emissionPointService.searchTerm.set('');
+    this.emissionPointService.currentPage.set(0);
+    this.loadEmissionPoints();
   }
 
   /**
-   * Abre el drawer para crear nuevo tipo de documento
+   * Abre el drawer para crear nuevo punto de emisión
    */
   openCreateDrawer(): void {
-    this.selectedDocumentTypeId.set(null);
+    this.selectedEmissionPointId.set(null);
     this.showDrawer.set(true);
   }
 
   /**
-   * Abre el drawer para editar tipo de documento existente
+   * Abre el drawer para editar punto de emisión existente
    */
-  openEditDrawer(documentType: DocumentType): void {
-    this.selectedDocumentTypeId.set(documentType.docTypeId);
+  openEditDrawer(emissionPoint: EmissionPoint): void {
+    this.selectedEmissionPointId.set(emissionPoint.emissionPointId);
     this.showDrawer.set(true);
   }
 
@@ -156,7 +158,7 @@ export class DocumentTypesComponent implements OnInit {
    */
   closeDrawer(): void {
     this.showDrawer.set(false);
-    this.selectedDocumentTypeId.set(null);
+    this.selectedEmissionPointId.set(null);
   }
 
   /**
@@ -164,11 +166,11 @@ export class DocumentTypesComponent implements OnInit {
    */
   onSaveSuccess(): void {
     this.closeDrawer();
-    this.loadDocumentTypes();
+    this.loadEmissionPoints();
     this.messageService.add({
       severity: 'success',
       summary: 'Éxito',
-      detail: 'Tipo de documento guardado correctamente',
+      detail: 'Punto de emisión guardado correctamente',
       life: 3000
     });
   }
@@ -176,25 +178,22 @@ export class DocumentTypesComponent implements OnInit {
   /**
    * Toggle de estado activo/inactivo
    */
-  onStatusToggle(documentType: DocumentType): void {
-    // Pasar el estado actual (antes del cambio) al servicio
-    // El servicio se encargará de invertirlo
-    const newStatus = !documentType.isActive;
-    this.documentTypeService.changeStatus(documentType.docTypeId, documentType.isActive).subscribe({
+  onStatusToggle(emissionPoint: EmissionPoint): void {
+    this.emissionPointService.changeStatus(emissionPoint.emissionPointId).subscribe({
       next: () => {
         this.messageService.add({
           severity: 'success',
           summary: 'Éxito',
-          detail: `Tipo de documento ${newStatus ? 'activado' : 'desactivado'} correctamente`,
+          detail: `Punto de emisión ${!emissionPoint.emissionPointEnabled ? 'activado' : 'desactivado'} correctamente`,
           life: 3000
         });
-        this.loadDocumentTypes();
+        this.loadEmissionPoints();
       },
       error: () => {
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: 'Error al cambiar el estado del tipo de documento',
+          detail: 'Error al cambiar el estado del punto de emisión',
           life: 3000
         });
       }
