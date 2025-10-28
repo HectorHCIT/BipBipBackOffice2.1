@@ -9,7 +9,7 @@ import { Routes } from '@angular/router';
  * - Emission Points (Puntos de Emisión) ✅
  * - Establishments (Establecimientos) ✅
  * - Fiscal Correlatives (Correlativos Fiscales) ✅
- * - Invoices (Facturas) - TODO
+ * - Invoices (Facturas) ✅
  * - Settlements (Liquidaciones) - TODO
  * - Spreadsheets (Hojas de Cálculo) - TODO
  * - Reports (Reportes) - TODO
@@ -54,6 +54,11 @@ export const ACCOUNTING_ROUTES: Routes = [
     path: 'fiscal-correlatives',
     loadChildren: () => import('./fiscal-correlatives/fiscal-correlatives.routes').then(m => m.FISCAL_CORRELATIVES_ROUTES),
     title: 'Correlativos Fiscales'
+  },
+  {
+    path: 'invoices',
+    loadChildren: () => import('./invoices/invoices.routes').then(m => m.INVOICES_ROUTES),
+    title: 'Facturas'
   }
   // TODO: Agregar más submódulos de contabilidad aquí
   /*

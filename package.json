@@ -37,6 +37,7 @@
     "@angular/router": "^20.3.0",
     "@primeuix/themes": "^1.2.5",
     "@tailwindcss/postcss": "^4.1.16",
+    "chart.js": "^4.5.1",
     "exceljs": "^4.4.0",
     "file-saver": "^2.0.5",
     "firebase": "^11.10.0",

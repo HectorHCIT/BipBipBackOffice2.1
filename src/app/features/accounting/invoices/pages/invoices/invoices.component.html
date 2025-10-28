@@ -1,0 +1,257 @@
+<div class="p-6 space-y-6">
+  <!-- Toast para notificaciones -->
+  <p-toast />
+
+  <!-- Header con título y botones de reporte -->
+  <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Facturas</h1>
+      <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+        Consulta de facturas generadas y generación de reportes
+      </p>
+    </div>
+    <div class="flex gap-2">
+      <p-button
+        [label]="showCharts() ? 'Ocultar Gráficos' : 'Mostrar Gráficos'"
+        [icon]="showCharts() ? 'pi pi-chart-line' : 'pi pi-chart-line'"
+        [severity]="showCharts() ? 'secondary' : 'primary'"
+        [outlined]="true"
+        (onClick)="toggleCharts()"
+      />
+      <p-button
+        label="Reporte PDF"
+        icon="pi pi-file-pdf"
+        severity="danger"
+        [outlined]="true"
+        (onClick)="generatePDFReport()"
+        [loading]="isGeneratingReport()"
+        [disabled]="isGeneratingReport()"
+      />
+      <p-button
+        label="Reporte Excel"
+        icon="pi pi-file-excel"
+        severity="success"
+        [outlined]="true"
+        (onClick)="generateExcelReport()"
+        [loading]="isGeneratingReport()"
+        [disabled]="isGeneratingReport()"
+      />
+    </div>
+  </div>
+
+  <!-- Filtros de fecha -->
+  <div class="flex flex-col gap-6 lg:flex-row lg:items-end">
+    <!-- Selector de filtro predefinido -->
+    <div class="flex flex-col gap-2 lg:w-64">
+      <label for="dateFilter" class="font-medium text-gray-900 dark:text-white">
+        Período
+      </label>
+      <p-select
+        id="dateFilter"
+        [options]="dateFilterOptions()"
+        [(ngModel)]="selectedDateFilter"
+        (ngModelChange)="onDateFilterChange($event)"
+        optionLabel="name"
+        optionValue="id"
+        placeholder="Seleccione un período"
+        class="w-full"
+      />
+    </div>
+
+    <!-- Fechas personalizadas (solo visible si se selecciona "Personalizado") -->
+    @if (selectedDateFilter() === 5) {
+      <div class="flex flex-col gap-4 lg:flex-row lg:gap-4">
+        <div class="flex flex-col gap-2 ">
+          <label for="dateFrom" class="font-medium text-gray-900 dark:text-white">
+            Desde
+          </label>
+          <p-datepicker
+            id="dateFrom"
+            [(ngModel)]="customDateFrom"
+            (ngModelChange)="onCustomDateChange()"
+            placeholder="Fecha inicio"
+            dateFormat="dd/mm/yy"
+            [showIcon]="true"
+            [iconDisplay]="'input'"
+            styleClass="w-full"
+          />
+        </div>
+
+        <div class="flex flex-col gap-2 ">
+          <label for="dateTo" class="font-medium text-gray-900 dark:text-white">
+            Hasta
+          </label>
+          <p-datepicker
+            id="dateTo"
+            [(ngModel)]="customDateTo"
+            (ngModelChange)="onCustomDateChange()"
+            placeholder="Fecha fin"
+            dateFormat="dd/mm/yy"
+            [showIcon]="true"
+            [iconDisplay]="'input'"
+            styleClass="w-full"
+          />
+        </div>
+      </div>
+    }
+
+    <!-- Resumen de totales -->
+    <div class="flex gap-4 lg:ml-auto">
+      <div class="flex flex-col p-4 bg-gray-50 rounded-lg dark:bg-gray-700">
+        <span class="text-sm text-gray-600 dark:text-gray-400">Total Facturas</span>
+        <span class="text-2xl font-bold text-gray-900 dark:text-white">
+          {{ totalRecords() }}
+        </span>
+      </div>
+      <div class="flex flex-col p-4 bg-gray-50 rounded-lg dark:bg-gray-700">
+        <span class="text-sm text-gray-600 dark:text-gray-400">Monto Total</span>
+        <span class="text-2xl font-bold text-gray-900 dark:text-white">
+          {{ formatCurrency(totalAmount()) }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gráficos de Analytics -->
+  @if (showCharts()) {
+    <div class="bg-white rounded-lg shadow dark:bg-gray-800 p-6">
+      <div class="mb-4">
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
+          Analytics de Facturas
+        </h2>
+        <p class="text-sm text-gray-600 dark:text-gray-400">
+          Visualización de ventas y órdenes según el período seleccionado
+        </p>
+      </div>
+
+      @if (isLoadingCharts()) {
+        <div class="flex items-center justify-center h-64">
+          <i class="pi pi-spin pi-spinner text-4xl text-blue-500"></i>
+        </div>
+      } @else {
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Gráfico de Ventas Totales -->
+          <app-invoice-charts
+            [chartData]="chartTotalsData()"
+            chartLabel="Ventas totales"
+          />
+
+          <!-- Gráfico de Órdenes Totales -->
+          <app-invoice-charts
+            [chartData]="chartOrdersData()"
+            chartLabel="Órdenes totales"
+          />
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Tabla de facturas -->
+  <div class="bg-white rounded-lg shadow dark:bg-gray-800">
+    <p-table
+      [value]="invoices()"
+      [loading]="isLoading()"
+      [paginator]="true"
+      [rows]="pageSize()"
+      [totalRecords]="totalRecords()"
+      [lazy]="true"
+      [first]="currentPage() * pageSize()"
+      (onLazyLoad)="onPageChange($event)"
+      [rowsPerPageOptions]="[5, 10, 20, 50]"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} facturas"
+      styleClass="p-datatable-sm"
+      [tableStyle]="{ 'min-width': '60rem' }"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th class="font-semibold">Fecha</th>
+          <th class="font-semibold">País y Ciudad</th>
+          <th class="font-semibold">N° de Factura</th>
+          <th class="font-semibold">N° de Orden</th>
+          <th class="font-semibold">Monto a Pagar</th>
+          <th class="text-center font-semibold">Acciones</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-invoice>
+        <tr>
+          <!-- Fecha -->
+          <td>
+            <span class="text-gray-900 dark:text-white">
+              {{ formatDate(invoice.FechaCreacionFactura) }}
+            </span>
+          </td>
+
+          <!-- País y Ciudad con bandera -->
+          <td>
+            <div class="flex items-center gap-2">
+              @if (getCountryFlag(invoice.CodPais)) {
+                <img
+                  [src]="getCountryFlag(invoice.CodPais)!"
+                  [alt]="invoice.Pais"
+                  class="w-6 h-4 object-cover rounded"
+                />
+              }
+              <div class="flex flex-col">
+                <span class="font-medium text-gray-900 dark:text-white">
+                  {{ invoice.Pais }}
+                </span>
+                <span class="text-sm text-gray-600 dark:text-gray-400">
+                  {{ invoice.Ciudad }}
+                </span>
+              </div>
+            </div>
+          </td>
+
+          <!-- N° de Factura -->
+          <td>
+            <span class="font-mono font-medium text-gray-900 dark:text-white">
+              {{ invoice.NumFactura }}
+            </span>
+          </td>
+
+          <!-- N° de Orden -->
+          <td>
+            <span class="text-gray-600 dark:text-gray-400">
+              {{ invoice.NumOrden }}
+            </span>
+          </td>
+
+          <!-- Monto a Pagar -->
+          <td>
+            <span class="font-semibold text-green-600 dark:text-green-400">
+              {{ formatCurrency(invoice.TotalFactura) }}
+            </span>
+          </td>
+
+          <!-- Acciones -->
+          <td class="text-center">
+            <div class="flex items-center justify-center gap-2">
+              <p-button
+                icon="pi pi-eye"
+                [text]="true"
+                [rounded]="true"
+                severity="secondary"
+                (onClick)="viewInvoiceDetail(invoice.CodFactura)"
+                pTooltip="Ver detalle"
+                tooltipPosition="top"
+              />
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="6" class="text-center">
+            <div class="py-8 text-gray-500 dark:text-gray-400">
+              <i class="pi pi-inbox text-4xl"></i>
+              <p class="mt-2">No se encontraron facturas para el período seleccionado</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>

@@ -3,7 +3,8 @@
     "allow": [
       "Bash(npm run generate:env:*)",
       "Bash(tree:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(npm install:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

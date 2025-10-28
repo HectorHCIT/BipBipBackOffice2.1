@@ -1,0 +1,260 @@
+<div class="p-6 space-y-6">
+  <!-- Toast para notificaciones -->
+  <p-toast />
+
+  @if (isLoading()) {
+    <div class="flex items-center justify-center py-12">
+      <i class="pi pi-spin pi-spinner text-4xl text-primary"></i>
+    </div>
+  } @else if (invoiceDetail()) {
+    <!-- Header con botones de acción -->
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+          Factura #{{ invoiceDetail()!.numFactura }}
+        </h1>
+        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+          Fecha de creación: {{ formatDateTime(invoiceDetail()!.fechaCreacionFactura) }}
+        </p>
+      </div>
+      <div class="flex gap-2">
+        <p-button
+          label="Volver"
+          icon="pi pi-arrow-left"
+          severity="secondary"
+          [outlined]="true"
+          (onClick)="backToList()"
+        />
+        @if (invoiceDetail()!.invoiceUrl) {
+          <p-button
+            label="Descargar PDF"
+            icon="pi pi-file-pdf"
+            severity="danger"
+            (onClick)="downloadInvoicePDF()"
+          />
+        }
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <!-- Información de la Empresa -->
+      <p-card header="Información de la Empresa">
+        <div class="space-y-3">
+          <div>
+            <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Empresa</label>
+            <p class="text-gray-900 dark:text-white">{{ invoiceDetail()!.nombEmpresa }}</p>
+          </div>
+          <div>
+            <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Dirección</label>
+            <p class="text-gray-900 dark:text-white">{{ invoiceDetail()!.dirEmpresa }}</p>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="text-sm font-medium text-gray-600 dark:text-gray-400">CAI</label>
+              <p class="text-gray-900 dark:text-white font-mono">{{ invoiceDetail()!.cai }}</p>
+            </div>
+            <div>
+              <label class="text-sm font-medium text-gray-600 dark:text-gray-400">RTN</label>
+              <p class="text-gray-900 dark:text-white font-mono">{{ invoiceDetail()!.rtn }}</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Teléfono</label>
+              <p class="text-gray-900 dark:text-white">{{ invoiceDetail()!.telefono }}</p>
+            </div>
+            <div>
+              <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Correo</label>
+              <p class="text-gray-900 dark:text-white">{{ invoiceDetail()!.correo }}</p>
+            </div>
+          </div>
+        </div>
+      </p-card>
+
+      <!-- Información del Cliente -->
+      <p-card header="Información del Cliente">
+        <div class="space-y-3">
+          <div>
+            <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Cliente</label>
+            <p class="text-gray-900 dark:text-white">{{ invoiceDetail()!.NameCliente }}</p>
+          </div>
+          <div>
+            <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Código de Cliente</label>
+            <p class="text-gray-900 dark:text-white">{{ invoiceDetail()!.CodCliente }}</p>
+          </div>
+        </div>
+      </p-card>
+    </div>
+
+    <!-- Información de la Orden -->
+    <p-card header="Información de la Orden">
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div>
+          <label class="text-sm font-medium text-gray-600 dark:text-gray-400">N° de Orden</label>
+          <p class="text-gray-900 dark:text-white font-semibold">{{ invoiceDetail()!.numOrden }}</p>
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-600 dark:text-gray-400">POSGC Order ID</label>
+          <p class="text-gray-900 dark:text-white">{{ invoiceDetail()!.posgcOrderId }}</p>
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Canal</label>
+          <p class="text-gray-900 dark:text-white">{{ invoiceDetail()!.nombCanal }}</p>
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Unidad</label>
+          <p class="text-gray-900 dark:text-white">{{ invoiceDetail()!.unidad }}</p>
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Fecha de Orden</label>
+          <p class="text-gray-900 dark:text-white">{{ formatDate(invoiceDetail()!.fechaOrden) }}</p>
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Tiempo Estimado</label>
+          <p class="text-gray-900 dark:text-white">{{ invoiceDetail()!.tiempoEstimado }} min</p>
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Tiempo Real</label>
+          <p class="text-gray-900 dark:text-white">{{ invoiceDetail()!.tiempoReal }} min</p>
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Hora Inicio</label>
+          <p class="text-gray-900 dark:text-white font-mono">{{ formatHour(invoiceDetail()!.horaInicio) }}</p>
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Hora Fin</label>
+          <p class="text-gray-900 dark:text-white font-mono">{{ formatHour(invoiceDetail()!.horaFin) }}</p>
+        </div>
+      </div>
+    </p-card>
+
+    <!-- Ubicación -->
+    <p-card header="Ubicación">
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div>
+          <label class="text-sm font-medium text-gray-600 dark:text-gray-400">País</label>
+          <p class="text-gray-900 dark:text-white">{{ invoiceDetail()!.nombPais }}</p>
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Ciudad</label>
+          <p class="text-gray-900 dark:text-white">{{ invoiceDetail()!.nombCity }}</p>
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Distancia</label>
+          <p class="text-gray-900 dark:text-white">{{ invoiceDetail()!.km }} km</p>
+        </div>
+      </div>
+    </p-card>
+
+    <!-- Resumen Financiero -->
+    <p-card header="Resumen Financiero">
+      <div class="space-y-4">
+        <!-- Items/Servicios -->
+        <div>
+          <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Costo de Envío</h3>
+          <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded">
+            <div class="flex justify-between">
+              <span class="text-gray-600 dark:text-gray-400">Costo de envío</span>
+              <span class="text-gray-900 dark:text-white font-semibold">
+                {{ formatCurrency(invoiceDetail()!.invoiceChargeCost) }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <p-divider />
+
+        <!-- Cálculos -->
+        <div class="space-y-2">
+          <div class="flex justify-between">
+            <span class="text-gray-600 dark:text-gray-400">Subtotal</span>
+            <span class="text-gray-900 dark:text-white">
+              {{ formatCurrency(invoiceDetail()!.subTotal) }}
+            </span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600 dark:text-gray-400">Descuentos y Rebajas</span>
+            <span class="text-gray-900 dark:text-white">
+              {{ formatCurrency(invoiceDetail()!.descuentoRebajas) }}
+            </span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600 dark:text-gray-400">Importe Gravado</span>
+            <span class="text-gray-900 dark:text-white">
+              {{ formatCurrency(invoiceDetail()!.importeGravado) }}
+            </span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600 dark:text-gray-400">Importe Exonerado</span>
+            <span class="text-gray-900 dark:text-white">
+              {{ formatCurrency(invoiceDetail()!.importeExonerado) }}
+            </span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600 dark:text-gray-400">Importe Exento</span>
+            <span class="text-gray-900 dark:text-white">
+              {{ formatCurrency(invoiceDetail()!.importeExento) }}
+            </span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600 dark:text-gray-400">Importe Gravado 15%</span>
+            <span class="text-gray-900 dark:text-white">
+              {{ formatCurrency(invoiceDetail()!.importeGravado15) }}
+            </span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600 dark:text-gray-400">ISV 15%</span>
+            <span class="text-gray-900 dark:text-white">
+              {{ formatCurrency(invoiceDetail()!.isv15) }}
+            </span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600 dark:text-gray-400">Total ISV</span>
+            <span class="text-gray-900 dark:text-white">
+              {{ formatCurrency(invoiceDetail()!.totalIsv) }}
+            </span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600 dark:text-gray-400">Valor Descuento</span>
+            <span class="text-gray-900 dark:text-white">
+              {{ formatCurrency(invoiceDetail()!.valorDescuento) }}
+            </span>
+          </div>
+
+          <p-divider />
+
+          <div class="flex justify-between text-xl font-bold">
+            <span class="text-gray-900 dark:text-white">Total a Pagar</span>
+            <span class="text-green-600 dark:text-green-400">
+              {{ formatCurrency(invoiceDetail()!.totalPagar) }}
+            </span>
+          </div>
+
+          <div class="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded">
+            <p class="text-sm text-blue-900 dark:text-blue-200">
+              <strong>Total en letras:</strong> {{ invoiceDetail()!.totalLetras }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </p-card>
+
+    <!-- Información Administrativa -->
+    <p-card header="Información Administrativa">
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div>
+          <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Forma de Pago</label>
+          <p class="text-gray-900 dark:text-white">{{ invoiceDetail()!.nameFormaPago }}</p>
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Fecha Límite de Pago</label>
+          <p class="text-gray-900 dark:text-white">{{ formatDate(invoiceDetail()!.fechaLimite) }}</p>
+        </div>
+        <div class="md:col-span-2">
+          <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Rango Autorizado</label>
+          <p class="text-gray-900 dark:text-white font-mono">{{ invoiceDetail()!.rangoAutorizado }}</p>
+        </div>
+      </div>
+    </p-card>
+  }
+</div>
