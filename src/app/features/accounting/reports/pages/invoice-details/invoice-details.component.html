@@ -1,0 +1,119 @@
+<div class="p-6 space-y-6">
+  <!-- Toast para notificaciones -->
+  <p-toast />
+
+  <!-- Header -->
+  <div>
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+      Reporte de Detalles de Facturas
+    </h1>
+    <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+      Genera reporte de facturas por rango de fechas en formato PDF o Excel
+    </p>
+  </div>
+
+  <!-- Form Card -->
+  <div class="bg-white rounded-lg shadow dark:bg-gray-800 p-6">
+    <form [formGroup]="form" (ngSubmit)="generateReport()" class="space-y-6">
+      <!-- Grid de Filtros -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Fecha Desde -->
+        <div class="flex flex-col gap-2">
+          <label for="dateFrom" class="font-medium text-gray-900 dark:text-white">
+            Fecha Desde <span class="text-red-500">*</span>
+          </label>
+          <p-datepicker
+            id="dateFrom"
+            formControlName="dateFrom"
+            dateFormat="dd/mm/yy"
+            [showIcon]="true"
+            [iconDisplay]="'button'"
+            placeholder="Seleccione fecha inicial"
+            class="w-full"
+          />
+          @if (form.get('dateFrom')?.invalid && form.get('dateFrom')?.touched) {
+            <small class="text-red-500">La fecha inicial es requerida</small>
+          }
+        </div>
+
+        <!-- Fecha Hasta -->
+        <div class="flex flex-col gap-2">
+          <label for="dateTo" class="font-medium text-gray-900 dark:text-white">
+            Fecha Hasta <span class="text-red-500">*</span>
+          </label>
+          <p-datepicker
+            id="dateTo"
+            formControlName="dateTo"
+            dateFormat="dd/mm/yy"
+            [showIcon]="true"
+            [iconDisplay]="'button'"
+            placeholder="Seleccione fecha final"
+            class="w-full"
+          />
+          @if (form.get('dateTo')?.hasError('required') && form.get('dateTo')?.touched) {
+            <small class="text-red-500">La fecha final es requerida</small>
+          }
+          @if (form.get('dateTo')?.hasError('dateRange')) {
+            <small class="text-red-500">
+              La fecha final debe ser mayor o igual a la fecha inicial
+            </small>
+          }
+        </div>
+
+        <!-- Formato -->
+        <div class="flex flex-col gap-2">
+          <label for="format" class="font-medium text-gray-900 dark:text-white">
+            Formato <span class="text-red-500">*</span>
+          </label>
+          <p-select
+            id="format"
+            formControlName="format"
+            [options]="formatOptions"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Seleccione formato"
+            class="w-full"
+          />
+          @if (form.get('format')?.invalid && form.get('format')?.touched) {
+            <small class="text-red-500">El formato es requerido</small>
+          }
+        </div>
+      </div>
+
+      <!-- Botones -->
+      <div class="flex gap-3 pt-4">
+        <p-button
+          type="submit"
+          label="Generar Reporte"
+          icon="pi pi-download"
+          [loading]="isLoading()"
+          [disabled]="form.invalid || isLoading()"
+        />
+
+        @if (form.dirty && !form.invalid) {
+          <p-button
+            type="button"
+            label="Limpiar"
+            icon="pi pi-times"
+            severity="secondary"
+            [outlined]="true"
+            (onClick)="resetForm()"
+          />
+        }
+      </div>
+
+      <!-- Información de ayuda -->
+      <div class="flex items-start gap-2 p-4 bg-blue-50 rounded-lg dark:bg-blue-900/20">
+        <i class="pi pi-info-circle text-blue-500 mt-0.5"></i>
+        <div class="text-sm text-blue-700 dark:text-blue-300">
+          <p class="font-medium mb-1">Información del reporte</p>
+          <ul class="list-disc list-inside space-y-1 text-blue-600 dark:text-blue-400">
+            <li>Incluye todas las facturas en el rango de fechas seleccionado</li>
+            <li>El formato PDF es ideal para visualización e impresión</li>
+            <li>El formato Excel permite análisis y manipulación de datos</li>
+          </ul>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

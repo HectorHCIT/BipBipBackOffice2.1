@@ -529,7 +529,7 @@ export const navigationData: NavigationItem[] = [
           {
             id: 982,
             title: 'Flujo de Efectivo',
-            link: '/accounting/reports',
+            link: '/accounting/reports/cash-flow',
           },
           {
             id: 983,

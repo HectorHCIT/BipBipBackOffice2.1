@@ -10,9 +10,9 @@ import { Routes } from '@angular/router';
  * - Establishments (Establecimientos) ✅
  * - Fiscal Correlatives (Correlativos Fiscales) ✅
  * - Invoices (Facturas) ✅
+ * - Reports (Reportes) ✅
  * - Settlements (Liquidaciones) - TODO
  * - Spreadsheets (Hojas de Cálculo) - TODO
- * - Reports (Reportes) - TODO
  *
  * Estructura:
  * /accounting/companies -> CompaniesComponent
@@ -59,6 +59,11 @@ export const ACCOUNTING_ROUTES: Routes = [
     path: 'invoices',
     loadChildren: () => import('./invoices/invoices.routes').then(m => m.INVOICES_ROUTES),
     title: 'Facturas'
+  },
+  {
+    path: 'reports',
+    loadChildren: () => import('./reports/reports.routes').then(m => m.REPORTS_ROUTES),
+    title: 'Reportes'
   }
   // TODO: Agregar más submódulos de contabilidad aquí
   /*

@@ -1,0 +1,138 @@
+<div class="p-6 space-y-6">
+  <!-- Toast para notificaciones -->
+  <p-toast />
+
+  <!-- Header -->
+  <div>
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+      Reporte de Flujo de Efectivo
+    </h1>
+    <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+      Genera reporte de flujo de efectivo por tienda en formato PDF
+    </p>
+  </div>
+
+  <!-- Form Card -->
+  <div class="bg-white rounded-lg shadow dark:bg-gray-800 p-6">
+    <form [formGroup]="form" (ngSubmit)="generateReport()" class="space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <!-- Fecha -->
+      <div class="flex flex-col gap-2 ">
+        <label for="date" class="font-medium text-gray-900 dark:text-white">
+          Fecha <span class="text-red-500">*</span>
+        </label>
+        <p-datepicker
+          id="date"
+          formControlName="date"
+          dateFormat="dd/mm/yy"
+          [showIcon]="true"
+          [iconDisplay]="'button'"
+          placeholder="Seleccione fecha"
+          class="w-full"
+        />
+        @if (form.get('date')?.invalid && form.get('date')?.touched) {
+          <small class="text-red-500">La fecha es requerida</small>
+        }
+      </div>
+
+      <!-- Marca -->
+      <div class="flex flex-col gap-2">
+        <label for="brandId" class="font-medium text-gray-900 dark:text-white">
+          Marca <span class="text-red-500">*</span>
+        </label>
+        <p-select
+          id="brandId"
+          formControlName="brandId"
+          [options]="brands()"
+          optionLabel="nameBrand"
+          optionValue="idBrand"
+          placeholder="Seleccione una marca"
+          [filter]="true"
+          filterPlaceholder="Buscar marca..."
+          class="w-full"
+        >
+          <ng-template pTemplate="item" let-brand>
+            <div class="flex items-center gap-3">
+              @if (brand.logoBrand) {
+                <img
+                  [src]="brand.logoBrand"
+                  [alt]="brand.nameBrand"
+                  class="w-8 h-8 object-contain"
+                />
+              }
+              <span>{{ brand.nameBrand }}</span>
+            </div>
+          </ng-template>
+        </p-select>
+        @if (form.get('brandId')?.invalid && form.get('brandId')?.touched) {
+          <small class="text-red-500">La marca es requerida</small>
+        }
+      </div>
+
+      <!-- Tienda/Unidad -->
+      <div class="flex flex-col gap-2">
+        <label for="storeId" class="font-medium text-gray-900 dark:text-white">
+          Unidad <span class="text-red-500">*</span>
+        </label>
+        <p-select
+          id="storeId"
+          formControlName="storeId"
+          [options]="stores()"
+          optionLabel="shortName"
+          optionValue="restId"
+          placeholder="Primero seleccione una marca"
+          [filter]="true"
+          filterPlaceholder="Buscar unidad..."
+          [disabled]="!form.get('brandId')?.value || isLoadingStores()"
+          class="w-full"
+        />
+        @if (isLoadingStores()) {
+          <small class="text-gray-500">Cargando unidades...</small>
+        }
+        @if (form.get('storeId')?.invalid && form.get('storeId')?.touched) {
+          <small class="text-red-500">La unidad es requerida</small>
+        }
+        @if (form.get('brandId')?.value && stores().length === 0 && !isLoadingStores()) {
+          <small class="text-yellow-600">No hay unidades disponibles para esta marca</small>
+        }
+      </div>
+      </div>
+
+
+      <!-- Botones -->
+      <div class="flex gap-3 pt-4">
+        <p-button
+          type="submit"
+          label="Generar Reporte"
+          icon="pi pi-download"
+          [loading]="isLoading()"
+          [disabled]="form.invalid || isLoading()"
+        />
+
+        @if (form.dirty && !form.invalid) {
+          <p-button
+            type="button"
+            label="Limpiar"
+            icon="pi pi-times"
+            severity="secondary"
+            [outlined]="true"
+            (onClick)="resetForm()"
+          />
+        }
+      </div>
+
+      <!-- Información de ayuda -->
+      <div class="flex items-start gap-2 p-4 bg-blue-50 rounded-lg dark:bg-blue-900/20">
+        <i class="pi pi-info-circle text-blue-500 mt-0.5"></i>
+        <div class="text-sm text-blue-700 dark:text-blue-300">
+          <p class="font-medium mb-1">Información del reporte</p>
+          <ul class="list-disc list-inside space-y-1 text-blue-600 dark:text-blue-400">
+            <li>Muestra el flujo de efectivo de la unidad seleccionada</li>
+            <li>Incluye ingresos, egresos y balance del día</li>
+            <li>El reporte se genera en formato PDF</li>
+          </ul>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
