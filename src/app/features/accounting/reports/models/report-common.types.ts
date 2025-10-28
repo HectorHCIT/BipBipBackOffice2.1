@@ -9,11 +9,13 @@
 
 /**
  * Formato de reporte disponible
+ * IMPORTANTE: Los valores deben coincidir con lo que espera la API
+ * - PDF = 1
+ * - Excel = 2 (formato antiguo .xls)
  */
 export enum ReportFormat {
-  PDF = 0,
-  Excel = 1,
-  ExcelXLSX = 2
+  PDF = 1,
+  Excel = 2
 }
 
 /**

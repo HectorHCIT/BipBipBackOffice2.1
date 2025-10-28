@@ -1,6 +1,8 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, tap, catchError } from 'rxjs';
 import { ReportBaseService } from '../../shared/services/report-base.service';
+import { environment } from '../../../../../../environments/environment';
 
 /**
  * CouponsRedeemedService
@@ -8,13 +10,16 @@ import { ReportBaseService } from '../../shared/services/report-base.service';
  * Servicio para el reporte de Cupones Canjeados.
  * Genera reportes en Excel (.xlsx) según rango de fechas y ciudades seleccionadas.
  *
- * Endpoint: POST Reports/Coupons/Redeemed/Excel
- * Body: { dateFrom: 'YYYY-MM-DD', dateTo: 'YYYY-MM-DD', cityIds: [1, 2, 3] }
+ * Endpoint: GET {apiURL}Reports/Coupons/Redeemed/Excel
+ * Query Params: fechaInicio, fechaFinal, ciudades (multiple)
  *
  * Patrón: Extiende ReportBaseService para reutilizar funcionalidad común
  */
 @Injectable({ providedIn: 'root' })
 export class CouponsRedeemedService extends ReportBaseService {
+  private readonly httpClient = inject(HttpClient);
+  private readonly apiUrl = environment.apiURL + 'Reports/Coupons/Redeemed/';
+
   /**
    * Genera reporte de cupones canjeados
    *
@@ -40,14 +45,24 @@ export class CouponsRedeemedService extends ReportBaseService {
     this.isLoading.set(true);
 
     // Formatear fechas a ISO (YYYY-MM-DD)
-    const body = {
-      dateFrom: this.formatDateISO(dateFrom),
-      dateTo: this.formatDateISO(dateTo),
-      cityIds: cityIds
-    };
+    const fechaInicio = this.formatDateISO(dateFrom);
+    const fechaFinal = this.formatDateISO(dateTo);
 
-    // Endpoint: POST Reports/Coupons/Redeemed/Excel
-    return this.http.post<string>('Reports/Coupons/Redeemed/Excel', body).pipe(
+    // Build query params with multiple ciudades
+    let httpParams = new HttpParams()
+      .set('fechaInicio', fechaInicio)
+      .set('fechaFinal', fechaFinal);
+
+    // Append each city ID as separate parameter (ciudades=1&ciudades=2&ciudades=3)
+    cityIds.forEach(cityId => {
+      httpParams = httpParams.append('ciudades', cityId.toString());
+    });
+
+    // Endpoint: GET Reports/Coupons/Redeemed/Excel
+    return this.httpClient.get(this.apiUrl + 'Excel', {
+      params: httpParams,
+      responseType: 'text'
+    }).pipe(
       tap(() => {
         this.isLoading.set(false);
         console.log('Coupons Redeemed report generated successfully');

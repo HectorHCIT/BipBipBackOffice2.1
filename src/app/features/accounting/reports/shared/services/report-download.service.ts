@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ReportFormat } from '../../models/report-common.types';
-import { downloadPDF, downloadExcel, downloadExcelXLSX } from '../utils/report-export.utils';
+import { downloadPDF, downloadExcel } from '../utils/report-export.utils';
 
 /**
  * ReportDownloadService
@@ -18,7 +18,7 @@ export class ReportDownloadService {
    * Descarga un reporte según el formato especificado
    *
    * @param base64 - String base64 retornado por el API
-   * @param format - Formato del archivo (PDF, Excel, ExcelXLSX)
+   * @param format - Formato del archivo (PDF=1, Excel=2)
    * @param filename - Nombre del archivo sin extensión
    *
    * @example
@@ -35,11 +35,8 @@ export class ReportDownloadService {
         break;
 
       case ReportFormat.Excel:
+        // El API retorna formato .xls antiguo (Excel 97-2003)
         downloadExcel(base64, filename);
-        break;
-
-      case ReportFormat.ExcelXLSX:
-        downloadExcelXLSX(base64, filename);
         break;
 
       default:

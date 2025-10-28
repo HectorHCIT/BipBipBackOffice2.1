@@ -2,6 +2,9 @@
   <!-- Toast para notificaciones -->
   <p-toast />
 
+  <!-- Breadcrumb -->
+  <p-breadcrumb [model]="breadcrumbItems" [home]="breadcrumbHome" styleClass="mb-4" />
+
   @if (isLoading()) {
     <div class="flex items-center justify-center py-12">
       <i class="pi pi-spin pi-spinner text-4xl text-primary"></i>

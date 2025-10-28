@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MessageService } from 'primeng/api';
+import { MenuItem, MessageService } from 'primeng/api';
 
 // PrimeNG
 import { ButtonModule } from 'primeng/button';
@@ -13,6 +13,7 @@ import { InputIconModule } from 'primeng/inputicon';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { ToastModule } from 'primeng/toast';
 import { TooltipModule } from 'primeng/tooltip';
+import { BreadcrumbModule } from 'primeng/breadcrumb';
 
 // Models & Services
 import { EmissionPoint, StatusFilter } from '../../models/emission-point.model';
@@ -44,6 +45,7 @@ import { EmissionPointFormComponent } from '../../components/emission-point-form
     ToggleSwitchModule,
     ToastModule,
     TooltipModule,
+    BreadcrumbModule,
     EmissionPointFormComponent
   ],
   templateUrl: './emission-points.component.html',
@@ -52,6 +54,13 @@ import { EmissionPointFormComponent } from '../../components/emission-point-form
 })
 export class EmissionPointsComponent implements OnInit {
   private readonly emissionPointService = inject(EmissionPointService);
+
+  // Breadcrumb
+  readonly breadcrumbHome: MenuItem = { icon: 'pi pi-home', routerLink: '/' };
+  readonly breadcrumbItems: MenuItem[] = [
+    { label: 'Contabilidad', routerLink: '/accounting' },
+    { label: 'Puntos de Emisión' }
+  ];
   private readonly messageService = inject(MessageService);
 
   // Estado local del componente

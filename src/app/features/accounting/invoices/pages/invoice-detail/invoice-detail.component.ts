@@ -1,13 +1,14 @@
 import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MessageService } from 'primeng/api';
+import { MenuItem, MessageService } from 'primeng/api';
 
 // PrimeNG
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { DividerModule } from 'primeng/divider';
 import { ToastModule } from 'primeng/toast';
+import { BreadcrumbModule } from 'primeng/breadcrumb';
 
 // Models & Services
 import { InvoiceDetail } from '../../models/invoice.model';
@@ -30,7 +31,8 @@ import { InvoiceService } from '../../services/invoice.service';
     ButtonModule,
     CardModule,
     DividerModule,
-    ToastModule
+    ToastModule,
+    BreadcrumbModule
   ],
   templateUrl: './invoice-detail.component.html',
   providers: [MessageService],
@@ -41,6 +43,14 @@ export class InvoiceDetailComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly invoiceService = inject(InvoiceService);
   private readonly messageService = inject(MessageService);
+
+  // Breadcrumb
+  readonly breadcrumbHome: MenuItem = { icon: 'pi pi-home', routerLink: '/' };
+  readonly breadcrumbItems: MenuItem[] = [
+    { label: 'Contabilidad', routerLink: '/accounting' },
+    { label: 'Facturas', routerLink: '/accounting/invoices' },
+    { label: 'Detalle' }
+  ];
 
   readonly invoiceDetail = signal<InvoiceDetail | null>(null);
   readonly isLoading = signal<boolean>(false);

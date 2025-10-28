@@ -60,20 +60,42 @@ export function downloadExcelXLSX(base64: string, filename: string): void {
 }
 
 /**
- * Limpia el string base64 removiendo prefijos data URI si existen
+ * Limpia el string base64 removiendo prefijos data URI, comillas y espacios
  *
- * @param base64 - String base64 con o sin prefijo
- * @returns String base64 limpio
+ * IMPORTANTE: Algunos endpoints del API retornan el base64 envuelto en comillas
+ * y con caracteres de espacio/newline que deben ser removidos antes de decodificar.
+ *
+ * @param base64 - String base64 con o sin prefijo/comillas/espacios
+ * @returns String base64 limpio listo para decodificar
  *
  * @example
  * cleanBase64('data:application/pdf;base64,JVBERi0x...')
  * // Retorna: 'JVBERi0x...'
  *
- * cleanBase64('JVBERi0x...')
- * // Retorna: 'JVBERi0x...' (sin cambios)
+ * cleanBase64('"JVBERi0x..."')
+ * // Retorna: 'JVBERi0x...' (sin comillas)
+ *
+ * cleanBase64('JVBERi0x\n...\r\n')
+ * // Retorna: 'JVBERi0x...' (sin espacios)
  */
 function cleanBase64(base64: string): string {
-  return base64.includes(',') ? base64.split(',')[1] : base64;
+  let cleaned = base64.trim();
+
+  // Remove data URI prefix if present (e.g., 'data:application/pdf;base64,')
+  if (cleaned.includes(',')) {
+    cleaned = cleaned.split(',')[1];
+  }
+
+  // Remove surrounding quotes (CRITICAL FIX for API responses)
+  // Some endpoints return base64 wrapped in quotes: "UEsDBBQ..."
+  if (cleaned.startsWith('"') && cleaned.endsWith('"')) {
+    cleaned = cleaned.slice(1, -1);
+  }
+
+  // Remove all whitespace characters (spaces, newlines, carriage returns)
+  cleaned = cleaned.replace(/[\r\n\s]+/g, '');
+
+  return cleaned;
 }
 
 /**

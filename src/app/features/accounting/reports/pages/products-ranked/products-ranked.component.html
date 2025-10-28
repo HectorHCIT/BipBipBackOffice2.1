@@ -1,0 +1,143 @@
+<div class="p-6">
+  <p-toast />
+
+  <!-- Breadcrumb -->
+  <p-breadcrumb [model]="breadcrumbItems" [home]="breadcrumbHome" styleClass="mb-4" />
+
+  <div class="mb-6">
+    <h2 class="text-2xl font-semibold text-gray-800">Productos Clasificados</h2>
+    <p class="text-gray-600 mt-1">Genera el reporte de productos clasificados por marca en formato Excel</p>
+  </div>
+
+  <form [formGroup]="form" class="space-y-6">
+    <!-- Date Presets -->
+    <div class="flex flex-wrap gap-2">
+      <p-button
+        label="Hoy"
+        [outlined]="true"
+        size="small"
+        icon="pi pi-calendar"
+        (onClick)="setToday()"
+        type="button"
+      />
+      <p-button
+        label="Última Semana"
+        [outlined]="true"
+        size="small"
+        icon="pi pi-calendar"
+        (onClick)="setLastWeek()"
+        type="button"
+      />
+      <p-button
+        label="Último Mes"
+        [outlined]="true"
+        size="small"
+        icon="pi pi-calendar"
+        (onClick)="setLastMonth()"
+        type="button"
+      />
+    </div>
+
+    <!-- Filter Fields in Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Date Start -->
+      <div class="flex flex-col gap-2">
+        <label for="fechaInicio" class="font-medium text-gray-700">
+          Fecha Inicio <span class="text-red-500">*</span>
+        </label>
+        <p-datepicker
+          id="fechaInicio"
+          formControlName="fechaInicio"
+          dateFormat="dd/mm/yy"
+          [showIcon]="true"
+          [iconDisplay]="'button'"
+          placeholder="Seleccione fecha inicial"
+          class="w-full"
+        />
+      </div>
+
+      <!-- Date End -->
+      <div class="flex flex-col gap-2">
+        <label for="fechaFin" class="font-medium text-gray-700">
+          Fecha Fin <span class="text-red-500">*</span>
+        </label>
+        <p-datepicker
+          id="fechaFin"
+          formControlName="fechaFin"
+          dateFormat="dd/mm/yy"
+          [showIcon]="true"
+          [iconDisplay]="'button'"
+          placeholder="Seleccione fecha final"
+          class="w-full"
+        />
+      </div>
+
+      <!-- Brands Multi-Select -->
+      <div class="flex flex-col gap-2">
+        <label for="marcas" class="font-medium text-gray-700">
+          Marcas <span class="text-red-500">*</span>
+        </label>
+        <p-multiselect
+          id="marcas"
+          formControlName="marcas"
+          [options]="brands()"
+          optionLabel="nameBrand"
+          optionValue="idBrand"
+          display="chip"
+          placeholder="Seleccione marcas"
+          [loading]="isLoadingBrands()"
+          class="w-full"
+        >
+          <ng-template #item let-brand>
+            <div class="flex items-center gap-2">
+              @if (brand.logoBrand) {
+                <img
+                  [src]="brand.logoBrand"
+                  [alt]="brand.nameBrand"
+                  class="w-6 h-6 object-contain"
+                />
+              }
+              <span>{{ brand.nameBrand }}</span>
+            </div>
+          </ng-template>
+        </p-multiselect>
+      </div>
+
+      <!-- Top N (Optional) -->
+      <div class="flex flex-col gap-2">
+        <label for="top" class="font-medium text-gray-700">
+          Top N Productos (Opcional)
+        </label>
+        <p-inputnumber
+          id="top"
+          formControlName="top"
+          [min]="1"
+          [max]="10000"
+          placeholder="Ej: 100"
+          class="w-full"
+        />
+        <small class="text-gray-500">Deja vacío para todos los productos</small>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex gap-3 pt-4">
+      <p-button
+        label="Generar Reporte"
+        icon="pi pi-file-excel"
+        (onClick)="generateReport()"
+        [loading]="isLoading()"
+        [disabled]="form.invalid"
+        type="button"
+      />
+      <p-button
+        label="Limpiar"
+        icon="pi pi-times"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="resetForm()"
+        type="button"
+      />
+    </div>
+  </form>
+</div>

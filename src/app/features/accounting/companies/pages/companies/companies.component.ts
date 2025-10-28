@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MessageService } from 'primeng/api';
+import { MenuItem, MessageService } from 'primeng/api';
 
 // PrimeNG
 import { ButtonModule } from 'primeng/button';
@@ -12,6 +12,7 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { ToastModule } from 'primeng/toast';
+import { BreadcrumbModule } from 'primeng/breadcrumb';
 
 // Models & Services
 import { Company, StatusFilter } from '../../models/company.model';
@@ -42,6 +43,7 @@ import { CompanyFormComponent } from '../../components/company-form/company-form
     InputIconModule,
     ToggleSwitchModule,
     ToastModule,
+    BreadcrumbModule,
     CompanyFormComponent
   ],
   templateUrl: './companies.component.html',
@@ -51,6 +53,13 @@ import { CompanyFormComponent } from '../../components/company-form/company-form
 export class CompaniesComponent implements OnInit {
   private readonly companyService = inject(CompanyService);
   private readonly messageService = inject(MessageService);
+
+  // Breadcrumb
+  readonly breadcrumbHome: MenuItem = { icon: 'pi pi-home', routerLink: '/' };
+  readonly breadcrumbItems: MenuItem[] = [
+    { label: 'Contabilidad', routerLink: '/accounting' },
+    { label: 'Empresas' }
+  ];
 
   // Signals del servicio
   readonly companies = this.companyService.companies;

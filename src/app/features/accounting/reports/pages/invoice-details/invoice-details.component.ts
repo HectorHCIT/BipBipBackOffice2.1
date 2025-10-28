@@ -1,13 +1,14 @@
 import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MessageService } from 'primeng/api';
+import { MenuItem, MessageService } from 'primeng/api';
 
 // PrimeNG
 import { ButtonModule } from 'primeng/button';
 import { DatePickerModule } from 'primeng/datepicker';
 import { SelectModule } from 'primeng/select';
 import { ToastModule } from 'primeng/toast';
+import { BreadcrumbModule } from 'primeng/breadcrumb';
 
 // Services & Models
 import { InvoiceDetailsService } from './invoice-details.service';
@@ -33,7 +34,8 @@ import { ReportFormat } from '../../models/report-common.types';
     ButtonModule,
     DatePickerModule,
     SelectModule,
-    ToastModule
+    ToastModule,
+    BreadcrumbModule
   ],
   templateUrl: './invoice-details.component.html',
   providers: [MessageService],
@@ -46,6 +48,14 @@ export class InvoiceDetailsComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
 
   readonly isLoading = this.service.isLoading;
+
+  // Breadcrumb
+  readonly breadcrumbHome: MenuItem = { icon: 'pi pi-home', routerLink: '/' };
+  readonly breadcrumbItems: MenuItem[] = [
+    { label: 'Contabilidad', routerLink: '/accounting' },
+    { label: 'Reportes', routerLink: '/accounting/reports' },
+    { label: 'Detalles de Facturas' }
+  ];
 
   readonly formatOptions = [
     { label: 'PDF', value: ReportFormat.PDF },

@@ -2,8 +2,9 @@ import { Component, OnInit, inject, signal, ChangeDetectionStrategy, effect } fr
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { MessageService } from 'primeng/api';
+import { MenuItem, MessageService } from 'primeng/api';
 
+import { BreadcrumbModule } from 'primeng/breadcrumb';
 // PrimeNG
 import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
@@ -60,6 +61,7 @@ import { InvoiceChartsComponent } from '../../components/invoice-charts/invoice-
     TooltipModule,
     DatePickerModule,
     SelectModule,
+    BreadcrumbModule,
     InvoiceChartsComponent
   ],
   templateUrl: './invoices.component.html',
@@ -70,6 +72,13 @@ export class InvoicesComponent implements OnInit {
   private readonly invoiceService = inject(InvoiceService);
   private readonly messageService = inject(MessageService);
   private readonly router = inject(Router);
+
+  // Breadcrumb
+  readonly breadcrumbHome: MenuItem = { icon: 'pi pi-home', routerLink: '/' };
+  readonly breadcrumbItems: MenuItem[] = [
+    { label: 'Contabilidad', routerLink: '/accounting' },
+    { label: 'Facturas' }
+  ];
 
   // Signals del servicio
   readonly invoices = this.invoiceService.invoices;

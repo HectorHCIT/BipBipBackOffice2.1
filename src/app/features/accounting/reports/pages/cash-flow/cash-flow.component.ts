@@ -1,13 +1,14 @@
 import { Component, OnInit, inject, signal, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MessageService } from 'primeng/api';
+import { MenuItem, MessageService } from 'primeng/api';
 
 // PrimeNG
 import { ButtonModule } from 'primeng/button';
 import { DatePickerModule } from 'primeng/datepicker';
 import { SelectModule } from 'primeng/select';
 import { ToastModule } from 'primeng/toast';
+import { BreadcrumbModule } from 'primeng/breadcrumb';
 
 // Services & Models
 import { CashFlowService } from './cash-flow.service';
@@ -34,7 +35,8 @@ import { ReportFormat, Brand, Store } from '../../models/report-common.types';
     ButtonModule,
     DatePickerModule,
     SelectModule,
-    ToastModule
+    ToastModule,
+    BreadcrumbModule
   ],
   templateUrl: './cash-flow.component.html',
   providers: [MessageService],
@@ -48,6 +50,14 @@ export class CashFlowComponent implements OnInit {
   private readonly cdr = inject(ChangeDetectorRef);
 
   readonly isLoading = this.service.isLoading;
+
+  // Breadcrumb
+  readonly breadcrumbHome: MenuItem = { icon: 'pi pi-home', routerLink: '/' };
+  readonly breadcrumbItems: MenuItem[] = [
+    { label: 'Contabilidad', routerLink: '/accounting' },
+    { label: 'Reportes', routerLink: '/accounting/reports' },
+    { label: 'Flujo de Efectivo' }
+  ];
   readonly brands = signal<Brand[]>([]);
   readonly stores = signal<Store[]>([]);
   readonly isLoadingStores = signal<boolean>(false);

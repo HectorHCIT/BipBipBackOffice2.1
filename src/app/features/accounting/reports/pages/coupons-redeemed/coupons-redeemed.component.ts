@@ -1,13 +1,14 @@
 import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MessageService } from 'primeng/api';
+import { MenuItem, MessageService } from 'primeng/api';
 
 // PrimeNG
 import { ButtonModule } from 'primeng/button';
 import { DatePickerModule } from 'primeng/datepicker';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { ToastModule } from 'primeng/toast';
+import { BreadcrumbModule } from 'primeng/breadcrumb';
 
 // Services & Models
 import { CouponsRedeemedService } from './coupons-redeemed.service';
@@ -33,7 +34,8 @@ import { ReportFormat, City } from '../../models/report-common.types';
     ButtonModule,
     DatePickerModule,
     MultiSelectModule,
-    ToastModule
+    ToastModule,
+    BreadcrumbModule
   ],
   templateUrl: './coupons-redeemed.component.html',
   providers: [MessageService],
@@ -43,6 +45,14 @@ export class CouponsRedeemedComponent implements OnInit {
   private readonly service = inject(CouponsRedeemedService);
   private readonly downloadService = inject(ReportDownloadService);
   private readonly messageService = inject(MessageService);
+
+  // Breadcrumb
+  readonly breadcrumbHome: MenuItem = { icon: 'pi pi-home', routerLink: '/' };
+  readonly breadcrumbItems: MenuItem[] = [
+    { label: 'Contabilidad', routerLink: '/accounting' },
+    { label: 'Reportes', routerLink: '/accounting/reports' },
+    { label: 'Cupones Canjeados' }
+  ];
   private readonly fb = inject(FormBuilder);
 
   readonly isLoading = this.service.isLoading;
@@ -168,8 +178,8 @@ export class CouponsRedeemedComponent implements OnInit {
         const cityCount = cityIds.length;
         const filename = `cupones-canjeados_${dateFromStr}_${dateToStr}_${cityCount}ciudades`;
 
-        // Descargar usando el servicio centralizado (solo XLSX)
-        this.downloadService.download(base64, ReportFormat.ExcelXLSX, filename);
+        // Descargar usando el servicio centralizado (Excel .xls formato antiguo)
+        this.downloadService.download(base64, ReportFormat.Excel, filename);
 
         // Mostrar mensaje de éxito
         this.messageService.add({

@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MessageService } from 'primeng/api';
+import { MenuItem, MessageService } from 'primeng/api';
 
 // PrimeNG
 import { ButtonModule } from 'primeng/button';
@@ -13,6 +13,7 @@ import { InputIconModule } from 'primeng/inputicon';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { ToastModule } from 'primeng/toast';
 import { TooltipModule } from 'primeng/tooltip';
+import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { ImageModule } from 'primeng/image';
 
 // Models & Services
@@ -47,6 +48,7 @@ import { FiscalCorrelativeFormComponent } from '../../components/fiscal-correlat
     ToastModule,
     TooltipModule,
     ImageModule,
+    BreadcrumbModule,
     FiscalCorrelativeFormComponent
   ],
   templateUrl: './fiscal-correlatives.component.html',
@@ -56,6 +58,13 @@ import { FiscalCorrelativeFormComponent } from '../../components/fiscal-correlat
 export class FiscalCorrelativesComponent implements OnInit {
   private readonly fiscalCorrelativeService = inject(FiscalCorrelativeService);
   private readonly messageService = inject(MessageService);
+
+  // Breadcrumb
+  readonly breadcrumbHome: MenuItem = { icon: 'pi pi-home', routerLink: '/' };
+  readonly breadcrumbItems: MenuItem[] = [
+    { label: 'Contabilidad', routerLink: '/accounting' },
+    { label: 'Correlativos Fiscales' }
+  ];
 
   // Signals del servicio
   readonly fiscalCorrelatives = this.fiscalCorrelativeService.fiscalCorrelatives;

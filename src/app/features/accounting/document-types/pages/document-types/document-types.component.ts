@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MessageService } from 'primeng/api';
+import { MenuItem, MessageService } from 'primeng/api';
 
 // PrimeNG
 import { ButtonModule } from 'primeng/button';
@@ -12,6 +12,7 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { ToastModule } from 'primeng/toast';
+import { BreadcrumbModule } from 'primeng/breadcrumb';
 
 // Models & Services
 import { DocumentType, StatusFilter } from '../../models/document-type.model';
@@ -42,6 +43,7 @@ import { DocumentTypeFormComponent } from '../../components/document-type-form/d
     InputIconModule,
     ToggleSwitchModule,
     ToastModule,
+    BreadcrumbModule,
     DocumentTypeFormComponent
   ],
   templateUrl: './document-types.component.html',
@@ -51,6 +53,13 @@ import { DocumentTypeFormComponent } from '../../components/document-type-form/d
 export class DocumentTypesComponent implements OnInit {
   private readonly documentTypeService = inject(DocumentTypeService);
   private readonly messageService = inject(MessageService);
+
+  // Breadcrumb
+  readonly breadcrumbHome: MenuItem = { icon: 'pi pi-home', routerLink: '/' };
+  readonly breadcrumbItems: MenuItem[] = [
+    { label: 'Contabilidad', routerLink: '/accounting' },
+    { label: 'Tipos de Documentos' }
+  ];
 
   // Estado local del componente
   readonly showDrawer = signal<boolean>(false);

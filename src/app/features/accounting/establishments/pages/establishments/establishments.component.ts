@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MessageService } from 'primeng/api';
+import { MenuItem, MessageService } from 'primeng/api';
 
 // PrimeNG
 import { ButtonModule } from 'primeng/button';
@@ -13,6 +13,7 @@ import { InputIconModule } from 'primeng/inputicon';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { ToastModule } from 'primeng/toast';
 import { TooltipModule } from 'primeng/tooltip';
+import { BreadcrumbModule } from 'primeng/breadcrumb';
 
 // Models & Services
 import { Establishment, StatusFilter } from '../../models/establishment.model';
@@ -44,6 +45,7 @@ import { EstablishmentFormComponent } from '../../components/establishment-form/
     ToggleSwitchModule,
     ToastModule,
     TooltipModule,
+    BreadcrumbModule,
     EstablishmentFormComponent
   ],
   templateUrl: './establishments.component.html',
@@ -53,6 +55,13 @@ import { EstablishmentFormComponent } from '../../components/establishment-form/
 export class EstablishmentsComponent implements OnInit {
   private readonly establishmentService = inject(EstablishmentService);
   private readonly messageService = inject(MessageService);
+
+  // Breadcrumb
+  readonly breadcrumbHome: MenuItem = { icon: 'pi pi-home', routerLink: '/' };
+  readonly breadcrumbItems: MenuItem[] = [
+    { label: 'Contabilidad', routerLink: '/accounting' },
+    { label: 'Establecimientos' }
+  ];
 
   // Signals del servicio
   readonly establishments = this.establishmentService.establishments;

@@ -10,7 +10,15 @@ import { Routes } from '@angular/router';
  * ✅ invoice-details (SIMPLE)
  * ✅ cash-flow (MEDIO)
  * ✅ coupons-redeemed (COMPLEJO)
- * ⏳ Pendientes: 7 reportes más
+ * ✅ manual-settlements (SIMPLE)
+ * ✅ cash-sales (SIMPLE)
+ * ✅ not-delivery (SIMPLE)
+ * ✅ pending-settlements (SIMPLE)
+ * ✅ products-ranked (MEDIO - movido)
+ * ✅ inactive-deliveries (SIMPLE - movido)
+ * ✅ cancelled-orders (COMPLEJO)
+ *
+ * 🎉 MIGRACIÓN COMPLETA: 10/10 REPORTES
  */
 export const REPORTS_ROUTES: Routes = [
   {
@@ -55,21 +63,8 @@ export const REPORTS_ROUTES: Routes = [
       title: 'Cupones Canjeados',
       breadcrumb: 'Cupones Canjeados'
     }
-  }
-
-  // ========== TODO: REPORTES PENDIENTES ==========
-  /*
-  {
-    path: 'cancelled-orders',
-    loadComponent: () =>
-      import('./pages/cancelled-orders/cancelled-orders.component').then(
-        (m) => m.CancelledOrdersComponent
-      ),
-    data: {
-      title: 'Órdenes Canceladas',
-      breadcrumb: 'Órdenes Canceladas'
-    }
   },
+
   {
     path: 'manual-settlements',
     loadComponent: () =>
@@ -81,6 +76,7 @@ export const REPORTS_ROUTES: Routes = [
       breadcrumb: 'Liquidaciones Manuales'
     }
   },
+
   {
     path: 'cash-sales',
     loadComponent: () =>
@@ -92,17 +88,7 @@ export const REPORTS_ROUTES: Routes = [
       breadcrumb: 'Ventas en Efectivo'
     }
   },
-  {
-    path: 'pending-settlements',
-    loadComponent: () =>
-      import('./pages/pending-settlements/pending-settlements.component').then(
-        (m) => m.PendingSettlementsComponent
-      ),
-    data: {
-      title: 'Liquidaciones Pendientes',
-      breadcrumb: 'Liquidaciones Pendientes'
-    }
-  },
+
   {
     path: 'not-delivery',
     loadComponent: () =>
@@ -114,6 +100,19 @@ export const REPORTS_ROUTES: Routes = [
       breadcrumb: 'No Entregados'
     }
   },
+
+  {
+    path: 'pending-settlements',
+    loadComponent: () =>
+      import('./pages/pending-settlements/pending-settlements.component').then(
+        (m) => m.PendingSettlementsComponent
+      ),
+    data: {
+      title: 'Liquidaciones Pendientes',
+      breadcrumb: 'Liquidaciones Pendientes'
+    }
+  },
+
   {
     path: 'products-ranked',
     loadComponent: () =>
@@ -125,6 +124,7 @@ export const REPORTS_ROUTES: Routes = [
       breadcrumb: 'Productos Rankeados'
     }
   },
+
   {
     path: 'inactive-deliveries',
     loadComponent: () =>
@@ -135,6 +135,17 @@ export const REPORTS_ROUTES: Routes = [
       title: 'Deliveries Inactivos',
       breadcrumb: 'Deliveries Inactivos'
     }
+  },
+
+  {
+    path: 'cancelled-orders',
+    loadComponent: () =>
+      import('./pages/cancelled-orders/cancelled-orders.component').then(
+        (m) => m.CancelledOrdersComponent
+      ),
+    data: {
+      title: 'Órdenes Canceladas',
+      breadcrumb: 'Órdenes Canceladas'
+    }
   }
-  */
 ];

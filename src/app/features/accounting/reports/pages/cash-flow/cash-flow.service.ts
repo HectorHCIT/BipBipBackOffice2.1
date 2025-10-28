@@ -1,6 +1,8 @@
-import { Injectable } from '@angular/core';
-import { Observable, tap, catchError } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, tap, catchError, throwError } from 'rxjs';
 import { ReportBaseService } from '../../shared/services/report-base.service';
+import { environment } from '../../../../../../environments/environment';
 
 /**
  * CashFlowService
@@ -8,28 +10,17 @@ import { ReportBaseService } from '../../shared/services/report-base.service';
  * Servicio para el reporte de Flujo de Efectivo por tienda.
  * Genera reportes en PDF según fecha, marca y tienda.
  *
- * Endpoint: backoffice/reporteefectivo/{dateFormatted}/{dateFormatted}/{storeShortName}/{storeId}
+ * Endpoint: {apiURLReports}backoffice/reporteefectivo/{dateFormatted}/{dateFormatted}/{storeShortName}/{storeId}
  *
- * Patrón: Extiende ReportBaseService para reutilizar funcionalidad común
+ * IMPORTANTE: Usa apiURLReports, no apiURL
  */
 @Injectable({ providedIn: 'root' })
 export class CashFlowService extends ReportBaseService {
+  private readonly httpClient = inject(HttpClient);
+
   /**
    * Genera reporte de flujo de efectivo para una tienda específica
-   *
-   * @param date - Fecha del reporte
-   * @param storeShortName - Nombre corto de la tienda (para URL)
-   * @param storeId - ID de la tienda
-   * @returns Observable<string> con base64 del archivo PDF generado
-   *
-   * @example
-   * service.generateReport(
-   *   new Date('2024-01-15'),
-   *   'SPS-01',
-   *   123
-   * ).subscribe(base64 => {
-   *   // Descargar PDF
-   * });
+   * Formato: DD-MM-YYYY (con padding)
    */
   generateReport(
     date: Date,
@@ -41,19 +32,18 @@ export class CashFlowService extends ReportBaseService {
     // Formatear fecha a DD-MM-YYYY (con padding): 15-01-2024
     const dateFormatted = this.formatDateDDMMYYYY(date);
 
-    // Construir URL del endpoint
-    // Nota: La fecha se repite dos veces en el old project (inicio y fin iguales)
-    const url = `backoffice/reporteefectivo/${dateFormatted}/${dateFormatted}/${storeShortName}/${storeId}`;
+    // Construir URL completa con apiURLReports
+    // Nota: La fecha se repite dos veces (inicio y fin iguales)
+    const url = `${environment.apiURLReports}backoffice/reporteefectivo/${dateFormatted}/${dateFormatted}/${storeShortName}/${storeId}`;
 
-    return this.dataService.get$<string>(url).pipe(
+    return this.httpClient.get(url, { responseType: 'text' }).pipe(
       tap(() => {
         this.isLoading.set(false);
-        console.log('Cash Flow report generated successfully');
       }),
       catchError((error) => {
         this.isLoading.set(false);
         console.error('Error generating Cash Flow report:', error);
-        throw error;
+        return throwError(() => error);
       })
     );
   }
