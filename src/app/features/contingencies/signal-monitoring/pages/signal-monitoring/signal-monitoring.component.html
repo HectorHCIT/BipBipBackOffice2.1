@@ -1,0 +1,235 @@
+<div class="p-6 space-y-6">
+  <!-- Toast para notificaciones -->
+  <p-toast />
+
+  <!-- Diálogo de confirmación -->
+  <p-confirmDialog />
+
+  <!-- Breadcrumb -->
+  <p-breadcrumb
+    [model]="breadcrumbItems"
+    [home]="breadcrumbHome"
+    styleClass="mb-4"
+  />
+
+  <!-- Título -->
+  <div class="flex justify-between items-center">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-800">Monitoreo de Señal</h1>
+      <p class="text-gray-600 mt-1">
+        Gestión de órdenes atascadas en colas de Redis/SignalR
+      </p>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <p-card>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Selector de Ciudad -->
+      <div>
+        <label for="city" class="block text-sm font-semibold text-gray-700 mb-2">
+          Ciudad <span class="text-red-500">*</span>
+        </label>
+        <p-select
+          inputId="city"
+          [(ngModel)]="selectedCity"
+          [options]="cities()"
+          optionLabel="cityName"
+          optionValue="cityId"
+          placeholder="Seleccione una ciudad"
+          [filter]="true"
+          [showClear]="true"
+          (onChange)="onCityChange()"
+          class="w-full"
+        />
+      </div>
+
+      <!-- Campo de búsqueda -->
+      <div>
+        <label for="search" class="block text-sm font-semibold text-gray-700 mb-2">
+          Buscar
+        </label>
+        <input
+          id="search"
+          type="text"
+          pInputText
+          [(ngModel)]="searchTerm"
+          placeholder="Buscar por orden, restaurante o comando..."
+          [disabled]="!selectedCity()"
+          class="w-full"
+        />
+      </div>
+    </div>
+  </p-card>
+
+  <!-- Tabla de Órdenes (Desktop) -->
+  @if (selectedCity()) {
+    <p-card>
+      <ng-template pTemplate="header">
+        <div class="p-4 flex justify-between items-center">
+          <h3 class="text-lg font-semibold">
+            Órdenes en Cola
+            @if (filteredOrders().length > 0) {
+              <span class="text-gray-500">({{ filteredOrders().length }})</span>
+            }
+          </h3>
+        </div>
+      </ng-template>
+
+      @if (isLoading()) {
+        <!-- Loading state -->
+        <div class="flex justify-center items-center py-12">
+          <i class="pi pi-spin pi-spinner text-4xl text-primary"></i>
+        </div>
+      } @else if (filteredOrders().length === 0) {
+        <!-- Empty state -->
+        <div class="text-center py-12">
+          <i class="pi pi-inbox text-6xl text-gray-300 mb-4"></i>
+          <p class="text-gray-500 text-lg">No hay órdenes en cola</p>
+          @if (searchTerm()) {
+            <p class="text-gray-400 text-sm mt-2">
+              Intenta con otro término de búsqueda
+            </p>
+          }
+        </div>
+      } @else {
+        <!-- Vista Desktop: Tabla -->
+        <div class="hidden md:block">
+          <p-table
+            [value]="filteredOrders()"
+            [rows]="10"
+            [paginator]="filteredOrders().length > 10"
+            [rowsPerPageOptions]="[10, 25, 50]"
+            [tableStyle]="{ 'min-width': '60rem' }"
+            currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} órdenes"
+            [showCurrentPageReport]="true"
+          >
+            <ng-template pTemplate="header">
+              <tr>
+                <th>Orden</th>
+                <th>Pago</th>
+                <th>Restaurante</th>
+                <th>Fecha</th>
+                <th>Comando</th>
+                <th class="text-right">Total</th>
+                <th class="text-center">Acciones</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-order>
+              <tr>
+                <td>
+                  <span class="font-semibold">#{{ order.idOrder }}</span>
+                </td>
+                <td>
+                  <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm">
+                    {{ getPaymentMethodName(order.payment.paymentType) }}
+                  </span>
+                </td>
+                <td>{{ order.store.name }}</td>
+                <td>{{ formatDate(order.dateOrder) }}</td>
+                <td>{{ order.payment.idCommand }}</td>
+                <td class="text-right font-semibold">
+                  L {{ order.payment.total.toFixed(2) }}
+                </td>
+                <td class="text-center">
+                  <p-button
+                    icon="pi pi-trash"
+                    severity="danger"
+                    [outlined]="true"
+                    [rounded]="true"
+                    size="small"
+                    (onClick)="confirmDelete(order)"
+                    pTooltip="Eliminar orden"
+                    tooltipPosition="top"
+                  />
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+
+        <!-- Vista Mobile: Cards -->
+        <div class="md:hidden space-y-4">
+          @for (order of filteredOrders(); track order.idOrder) {
+            <p-card>
+              <div class="space-y-3">
+                <!-- Header -->
+                <div class="flex justify-between items-start">
+                  <div>
+                    <p class="text-sm text-gray-500">Orden</p>
+                    <p class="text-lg font-bold">#{{ order.idOrder }}</p>
+                  </div>
+                  <span
+                    class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
+                  >
+                    {{ getPaymentMethodName(order.payment.paymentType) }}
+                  </span>
+                </div>
+
+                <!-- Restaurante -->
+                <div>
+                  <p class="text-sm text-gray-500">Restaurante</p>
+                  <p class="font-semibold">{{ order.store.name }}</p>
+                </div>
+
+                <!-- Fecha -->
+                <div>
+                  <p class="text-sm text-gray-500">Fecha</p>
+                  <p>{{ formatDate(order.dateOrder) }}</p>
+                </div>
+
+                <!-- Comando y Total -->
+                <div class="flex justify-between items-center">
+                  <div>
+                    <p class="text-sm text-gray-500">Comando</p>
+                    <p>{{ order.payment.idCommand }}</p>
+                  </div>
+                  <div class="text-right">
+                    <p class="text-sm text-gray-500">Total</p>
+                    <p class="text-lg font-bold text-primary">
+                      L {{ order.payment.total.toFixed(2) }}
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Botón de eliminar -->
+                <div class="pt-2">
+                  <p-button
+                    label="Eliminar"
+                    icon="pi pi-trash"
+                    severity="danger"
+                    [outlined]="true"
+                    (onClick)="confirmDelete(order)"
+                    styleClass="w-full"
+                  />
+                </div>
+              </div>
+            </p-card>
+          }
+
+          <!-- Paginación para mobile (si es necesario) -->
+          @if (filteredOrders().length > 10) {
+            <div class="flex justify-center mt-4">
+              <p class="text-sm text-gray-500">
+                Mostrando {{ filteredOrders().length }} órdenes
+              </p>
+            </div>
+          }
+        </div>
+      }
+    </p-card>
+  }
+
+  <!-- Mensaje inicial cuando no hay ciudad seleccionada -->
+  @if (!selectedCity()) {
+    <p-card>
+      <div class="text-center py-12">
+        <i class="pi pi-filter text-6xl text-gray-300 mb-4"></i>
+        <p class="text-gray-500 text-lg">Seleccione una ciudad para comenzar</p>
+        <p class="text-gray-400 text-sm mt-2">
+          Las órdenes atascadas en la cola de Redis/SignalR se mostrarán aquí
+        </p>
+      </div>
+    </p-card>
+  }
+</div>

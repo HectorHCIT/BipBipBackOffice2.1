@@ -11,7 +11,7 @@ import { Routes } from '@angular/router';
  * - Fiscal Correlatives (Correlativos Fiscales) ✅
  * - Invoices (Facturas) ✅
  * - Reports (Reportes) ✅
- * - Settlements (Liquidaciones) - TODO
+ * - Settlements (Liquidaciones) ✅
  * - Spreadsheets (Hojas de Cálculo) - TODO
  *
  * Estructura:
@@ -64,43 +64,18 @@ export const ACCOUNTING_ROUTES: Routes = [
     path: 'reports',
     loadChildren: () => import('./reports/reports.routes').then(m => m.REPORTS_ROUTES),
     title: 'Reportes'
-  }
-  // TODO: Agregar más submódulos de contabilidad aquí
-  /*
-  {
-    path: 'establishments',
-    loadChildren: () => import('./establishments/establishments.routes').then(m => m.ESTABLISHMENTS_ROUTES),
-    title: 'Establecimientos'
-  },
-  {
-    path: 'emission-points',
-    loadChildren: () => import('./emission-points/emission-points.routes').then(m => m.EMISSION_POINTS_ROUTES),
-    title: 'Puntos de Emisión'
-  },
-  {
-    path: 'fiscal-correlatives',
-    loadChildren: () => import('./fiscal-correlatives/fiscal-correlatives.routes').then(m => m.FISCAL_CORRELATIVES_ROUTES),
-    title: 'Correlativos Fiscales'
-  },
-  {
-    path: 'invoices',
-    loadChildren: () => import('./invoices/invoices.routes').then(m => m.INVOICES_ROUTES),
-    title: 'Facturas'
   },
   {
     path: 'settlements',
     loadChildren: () => import('./settlements/settlements.routes').then(m => m.SETTLEMENTS_ROUTES),
     title: 'Liquidaciones'
-  },
+  }
+  // TODO: Agregar más submódulos de contabilidad aquí
+  /*
   {
     path: 'spreadsheets',
     loadChildren: () => import('./spreadsheets/spreadsheets.routes').then(m => m.SPREADSHEETS_ROUTES),
     title: 'Hojas de Cálculo'
-  },
-  {
-    path: 'reports',
-    loadChildren: () => import('./reports/reports.routes').then(m => m.REPORTS_ROUTES),
-    title: 'Reportes'
   }
   */
 ];

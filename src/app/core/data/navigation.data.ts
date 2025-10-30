@@ -608,7 +608,7 @@ export const navigationData: NavigationItem[] = [
     title: 'Reportes',
     type: 'collapsable',
     link: '/report',
-    icon: mapIcon('note-warning'),
+    icon: 'pi pi-file-pdf',
     unfolded: false,
     children: [
       {

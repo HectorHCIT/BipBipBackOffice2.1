@@ -1,0 +1,20 @@
+/* Animaciones para el menú colapsable */
+:host {
+  display: block;
+  width: 100%;
+}
+
+/* Smooth transitions para el contenido colapsable */
+.overflow-hidden {
+  transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+}
+
+/* Hover effects para las tarjetas */
+.group:hover {
+  transform: translateY(-2px);
+}
+
+/* Asegurar que los iconos de PrimeNG se vean correctamente */
+::ng-deep .p-button-icon {
+  font-size: 1rem;
+}

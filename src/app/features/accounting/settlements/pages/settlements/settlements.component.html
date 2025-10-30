@@ -1,0 +1,456 @@
+<div class="p-6 space-y-6">
+  <!-- Toast para notificaciones -->
+  <p-toast />
+
+  <!-- Breadcrumb -->
+  <p-breadcrumb [model]="breadcrumbItems" [home]="breadcrumbHome" styleClass="mb-4" />
+
+  <!-- Título -->
+  <div class="flex justify-between items-center">
+    <h1 class="text-3xl font-bold text-gray-800">Liquidaciones</h1>
+  </div>
+
+  <!-- Sección de Búsqueda de Orden -->
+  @if (!isActiveProcess()) {
+    <p-card>
+      <div class="space-y-4">
+        <h2 class="text-xl font-semibold text-gray-700">Buscar Orden</h2>
+
+        <div class="flex gap-3">
+          <input
+            type="text"
+            pInputText
+            placeholder="Número de orden"
+            [(ngModel)]="searchValue"
+            (keyup.enter)="searchOrder()"
+            [disabled]="isLoading()"
+            class="flex-1"
+          />
+          <p-button
+            label="Buscar"
+            icon="pi pi-search"
+            (onClick)="searchOrder()"
+            [loading]="isLoading()"
+          />
+        </div>
+      </div>
+    </p-card>
+  }
+
+  <!-- Sección de Detalles de la Orden -->
+  @if (order() && !isActiveProcess()) {
+    <div class="space-y-4">
+      <!-- Header de la orden -->
+      <p-card>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div>
+            <label class="text-sm font-semibold text-gray-600">Número de Orden</label>
+            <p class="text-lg font-bold">{{ order()?.numOrder }}</p>
+          </div>
+          <div>
+            <label class="text-sm font-semibold text-gray-600">Estado</label>
+            <p>
+              <p-tag
+                [value]="order()?.orderStatus"
+                [severity]="orderStatusSeverity()"
+              />
+            </p>
+          </div>
+          <div>
+            <label class="text-sm font-semibold text-gray-600">Fecha</label>
+            <p class="text-lg">{{ order()?.orderDate }}</p>
+          </div>
+          <div>
+            <label class="text-sm font-semibold text-gray-600">Método de Pago</label>
+            <p class="text-lg">{{ order()?.namePaymentMethod }}</p>
+          </div>
+        </div>
+      </p-card>
+
+      <!-- Grid de información del cliente y restaurante -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Información del Cliente -->
+        <p-card>
+          <ng-template pTemplate="header">
+            <div class="p-4 flex items-center gap-2">
+              <i class="pi pi-user text-xl"></i>
+              <h3 class="text-lg font-semibold">Información del Cliente</h3>
+            </div>
+          </ng-template>
+
+          <div class="space-y-2">
+            <div>
+              <label class="text-sm font-semibold text-gray-600">Nombre:</label>
+              <p>{{ order()?.customerName }}</p>
+            </div>
+            <div>
+              <label class="text-sm font-semibold text-gray-600">DNI:</label>
+              <p>{{ order()?.dniCustomer }}</p>
+            </div>
+            <div>
+              <label class="text-sm font-semibold text-gray-600">Teléfono:</label>
+              <p>{{ order()?.phoneCustomer }}</p>
+            </div>
+            <div>
+              <label class="text-sm font-semibold text-gray-600">Dirección:</label>
+              <p>{{ order()?.addressCustomer }}</p>
+            </div>
+          </div>
+        </p-card>
+
+        <!-- Información del Restaurante -->
+        <p-card>
+          <ng-template pTemplate="header">
+            <div class="p-4 flex items-center gap-2">
+              <i class="pi pi-building text-xl"></i>
+              <h3 class="text-lg font-semibold">Información del Restaurante</h3>
+            </div>
+          </ng-template>
+
+          <div class="space-y-2">
+            <div>
+              <label class="text-sm font-semibold text-gray-600">Nombre:</label>
+              <p>{{ order()?.nameCompany }}</p>
+            </div>
+            <div>
+              <label class="text-sm font-semibold text-gray-600">RTN:</label>
+              <p>{{ order()?.rtn?.rut || order()?.rutCompany }}</p>
+            </div>
+            <div>
+              <label class="text-sm font-semibold text-gray-600">Teléfono:</label>
+              <p>{{ order()?.phoneCompany }}</p>
+            </div>
+            <div>
+              <label class="text-sm font-semibold text-gray-600">Dirección:</label>
+              <p>{{ order()?.addressCompany }}</p>
+            </div>
+          </div>
+        </p-card>
+      </div>
+
+      <!-- Información del Conductor -->
+      <p-card>
+        <div class="flex items-center gap-2 mb-3">
+          <i class="pi pi-car text-xl"></i>
+          <h3 class="text-lg font-semibold">Información del Conductor</h3>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label class="text-sm font-semibold text-gray-600">ID:</label>
+            <p>{{ order()?.idDriver }}</p>
+          </div>
+          <div>
+            <label class="text-sm font-semibold text-gray-600">Nombre:</label>
+            <p>{{ order()?.nameDriver }}</p>
+          </div>
+          <div>
+            <label class="text-sm font-semibold text-gray-600">Estado:</label>
+            <p>
+              @if (order()?.driverPenalized) {
+                <p-tag value="Penalizado" severity="danger" />
+              } @else {
+                <p-tag value="Activo" severity="success" />
+              }
+            </p>
+          </div>
+        </div>
+      </p-card>
+
+      <!-- Tabla de Productos -->
+      <p-card>
+        <ng-template pTemplate="header">
+          <div class="p-4">
+            <h3 class="text-lg font-semibold">Productos</h3>
+          </div>
+        </ng-template>
+
+        <p-table
+          [value]="order()?.ordersProductsDetails || []"
+          [tableStyle]="{ 'min-width': '50rem' }"
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Producto</th>
+              <th class="text-right">Precio Unit.</th>
+              <th class="text-right">Cantidad</th>
+              <th class="text-right">Subtotal</th>
+              <th class="text-right">ISV</th>
+              <th class="text-right">Total</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-product>
+            <tr>
+              <td>{{ product.nameConcept }}</td>
+              <td class="text-right">L {{ product.unitPrice.toFixed(2) }}</td>
+              <td class="text-right">{{ product.quantity }}</td>
+              <td class="text-right">L {{ product.subTotal.toFixed(2) }}</td>
+              <td class="text-right">L {{ product.isv.toFixed(2) }}</td>
+              <td class="text-right font-semibold">L {{ product.total.toFixed(2) }}</td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="footer">
+            <tr>
+              <td colspan="5" class="text-right font-bold">Total:</td>
+              <td class="text-right font-bold">L {{ calculateTotal().toFixed(2) }}</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </p-card>
+
+      <!-- Grid de Pagos y Timeline -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Detalles de Pago -->
+        <p-card>
+          <ng-template pTemplate="header">
+            <div class="p-4">
+              <h3 class="text-lg font-semibold">Detalles de Pago</h3>
+            </div>
+          </ng-template>
+
+          <div class="space-y-2">
+            @for (payment of order()?.paidDetails; track payment.name) {
+              <div class="flex justify-between items-center">
+                <span class="font-medium">{{ payment.name }}</span>
+                <span class="font-bold">L {{ payment.amount.toFixed(2) }}</span>
+              </div>
+            }
+            <div class="border-t pt-2 mt-2">
+              <div class="flex justify-between items-center">
+                <span class="font-bold">Total:</span>
+                <span class="font-bold text-lg">L {{ calculatePaymentTotal().toFixed(2) }}</span>
+              </div>
+            </div>
+          </div>
+        </p-card>
+
+        <!-- Timeline de Estados -->
+        <p-card>
+          <ng-template pTemplate="header">
+            <div class="p-4">
+              <h3 class="text-lg font-semibold">Historial de Estados</h3>
+            </div>
+          </ng-template>
+
+          <div class="space-y-3">
+            @for (status of order()?.status; track status.time) {
+              <div class="flex items-start gap-3">
+                <i class="pi pi-check-circle text-green-500 mt-1"></i>
+                <div class="flex-1">
+                  <p class="font-semibold">{{ status.name }}</p>
+                  <p class="text-sm text-gray-600">{{ status.time }}</p>
+                  @if (status.driver) {
+                    <p class="text-sm text-gray-500">Conductor: {{ status.driver }}</p>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </p-card>
+      </div>
+
+      <!-- Información de Tiempos -->
+      <p-card>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div>
+            <label class="text-sm font-semibold text-gray-600">Tiempo Estimado</label>
+            <p class="text-lg">{{ order()?.estimatedTime }}</p>
+          </div>
+          <div>
+            <label class="text-sm font-semibold text-gray-600">Tiempo Real</label>
+            <p class="text-lg">{{ order()?.realTime }}</p>
+          </div>
+          <div>
+            <label class="text-sm font-semibold text-gray-600">Fecha de Asignación</label>
+            <p class="text-lg">{{ order()?.assignDate }}</p>
+          </div>
+          <div>
+            <label class="text-sm font-semibold text-gray-600">Fecha de Entrega</label>
+            <p class="text-lg">{{ order()?.deliveryDate }}</p>
+          </div>
+        </div>
+      </p-card>
+
+      <!-- Botón de Liquidar -->
+      <div class="flex justify-end gap-3">
+        @if (!canSettle()) {
+          <p-button
+            label="No se puede liquidar"
+            icon="pi pi-info-circle"
+            severity="warn"
+            [disabled]="true"
+          />
+        } @else {
+          <p-button
+            label="Liquidar Orden"
+            icon="pi pi-check"
+            severity="success"
+            (onClick)="toggleProcess()"
+          />
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Sección de Formulario de Liquidación -->
+  @if (isActiveProcess()) {
+    <p-card>
+      <ng-template pTemplate="header">
+        <div class="p-4 flex justify-between items-center">
+          <h2 class="text-xl font-semibold">Formulario de Liquidación</h2>
+          <p-button
+            icon="pi pi-times"
+            [rounded]="true"
+            [text]="true"
+            severity="secondary"
+            (onClick)="toggleProcess()"
+          />
+        </div>
+      </ng-template>
+
+      <form [formGroup]="settlementForm" (ngSubmit)="submitSettlement()" class="space-y-4">
+        <!-- Grid de campos -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Conductor (read-only) -->
+          <div>
+            <label for="driver" class="block text-sm font-semibold text-gray-700 mb-2">
+              Conductor
+            </label>
+            <input
+              id="driver"
+              type="text"
+              pInputText
+              formControlName="driver"
+              class="w-full"
+            />
+          </div>
+
+          <!-- Ciudad (read-only) -->
+          <div>
+            <label for="city" class="block text-sm font-semibold text-gray-700 mb-2">
+              Ciudad
+            </label>
+            <input
+              id="city"
+              type="text"
+              pInputText
+              formControlName="city"
+              class="w-full"
+            />
+          </div>
+
+          <!-- Marca -->
+          <div>
+            <label for="brand" class="block text-sm font-semibold text-gray-700 mb-2">
+              Marca <span class="text-red-500">*</span>
+            </label>
+            <p-select
+              inputId="brand"
+              formControlName="brand"
+              [options]="brandsList()"
+              optionLabel="nameBrand"
+              optionValue="idBrand"
+              placeholder="Seleccione una marca"
+              [filter]="true"
+              [showClear]="true"
+              class="w-full"
+            />
+            @if (settlementForm.get('brand')?.invalid && settlementForm.get('brand')?.touched) {
+              <small class="text-red-500">La marca es requerida</small>
+            }
+          </div>
+
+          <!-- Unidad/HQ -->
+          <div>
+            <label for="unit" class="block text-sm font-semibold text-gray-700 mb-2">
+              Unidad/Sede <span class="text-red-500">*</span>
+            </label>
+            <p-select
+              inputId="unit"
+              formControlName="unit"
+              [options]="hqList()"
+              optionLabel="shortName"
+              optionValue="restId"
+              placeholder="Seleccione una unidad"
+              [filter]="true"
+              [showClear]="true"
+              class="w-full"
+            />
+            @if (settlementForm.get('unit')?.invalid && settlementForm.get('unit')?.touched) {
+              <small class="text-red-500">La unidad es requerida</small>
+            }
+          </div>
+
+          <!-- Fecha de Liquidación -->
+          <div>
+            <label for="date" class="block text-sm font-semibold text-gray-700 mb-2">
+              Fecha de Liquidación <span class="text-red-500">*</span>
+            </label>
+            <p-datepicker
+              inputId="date"
+              formControlName="date"
+              [showTime]="true"
+              [showIcon]="true"
+              [iconDisplay]="'button'"
+              dateFormat="dd/mm/yy"
+              placeholder="Seleccione fecha"
+              class="w-full"
+            />
+            @if (settlementForm.get('date')?.hasError('futureDate') && settlementForm.get('date')?.touched) {
+              <small class="text-red-500">La fecha no puede ser futura</small>
+            }
+          </div>
+        </div>
+
+        <!-- Comentario (full width) -->
+        <div>
+          <label for="comment" class="block text-sm font-semibold text-gray-700 mb-2">
+            Comentario
+          </label>
+          <textarea
+            id="comment"
+            formControlName="comment"
+            rows="3"
+            placeholder="Agregue un comentario opcional..."
+            class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          ></textarea>
+          @if (settlementForm.get('comment')?.hasError('maxlength')) {
+            <small class="text-red-500">
+              Máximo 500 caracteres
+              ({{ settlementForm.get('comment')?.value?.length || 0 }}/500)
+            </small>
+          }
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="flex justify-end gap-3 pt-4">
+          <p-button
+            label="Cancelar"
+            icon="pi pi-times"
+            severity="secondary"
+            [outlined]="true"
+            type="button"
+            (onClick)="toggleProcess()"
+          />
+          <p-button
+            label="Crear Liquidación"
+            icon="pi pi-check"
+            severity="success"
+            type="submit"
+            [loading]="isSubmitting()"
+          />
+        </div>
+      </form>
+    </p-card>
+  }
+
+  <!-- Loading skeleton mientras carga la orden -->
+  @if (isLoading()) {
+    <p-card>
+      <div class="space-y-4">
+        <p-skeleton width="100%" height="2rem"></p-skeleton>
+        <p-skeleton width="100%" height="10rem"></p-skeleton>
+        <p-skeleton width="100%" height="10rem"></p-skeleton>
+      </div>
+    </p-card>
+  }
+</div>

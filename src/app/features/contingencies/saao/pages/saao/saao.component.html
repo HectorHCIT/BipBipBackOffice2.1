@@ -1,0 +1,255 @@
+<div class="w-full min-h-screen bg-surface-50 dark:bg-surface-950 p-6">
+  <!-- Breadcrumb Navigation -->
+  <p-breadcrumb [model]="breadcrumbs" styleClass="mb-6"></p-breadcrumb>
+
+  <!-- Header -->
+  <div class="mb-8">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-3xl font-bold text-surface-900 dark:text-surface-50">SAAO - Sistema de Análisis de Órdenes</h1>
+        <p class="mt-2 text-sm text-surface-600 dark:text-surface-400">
+          Análisis de asignación y liquidación de órdenes por driver
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Estadísticas Rápidas -->
+  @if (!loading() && orders().length > 0) {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <!-- Total Órdenes -->
+      <p-card>
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm text-surface-600 dark:text-surface-400">Total Órdenes</p>
+            <p class="text-2xl font-bold text-surface-900 dark:text-surface-50">{{ totalOrders() }}</p>
+          </div>
+          <i class="pi pi-receipt text-4xl text-blue-500"></i>
+        </div>
+      </p-card>
+
+      <!-- Incidentes -->
+      <p-card>
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm text-surface-600 dark:text-surface-400">Incidentes</p>
+            <p class="text-2xl font-bold text-red-600 dark:text-red-400">{{ totalIncidents() }}</p>
+          </div>
+          <i class="pi pi-exclamation-triangle text-4xl text-red-500"></i>
+        </div>
+      </p-card>
+
+      <!-- Tiempo Promedio -->
+      <p-card>
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm text-surface-600 dark:text-surface-400">Tiempo Promedio</p>
+            <p class="text-2xl font-bold text-surface-900 dark:text-surface-50">{{ averageAssignmentTime() }} min</p>
+          </div>
+          <i class="pi pi-clock text-4xl text-green-500"></i>
+        </div>
+      </p-card>
+
+      <!-- Drivers Únicos -->
+      <p-card>
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm text-surface-600 dark:text-surface-400">Drivers Únicos</p>
+            <p class="text-2xl font-bold text-surface-900 dark:text-surface-50">{{ uniqueDrivers() }}</p>
+          </div>
+          <i class="pi pi-car text-4xl text-purple-500"></i>
+        </div>
+      </p-card>
+    </div>
+  }
+
+  <!-- Filtros Unificados -->
+  <div class="mb-6">
+    <app-saao-filters
+      (filtersApplied)="onFiltersApplied($event)"
+      (filtersCleared)="onFiltersCleared()"
+    ></app-saao-filters>
+  </div>
+
+  <!-- Orders Table -->
+  <p-card>
+    <ng-template pTemplate="header">
+      <div class="flex items-center justify-between p-4">
+        <h3 class="text-lg font-semibold">Órdenes SAAO</h3>
+
+        <!-- Search Bar -->
+        @if (orders().length > 0) {
+          <span class="p-input-icon-left">
+            <i class="pi pi-search"></i>
+            <input
+              pInputText
+              type="text"
+              [value]="searchTerm()"
+              (input)="onSearch($event)"
+              placeholder="Buscar por orden, driver, restaurante..."
+              class="w-80"
+            />
+          </span>
+        }
+      </div>
+    </ng-template>
+
+    <!-- Loading State -->
+    @if (loading()) {
+      <div class="flex flex-col items-center justify-center py-16">
+        <i class="pi pi-spin pi-spinner text-6xl text-blue-600 mb-4"></i>
+        <p class="text-surface-600 dark:text-surface-400">Cargando órdenes SAAO...</p>
+      </div>
+    }
+
+    <!-- Error State -->
+    @if (error() && !loading()) {
+      <div class="p-6 text-center">
+        <div class="inline-flex items-center gap-2 px-4 py-3 bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400 rounded-lg">
+          <i class="pi pi-exclamation-circle"></i>
+          <span>{{ error() }}</span>
+        </div>
+      </div>
+    }
+
+    <!-- Empty State -->
+    @if (!loading() && !error() && orders().length === 0) {
+      <div class="p-12 text-center">
+        <i class="pi pi-inbox text-6xl text-surface-400 dark:text-surface-600 mb-4"></i>
+        <h3 class="text-lg font-semibold text-surface-700 dark:text-surface-300 mb-2">No hay órdenes disponibles</h3>
+        <p class="text-surface-500 dark:text-surface-400">Aplica filtros para cargar el reporte SAAO</p>
+      </div>
+    }
+
+    <!-- Table Content -->
+    @if (!loading() && !error() && filteredOrders().length > 0) {
+      <p-table
+        [value]="filteredOrders()"
+        [paginator]="true"
+        [rows]="10"
+        [rowsPerPageOptions]="[5, 10, 15, 20, 50]"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} órdenes"
+        [tableStyle]="{ 'min-width': '100%' }"
+        [globalFilterFields]="['orderId', 'driverNombre', 'driverCode', 'storeShortName']"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            <th pSortableColumn="orderId">
+              Orden <p-sortIcon field="orderId"></p-sortIcon>
+            </th>
+            <th pSortableColumn="driverNombre">
+              Driver <p-sortIcon field="driverNombre"></p-sortIcon>
+            </th>
+            <th pSortableColumn="storeShortName">
+              Restaurante <p-sortIcon field="storeShortName"></p-sortIcon>
+            </th>
+            <th pSortableColumn="hora">
+              Hora Creación <p-sortIcon field="hora"></p-sortIcon>
+            </th>
+            <th pSortableColumn="minutos">
+              Tiempo Asignación <p-sortIcon field="minutos"></p-sortIcon>
+            </th>
+            <th>Estado Mesa</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-order>
+          <tr>
+            <!-- Order ID -->
+            <td>
+              <div class="flex flex-col gap-1">
+                <div class="flex items-center gap-2">
+                  <span class="font-semibold">#{{ order.orderId }}</span>
+                  @if (hasIncident(order)) {
+                    <p-tag value="Incidente" severity="danger" icon="pi pi-exclamation-triangle"></p-tag>
+                  }
+                </div>
+                <span class="text-xs text-surface-500 dark:text-surface-400">{{ order.fechaOrden }}</span>
+              </div>
+            </td>
+
+            <!-- Driver -->
+            <td>
+              <div class="flex flex-col gap-1">
+                <span class="font-medium">{{ order.driverNombre }}</span>
+                <span class="text-xs text-surface-500 dark:text-surface-400">{{ order.driverCode }}</span>
+              </div>
+            </td>
+
+            <!-- Restaurant -->
+            <td>
+              <span class="font-medium">{{ order.storeShortName }}</span>
+            </td>
+
+            <!-- Hora Creación -->
+            <td>
+              <span>{{ order.hora }}</span>
+            </td>
+
+            <!-- Tiempo Asignación -->
+            <td>
+              <p-tag
+                [value]="order.minutos + ' min'"
+                [severity]="getTimingSeverity(order.minutos)"
+              ></p-tag>
+            </td>
+
+            <!-- Estado Mesa -->
+            <td>
+              <span class="text-sm">{{ order.codMesa || 'N/A' }}</span>
+            </td>
+
+            <!-- Estado -->
+            <td>
+              <p-tag
+                [value]="getStatus(order)"
+                [severity]="getStatusSeverity(order)"
+              ></p-tag>
+            </td>
+
+            <!-- Acciones -->
+            <td>
+              <p-button
+                icon="pi pi-eye"
+                [text]="true"
+                [rounded]="true"
+                severity="info"
+                (onClick)="openDriverDetails(order)"
+                pTooltip="Ver detalles del driver"
+                tooltipPosition="left"
+              ></p-button>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="8" class="text-center py-8">
+              <p class="text-surface-500 dark:text-surface-400">No se encontraron resultados para "{{ searchTerm() }}"</p>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    }
+  </p-card>
+
+  <!-- Driver Detail Drawer -->
+  <p-drawer
+    [(visible)]="drawerVisible"
+    position="right"
+    [style]="{ width: '500px' }"
+    [modal]="true"
+    [showCloseIcon]="false"
+  >
+    @if (selectedDriverId() !== null && selectedOrder() !== null) {
+      <app-driver-detail-drawer
+        [driverId]="selectedDriverId()!"
+        [orderId]="selectedOrder()!.orderId"
+        (closeDrawer)="closeDrawer()"
+      ></app-driver-detail-drawer>
+    }
+  </p-drawer>
+</div>

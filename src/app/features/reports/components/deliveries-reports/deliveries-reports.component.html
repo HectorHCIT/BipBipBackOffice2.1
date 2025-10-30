@@ -1,0 +1,168 @@
+<!-- Breadcrumb -->
+<div class="mb-4">
+  <p-breadcrumb [model]="breadcrumbItems" [home]="breadcrumbHome"></p-breadcrumb>
+</div>
+
+<!-- Título -->
+<div class="mb-6">
+  <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Reportería de Deliveries</h1>
+  <p class="text-gray-600 dark:text-gray-400 mt-1">Selecciona un reporte para generar</p>
+</div>
+
+<!-- Menú Colapsable -->
+<div class="w-full mb-8">
+  <!-- Botón de control -->
+  <div
+    class="cursor-pointer py-3 px-4 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg flex items-center justify-between transition-colors"
+    (click)="toggleMenu()"
+  >
+    <div class="flex items-center gap-2">
+      <i class="pi pi-file-pdf text-[#fb0021]"></i>
+      <span class="font-semibold text-gray-700 dark:text-gray-300">Opciones de Reportes</span>
+      @if (selectedReport() > 0) {
+        <span class="text-xs bg-[#fb0021] text-white px-2 py-1 rounded-full">
+          Reporte {{ selectedReport() }} seleccionado
+        </span>
+      }
+    </div>
+
+    <i [class]="isMenuOpen() ? 'pi pi-chevron-up' : 'pi pi-chevron-down'" class="text-gray-600 dark:text-gray-400"></i>
+  </div>
+
+  <!-- Contenido colapsable con animación -->
+  <div
+    class="overflow-hidden transition-all duration-300"
+    [style.max-height]="isMenuOpen() ? '1000px' : '0'"
+    [style.opacity]="isMenuOpen() ? '1' : '0'"
+  >
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-b-lg mt-2 p-6">
+      <!-- Grid de tarjetas de reportes -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        @for (report of reportsList; track report.id) {
+          <div
+            class="group relative bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-6 hover:border-[#fb0021] hover:shadow-lg transition-all duration-300 cursor-pointer"
+            [class.border-[#fb0021]]="selectedReport() === report.id"
+            [class.shadow-lg]="selectedReport() === report.id"
+            (click)="selectReport(report.id)"
+          >
+            <!-- Indicador de selección -->
+            @if (selectedReport() === report.id) {
+              <div class="absolute top-2 right-2">
+                <i class="pi pi-check-circle text-[#fb0021] text-xl"></i>
+              </div>
+            }
+
+            <!-- Contenido de la tarjeta -->
+            <div class="flex flex-col items-center gap-4">
+              <!-- Icono -->
+              <div
+                class="w-16 h-16 rounded-full flex items-center justify-center transition-colors"
+                [class.bg-[#fb0021]]="selectedReport() === report.id"
+                [class.bg-gray-100]="selectedReport() !== report.id"
+                [class.dark:bg-gray-800]="selectedReport() !== report.id"
+                [class.group-hover:bg-red-50]="selectedReport() !== report.id"
+                [class.dark:group-hover:bg-red-900/20]="selectedReport() !== report.id"
+              >
+                <i
+                  [class]="report.icon"
+                  class="text-2xl"
+                  [class.text-white]="selectedReport() === report.id"
+                  [class.text-gray-600]="selectedReport() !== report.id"
+                  [class.dark:text-gray-400]="selectedReport() !== report.id"
+                  [class.group-hover:text-[#fb0021]]="selectedReport() !== report.id"
+                ></i>
+              </div>
+
+              <!-- Nombre del reporte -->
+              <div class="text-center">
+                <h3
+                  class="font-semibold text-sm"
+                  [class.text-[#fb0021]]="selectedReport() === report.id"
+                  [class.text-gray-700]="selectedReport() !== report.id"
+                  [class.dark:text-gray-300]="selectedReport() !== report.id"
+                >
+                  {{ report.name }}
+                </h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Reporte #{{ report.id }}</p>
+              </div>
+
+              <!-- Botón -->
+              <button
+                pButton
+                type="button"
+                [label]="selectedReport() === report.id ? 'Seleccionado' : 'Ver Reporte'"
+                [severity]="selectedReport() === report.id ? 'danger' : 'secondary'"
+                [outlined]="selectedReport() !== report.id"
+                size="small"
+                class="w-full"
+              ></button>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Botón para limpiar selección -->
+      @if (selectedReport() > 0) {
+        <div class="mt-6 flex justify-center">
+          <button
+            pButton
+            type="button"
+            label="Limpiar Selección"
+            icon="pi pi-times"
+            severity="secondary"
+            [outlined]="true"
+            (click)="clearSelection()"
+          ></button>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- Área de Contenido del Reporte -->
+<section class="w-full">
+  @switch (selectedReport()) {
+    @case (1) {
+      <app-report-deliveries-inactivos />
+    }
+    @case (2) {
+      <app-report-deliveries-activos />
+    }
+    @case (3) {
+      <app-report-deliveries-activos-comanda />
+    }
+    @case (4) {
+      <app-report-dias-entrega />
+    }
+    @case (5) {
+      <app-report-incidencias />
+    }
+    @case (6) {
+      <app-report-tiempo-ordenes />
+    }
+    @case (7) {
+      <app-report-deliveries-orden />
+    }
+    @case (8) {
+      <app-report-activacion />
+    }
+    @case (9) {
+      <div class="text-center py-20 text-gray-500">
+        <i class="pi pi-wallet text-6xl mb-4"></i>
+        <p class="text-xl">Reporte BipPay</p>
+        <p class="text-sm mt-2">Componente en desarrollo</p>
+      </div>
+      <!-- <app-report-bippay /> -->
+    }
+    @case (10) {
+      <app-report-base-drivers />
+    }
+    @default {
+      <div class="text-center py-20 text-gray-400">
+        <i class="pi pi-file-pdf text-6xl mb-4"></i>
+        <p class="text-xl">Selecciona un reporte del menú superior</p>
+        <p class="text-sm mt-2">Los reportes se mostrarán en esta área</p>
+      </div>
+    }
+  }
+</section>

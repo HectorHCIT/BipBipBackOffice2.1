@@ -10,6 +10,8 @@ import { PasswordModule } from 'primeng/password';
 import { CheckboxModule } from 'primeng/checkbox';
 import { CardModule } from 'primeng/card';
 import { FloatLabelModule } from 'primeng/floatlabel';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 
 import { AuthService } from '@core/services/auth.service';
 
@@ -34,8 +36,10 @@ import { AuthService } from '@core/services/auth.service';
     PasswordModule,
     CheckboxModule,
     CardModule,
-    FloatLabelModule
+    FloatLabelModule,
+    ToastModule
   ],
+  providers: [MessageService],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })
@@ -44,6 +48,7 @@ export class LoginComponent {
   private readonly authService = inject(AuthService);
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
+  private readonly messageService = inject(MessageService);
 
   // 🔥 SIGNALS - Estado reactivo
   readonly isLoading = signal(false);
@@ -106,22 +111,86 @@ export class LoginComponent {
 
     this.authService.login(this.loginForm.value).subscribe({
       next: (response: any) => {
-        this.stopLoading();
         if (response) {
-          console.log('✅ Login exitoso');
-          // TODO: Mostrar toast de éxito con PrimeNG
+          // Esperar más tiempo para asegurar que authSave() completó
+          // authSave() usa requestAnimationFrame, necesitamos dar tiempo suficiente
           setTimeout(() => {
-            this.router.navigate(['/home']);
-          }, 500);
+            // Verificar que el token se guardó correctamente
+            const token = this.authService.getJwtToken();
+            const userName = this.authService.userFullName();
+
+            if (token) {
+              this.stopLoading();
+
+              // Mostrar mensaje de éxito
+              this.messageService.add({
+                severity: 'success',
+                summary: '¡Bienvenido!',
+                detail: userName ? `Hola ${userName}, inicio de sesión exitoso` : 'Inicio de sesión exitoso',
+                life: 2000
+              });
+
+              // Navegar después de mostrar el toast
+              setTimeout(() => {
+                this.router.navigate(['/home']);
+              }, 1000);
+            } else {
+              this.stopLoading();
+              this.messageService.add({
+                severity: 'error',
+                summary: 'Error de autenticación',
+                detail: 'No se pudo guardar la sesión. Por favor, intenta nuevamente.',
+                life: 5000
+              });
+            }
+          }, 500); // Incrementado de 300ms a 500ms
         } else {
-          console.error('❌ Login fallido');
-          // TODO: Mostrar toast de error con PrimeNG
+          this.stopLoading();
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error del servidor',
+            detail: 'El servidor no respondió correctamente. Por favor, intenta nuevamente.',
+            life: 5000
+          });
         }
       },
       error: (error: any) => {
         this.stopLoading();
-        console.error('❌ Error de conexión:', error);
-        // TODO: Mostrar toast de error con PrimeNG
+
+        // Manejo de errores específicos
+        if (error.status === 401) {
+          // Credenciales incorrectas
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Credenciales incorrectas',
+            detail: 'Usuario o contraseña inválidos. Por favor, verifica tus credenciales.',
+            life: 5000
+          });
+        } else if (error.status === 0 || error.status === 504) {
+          // Error de conexión o timeout
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error de conexión',
+            detail: 'No se pudo conectar con el servidor. Verifica tu conexión a internet.',
+            life: 5000
+          });
+        } else if (error.status === 500) {
+          // Error interno del servidor
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error del servidor',
+            detail: 'El servidor encontró un error. Por favor, intenta más tarde.',
+            life: 5000
+          });
+        } else {
+          // Error desconocido
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error inesperado',
+            detail: error.message || 'Ocurrió un error al iniciar sesión. Por favor, intenta nuevamente.',
+            life: 5000
+          });
+        }
       }
     });
   }

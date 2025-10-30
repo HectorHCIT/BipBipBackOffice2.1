@@ -37,6 +37,16 @@ export const routes: Routes = [
       {
         path: 'accounting',
         loadChildren: () => import('./features/accounting/accounting.routes').then(m => m.ACCOUNTING_ROUTES)
+      },
+      // Contingencias (Contingencies)
+      {
+        path: 'contingencies',
+        loadChildren: () => import('./features/contingencies/contingencies.routes').then(m => m.CONTINGENCIES_ROUTES)
+      },
+      // Reportes (Reports) - Nota: backend usa /report (sin 's')
+      {
+        path: 'report',
+        loadChildren: () => import('./features/reports/reports.routes').then(m => m.REPORTS_ROUTES)
       }
       // TODO: Agregar más módulos padre aquí (SAC, App Clientes, Drivers, etc.)
     ]

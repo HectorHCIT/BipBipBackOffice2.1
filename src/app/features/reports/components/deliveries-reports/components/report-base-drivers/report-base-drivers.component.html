@@ -1,0 +1,111 @@
+<p-toast />
+
+<p-card>
+  <ng-template pTemplate="header">
+    <div class="p-4">
+      <h2 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+        <i class="pi pi-building text-[#fb0021]"></i>
+        Reporte de Base de Drivers
+      </h2>
+      <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+        Reporte de drivers por base de operación
+      </p>
+    </div>
+  </ng-template>
+
+  <ng-template pTemplate="content">
+    <form [formGroup]="form" class="relative">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+        <!-- Ciudad -->
+        <div class="flex flex-col gap-2">
+          <label for="cityId" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+            Ciudad *
+          </label>
+          <p-select
+            inputId="cityId"
+            formControlName="cityId"
+            [options]="cityList()"
+            optionLabel="cityName"
+            optionValue="cityId"
+            placeholder="Seleccione ciudad"
+            [disabled]="isLoading()"
+            styleClass="w-full"
+          />
+        </div>
+
+        <!-- Base de Operaciones -->
+        <div class="flex flex-col gap-2">
+          <label for="baseId" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+            Base de Operaciones *
+          </label>
+          <p-select
+            inputId="baseId"
+            formControlName="baseId"
+            [options]="baseList()"
+            optionLabel="headquarterName"
+            optionValue="codHeadquarter"
+            placeholder="Seleccione base"
+            [disabled]="isLoading() || isLoadingBases() || !form.value.cityId"
+            [loading]="isLoadingBases()"
+            styleClass="w-full"
+          />
+        </div>
+
+        <!-- Formato -->
+        <div class="flex flex-col gap-2">
+          <label for="format" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+            Formato *
+          </label>
+          <p-select
+            inputId="format"
+            formControlName="format"
+            [options]="formatOptions"
+            optionLabel="name"
+            optionValue="id"
+            placeholder="Seleccione formato"
+            [disabled]="isLoading()"
+            styleClass="w-full"
+          />
+        </div>
+
+        <!-- Botón -->
+        <div class="flex gap-2">
+          <button
+            pButton
+            type="button"
+            label="Generar Reporte"
+            icon="pi pi-file"
+            [loading]="isLoading()"
+            [disabled]="isLoading()"
+            (click)="generateReport()"
+            severity="success"
+            class="flex-1"
+          ></button>
+        </div>
+      </div>
+
+      <!-- Loading Overlay -->
+      @if (isLoading()) {
+        <div class="absolute inset-0 bg-white/80 dark:bg-gray-800/80 flex flex-col items-center justify-center gap-4 rounded-lg">
+          <p-progressSpinner />
+          <p class="text-[#fb0021] font-semibold animate-pulse">
+            Generando Reporte...
+          </p>
+        </div>
+      }
+    </form>
+
+    <!-- Info Note -->
+    <div class="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+      <div class="flex gap-3">
+        <i class="pi pi-info-circle text-blue-600 dark:text-blue-400 text-xl"></i>
+        <div class="flex-1">
+          <p class="text-sm font-semibold text-blue-900 dark:text-blue-300">Información</p>
+          <p class="text-xs text-blue-700 dark:text-blue-400 mt-1">
+            Este reporte muestra todos los drivers por base de operación. Primero seleccione una ciudad para ver las bases disponibles. Puede exportar en formato PDF o Excel.
+          </p>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+</p-card>

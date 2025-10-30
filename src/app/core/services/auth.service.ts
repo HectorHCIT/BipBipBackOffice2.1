@@ -140,10 +140,14 @@ export class AuthService {
         // Limpiar storage ANTES de guardar nueva data
         await this.clearStorageOnLogin();
 
-        // Guardar datos de autenticación
+        // Guardar datos de autenticación (ahora esperamos a que termine)
         this.routeBackend.set(result.modules);
         this.routesAllow.set(result.modules as any);
-        this.authSave(result);
+        await this.authSave(result);
+
+        // Actualizar signals después de guardar
+        this.tokensData.set(result);
+        this.currentUser.set(this.getUser());
 
         // Cache routes for the user
         const userId = this.getUserId();
@@ -156,9 +160,6 @@ export class AuthService {
             roleData.UserRole
           );
         }
-
-        this.tokensData.set(result);
-        this.currentUser.set(this.getUser());
 
         // Obtener rutas completas del servidor (con todos los niveles)
         this.loadCompleteRoutes(result.modules);
@@ -339,20 +340,37 @@ export class AuthService {
     return user ? JSON.parse(user) : null;
   }
 
-  private authSave(tokens: Tokens): void {
-    localStorage.setItem(this.JWT_TOKEN, tokens.token);
-    localStorage.setItem(this.REFRESH_TOKEN, tokens.refreshToken);
+  /**
+   * Guardar datos de autenticación en localStorage
+   * Ahora retorna una Promise para mejor control de flujo
+   */
+  private authSave(tokens: Tokens): Promise<void> {
+    return new Promise((resolve) => {
+      try {
+        localStorage.setItem(this.JWT_TOKEN, tokens.token);
+        localStorage.setItem(this.REFRESH_TOKEN, tokens.refreshToken);
 
-    const user: User = {
-      userHas: tokens.iHash,
-      userName: tokens.userName,
-      fullName: tokens.fullName,
-      rolName: tokens.rolName,
-      photo: tokens.photo,
-      email: tokens.email,
-    };
+        const user: User = {
+          userHas: tokens.iHash,
+          userName: tokens.userName,
+          fullName: tokens.fullName,
+          rolName: tokens.rolName,
+          photo: tokens.photo,
+          email: tokens.email,
+        };
 
-    localStorage.setItem(this.USER, JSON.stringify(user));
+        localStorage.setItem(this.USER, JSON.stringify(user));
+
+        // Forzar que el navegador complete las operaciones de localStorage
+        // antes de resolver la Promise
+        requestAnimationFrame(() => {
+          resolve();
+        });
+      } catch (error) {
+        console.error('Error guardando datos de autenticación:', error);
+        resolve(); // Resolver de todas formas para no bloquear el flujo
+      }
+    });
   }
 
   /**

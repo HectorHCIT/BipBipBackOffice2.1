@@ -5,6 +5,7 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { providePrimeNG } from 'primeng/config';
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import { provideFirestore, getFirestore } from '@angular/fire/firestore';
+import { provideDatabase, getDatabase } from '@angular/fire/database';
 
 import Aura from '@primeuix/themes/aura';
 import { definePreset } from '@primeuix/themes';
@@ -36,6 +37,7 @@ export const appConfig: ApplicationConfig = {
     }),
     // Firebase configuration
     provideFirebaseApp(() => initializeApp(environment.firebaseConfigs)),
-    provideFirestore(() => getFirestore())
+    provideFirestore(() => getFirestore()),
+    provideDatabase(() => getDatabase())
   ]
 };

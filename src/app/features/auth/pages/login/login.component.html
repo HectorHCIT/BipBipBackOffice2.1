@@ -1,4 +1,7 @@
-<div class="min-h-screen flex flex-col justify-center bg-gray-50 dark:bg-gray-900 py-12 sm:px-6 lg:px-8 relative overflow-hidden">
+<!-- Toast Notifications -->
+<p-toast position="top-center" [life]="5000" />
+
+<div class="min-h-screen flex flex-col justify-center bg-surface-50 dark:bg-surface-950 py-12 sm:px-6 lg:px-8 relative overflow-hidden">
   <!-- Animated floating circles background -->
   <div class="absolute inset-0 overflow-hidden pointer-events-none">
     <div class="absolute w-64 h-64 bg-red-100 dark:bg-red-900/20 rounded-full opacity-20 -top-32 -left-32 animate-pulse"></div>
@@ -18,7 +21,7 @@
       alt="BipBip Logo"
       class="mx-auto min-w-48 max-w-56"
     >
-    <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
+    <h2 class="mt-6 text-center text-3xl font-extrabold text-surface-900 dark:text-surface-50">
       Inicio de sesión
     </h2>
   </div>
@@ -31,16 +34,16 @@
     [class.opacity-100]="slideInState() === 'visible'"
     [class.translate-y-0]="slideInState() === 'visible'"
   >
-    <div class="bg-white dark:bg-gray-800 py-8 px-4 shadow-xl rounded-lg sm:px-10 relative">
+    <div class="bg-surface-0 dark:bg-surface-900 py-8 px-4 shadow-xl rounded-lg sm:px-10 relative">
       <!-- Loading overlay -->
       @if (isLoading()) {
-        <div class="absolute inset-0 bg-white dark:bg-gray-800 bg-opacity-95 dark:bg-opacity-95 flex items-center justify-center rounded-lg z-20">
+        <div class="absolute inset-0 bg-surface-0 dark:bg-surface-900 bg-opacity-95 dark:bg-opacity-95 flex items-center justify-center rounded-lg z-20">
           <div class="flex flex-col items-center gap-4">
             <!-- Custom BipBip Loader (spinner) -->
-            <div class="w-12 h-12 border-4 border-gray-200 dark:border-gray-600 border-t-[#fb0021] rounded-full animate-spin"></div>
+            <div class="w-12 h-12 border-4 border-surface-200 dark:border-surface-700 border-t-[#fb0021] rounded-full animate-spin"></div>
 
             <!-- Loading text with animation -->
-            <span class="text-sm text-gray-700 dark:text-gray-300 font-medium">
+            <span class="text-sm text-surface-700 dark:text-surface-300 font-medium">
               {{ loadingMessage() }}
             </span>
 
@@ -58,7 +61,7 @@
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-6">
         <!-- Username field -->
         <div>
-          <label for="username" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label for="username" class="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">
             Usuario
           </label>
           <input
@@ -70,7 +73,7 @@
             class="w-full"
           />
           @if (userName?.invalid && userName?.touched) {
-            <small class="block mt-1 text-sm text-red-600">
+            <small class="block mt-1 text-sm text-red-600 dark:text-red-400">
               @if (userName?.errors?.['required']) {
                 El nombre de usuario es requerido
               }
@@ -80,7 +83,7 @@
 
         <!-- Password field -->
         <div>
-          <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label for="password" class="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">
             Contraseña
           </label>
           <p-password
@@ -93,7 +96,7 @@
             [inputStyleClass]="'w-full'"
           />
           @if (password?.invalid && password?.touched) {
-            <small class="block mt-1 text-sm text-red-600">
+            <small class="block mt-1 text-sm text-red-600 dark:text-red-400">
               @if (password?.errors?.['required']) {
                 La contraseña es requerida
               }
@@ -114,7 +117,7 @@
               inputId="remember"
               [disabled]="isLoading()"
             />
-            <label for="remember" class="ml-2 block text-sm text-gray-900 dark:text-gray-300">
+            <label for="remember" class="ml-2 block text-sm text-surface-900 dark:text-surface-300">
               Recuérdame
             </label>
           </div>
@@ -142,7 +145,7 @@
           <!-- Form validation message -->
           @if (!isFormValid() && (userName?.touched || password?.touched)) {
             <div class="mt-2 text-center">
-              <small class="text-xs text-gray-500">
+              <small class="text-xs text-surface-500 dark:text-surface-400">
                 Complete todos los campos para continuar
               </small>
             </div>
