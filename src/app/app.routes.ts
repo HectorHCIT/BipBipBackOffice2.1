@@ -47,6 +47,11 @@ export const routes: Routes = [
       {
         path: 'report',
         loadChildren: () => import('./features/reports/reports.routes').then(m => m.REPORTS_ROUTES)
+      },
+      // Restaurantes (Restaurants)
+      {
+        path: 'restaurants',
+        loadChildren: () => import('./features/restaurants/restaurants.routes').then(m => m.RESTAURANTS_ROUTES)
       }
       // TODO: Agregar más módulos padre aquí (SAC, App Clientes, Drivers, etc.)
     ]

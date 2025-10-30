@@ -57,20 +57,17 @@
 
         <!-- Botones -->
         <div class="flex gap-2">
-          <button
-            pButton
+          <p-button
             type="button"
             label="Generar Reporte"
             icon="pi pi-file-excel"
             [loading]="isLoading()"
             [disabled]="isLoading()"
             (click)="generateReport()"
-            severity="success"
             class="flex-1"
-          ></button>
+          ></p-button>
 
-          <button
-            pButton
+          <p-button
             type="button"
             icon="pi pi-refresh"
             [disabled]="isLoading()"
@@ -79,7 +76,7 @@
             [outlined]="true"
             pTooltip="Limpiar formulario"
             tooltipPosition="top"
-          ></button>
+          ></p-button>
         </div>
       </div>
 

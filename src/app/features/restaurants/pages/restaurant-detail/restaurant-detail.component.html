@@ -1,0 +1,114 @@
+<div class="card">
+  <!-- Breadcrumb -->
+  <div class="mb-4">
+    <p-breadcrumb
+      [model]="breadcrumbItems()"
+      [home]="breadcrumbHome"
+    />
+  </div>
+
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-4">
+    <div>
+      <h2 class="text-2xl font-semibold m-0">
+        @if (mode() === 'create') {
+          Crear Restaurante
+        } @else if (mode() === 'edit') {
+          Editar Restaurante
+        } @else {
+          Detalles del Restaurante
+        }
+      </h2>
+      @if (restaurantId()) {
+        <p class="text-sm text-gray-500 mt-1">ID: {{ restaurantId() }}</p>
+      }
+    </div>
+
+    <div class="flex gap-2">
+      <p-button
+        label="Volver"
+        icon="pi pi-arrow-left"
+        [outlined]="true"
+        severity="secondary"
+        (onClick)="goBack()"
+      />
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <p-tabs [value]="selectedTab().toString()">
+    <p-tablist>
+      <p-tab value="0" [disabled]="!tabsEnabled().information">
+        <i class="pi pi-info-circle mr-2"></i>
+        Información
+      </p-tab>
+      <p-tab value="1" [disabled]="!tabsEnabled().coverage">
+        <i class="pi pi-map-marker mr-2"></i>
+        Coberturas
+      </p-tab>
+      <p-tab value="2" [disabled]="!tabsEnabled().schedules">
+        <i class="pi pi-clock mr-2"></i>
+        Horarios
+      </p-tab>
+      <p-tab value="3" [disabled]="!tabsEnabled().scale">
+        <i class="pi pi-money-bill mr-2"></i>
+        Escalas
+      </p-tab>
+      <p-tab value="4" [disabled]="!tabsEnabled().configs">
+        <i class="pi pi-cog mr-2"></i>
+        Configuraciones
+      </p-tab>
+    </p-tablist>
+
+    <p-tabpanels>
+      <!-- Tab 1: Information -->
+      <p-tabpanel value="0">
+        <app-information-tab
+          [restaurantId]="restaurantId()"
+          [mode]="mode()"
+          (onSave)="onRestaurantSaved($event)"
+          (onError)="onSaveError($event)"
+        />
+      </p-tabpanel>
+
+      <!-- Tab 2: Coverage (Coming soon) -->
+      <p-tabpanel value="1">
+        <div class="p-4 text-center text-gray-500">
+          <i class="pi pi-map-marker text-4xl mb-3 block"></i>
+          <p class="text-lg font-semibold">Gestión de Zonas de Cobertura</p>
+          <p class="text-sm">Próximamente...</p>
+        </div>
+      </p-tabpanel>
+
+      <!-- Tab 3: Schedules (Coming soon) -->
+      <p-tabpanel value="2">
+        <div class="p-4 text-center text-gray-500">
+          <i class="pi pi-clock text-4xl mb-3 block"></i>
+          <p class="text-lg font-semibold">Horarios de Atención</p>
+          <p class="text-sm">Próximamente...</p>
+        </div>
+      </p-tabpanel>
+
+      <!-- Tab 4: Scale (Coming soon) -->
+      <p-tabpanel value="3">
+        <div class="p-4 text-center text-gray-500">
+          <i class="pi pi-money-bill text-4xl mb-3 block"></i>
+          <p class="text-lg font-semibold">Escalas de Precio</p>
+          <p class="text-sm">Próximamente...</p>
+        </div>
+      </p-tabpanel>
+
+      <!-- Tab 5: Configs (Coming soon) -->
+      <p-tabpanel value="4">
+        <div class="p-4 text-center text-gray-500">
+          <i class="pi pi-cog text-4xl mb-3 block"></i>
+          <p class="text-lg font-semibold">Configuraciones Operacionales</p>
+          <p class="text-sm">Próximamente...</p>
+        </div>
+      </p-tabpanel>
+    </p-tabpanels>
+  </p-tabs>
+</div>
+
+<!-- Toast for notifications -->
+<p-toast />

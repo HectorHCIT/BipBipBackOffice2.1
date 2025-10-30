@@ -1,0 +1,197 @@
+<div class="card">
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="text-2xl font-semibold m-0">Gestión de Restaurantes</h2>
+    <p-button
+      label="Nuevo Restaurante"
+      icon="pi pi-plus"
+      (onClick)="onCreateRestaurant()"
+    />
+  </div>
+
+  <!-- Search and Filters Bar -->
+  <div class="flex gap-3 mb-4 flex-wrap">
+    <!-- Search with IconField -->
+    <p-iconfield iconPosition="left" class="flex-1" style="min-width: 250px">
+      <p-inputicon styleClass="pi pi-search" />
+      <input
+        type="text"
+        pInputText
+        placeholder="Buscar por nombre..."
+        [value]="searchTerm()"
+        (input)="onSearchChange($any($event.target).value)"
+        class="w-full"
+      />
+    </p-iconfield>
+
+    <!-- Filters Button -->
+    <p-button
+      label="Filtros Avanzados"
+      icon="pi pi-filter"
+      [outlined]="true"
+      [badge]="(appliedCountries().length + appliedCities().length).toString()"
+      [badgeClass]="hasFilters() ? 'p-badge-info' : ''"
+      (onClick)="openFilters()"
+    />
+
+    <!-- Clear Filters Button -->
+    @if (hasFilters()) {
+      <p-button
+        label="Limpiar Filtros"
+        icon="pi pi-times"
+        [outlined]="true"
+        severity="secondary"
+        (onClick)="onClearFilters()"
+      />
+    }
+  </div>
+
+  <!-- Status Filters -->
+  <div class="flex gap-2 mb-4">
+    @for (filter of statusFilters(); track filter.idStatus) {
+      <p-button
+        [label]="filter.label + ' (' + filter.qty + ')'"
+        [outlined]="selectedStatusId() !== filter.idStatus"
+        [severity]="selectedStatusId() === filter.idStatus ? 'primary' : 'secondary'"
+        (onClick)="onStatusFilterChange(filter.idStatus)"
+      />
+    }
+  </div>
+
+  <!-- Table -->
+  <p-table
+    [value]="restaurants()"
+    [loading]="isLoading()"
+    [tableStyle]="{ 'min-width': '60rem' }"
+    styleClass="p-datatable-sm"
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        <th style="width: 60px">Logo</th>
+        <th>Nombre</th>
+        <th>País</th>
+        <th>Marca</th>
+        <th>Nombre Corto</th>
+        <th style="width: 120px">Estado</th>
+        <th style="width: 80px; text-align: center">Acciones</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-restaurant>
+      <tr>
+        <!-- Logo (más pequeño) -->
+        <td>
+          @if (restaurant.restUrllogo) {
+            <img
+              [src]="restaurant.restUrllogo"
+              [alt]="restaurant.restName"
+              class="border-circle"
+              style="width: 2rem; height: 2rem; object-fit: cover"
+            />
+          } @else {
+            <div
+              class="border-circle bg-primary-100 flex align-items-center justify-content-center"
+              style="width: 2rem; height: 2rem"
+            >
+              <i class="pi pi-building text-primary" style="font-size: 0.875rem"></i>
+            </div>
+          }
+        </td>
+
+        <!-- Name -->
+        <td>
+          <div class="font-semibold">{{ restaurant.restName }}</div>
+          <div class="text-sm text-500">{{ restaurant.restAddress }}</div>
+        </td>
+
+        <!-- Country -->
+        <td>{{ restaurant.restCountryName }}</td>
+
+        <!-- Brand -->
+        <td>{{ restaurant.restBrandName }}</td>
+
+        <!-- Short Name -->
+        <td>{{ restaurant.restShortName }}</td>
+
+        <!-- Status -->
+        <td>
+          <p-tag
+            [value]="getStatusLabel(restaurant.restStatus)"
+            [severity]="getStatusSeverity(restaurant.restStatus)"
+          />
+        </td>
+
+        <!-- Actions (vertical dots with popover) -->
+        <td style="text-align: center">
+          <p-button
+            icon="pi pi-ellipsis-v"
+            [text]="true"
+            [rounded]="true"
+            severity="secondary"
+            size="small"
+            (onClick)="popover.toggle($event)"
+          />
+          <p-popover #popover>
+            <div class="flex flex-col gap-2" style="min-width: 150px">
+              <p-button
+                label="Ver Detalles"
+                icon="pi pi-eye"
+                variant="outlined"
+                (click)="onViewRestaurantWithClose(restaurant.restId, popover)"
+              ></p-button>
+              <p-button
+                label="Editar"
+                icon="pi pi-pencil"
+                severity="info"
+                variant="outlined"
+                (click)="onEditRestaurant(restaurant.restId, popover)"
+              ></p-button>
+            </div>
+          </p-popover>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="7" class="text-center py-6">
+          @if (isLoading()) {
+            <div class="flex flex-column align-items-center gap-3">
+              <i class="pi pi-spin pi-spinner text-4xl text-primary"></i>
+              <p class="text-500">Cargando restaurantes...</p>
+            </div>
+          } @else {
+            <div class="flex flex-column align-items-center gap-3">
+              <i class="pi pi-inbox text-4xl text-400"></i>
+              <p class="text-500">No se encontraron restaurantes</p>
+            </div>
+          }
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+
+  <!-- Paginator -->
+  @if (totalRecords() > 0) {
+    <p-paginator
+      [rows]="pageSize()"
+      [totalRecords]="totalRecords()"
+      [first]="currentPage() * pageSize()"
+      [rowsPerPageOptions]="[5, 10, 20, 50]"
+      (onPageChange)="onPageChange($event)"
+      styleClass="mt-3"
+    />
+  }
+</div>
+
+<!-- Filters Drawer -->
+<app-restaurant-filters
+  [visible]="filtersVisible()"
+  [selectedCountries]="appliedCountries()"
+  [selectedCities]="appliedCities()"
+  (onApplyFilters)="onApplyFilters($event)"
+  (onClose)="closeFilters()"
+/>
+
+<!-- Toast for notifications -->
+<p-toast />

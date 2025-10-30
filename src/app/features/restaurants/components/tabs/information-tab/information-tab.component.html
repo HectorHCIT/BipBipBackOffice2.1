@@ -1,0 +1,332 @@
+<div class="p-4">
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="flex items-center justify-center py-12">
+      <i class="pi pi-spin pi-spinner text-4xl text-primary"></i>
+    </div>
+  } @else {
+    <form [formGroup]="form" (ngSubmit)="save()">
+      <!-- Datos Generales Section -->
+      <div class="mb-6">
+        <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">Datos Generales</h3>
+
+        <div class="grid grid-cols-1 gap-4">
+          <!-- Nombre del Establecimiento -->
+          <div>
+            <label for="restName" class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+              Nombre del Establecimiento <span class="text-red-500">*</span>
+            </label>
+            <input
+              id="restName"
+              type="text"
+              pInputText
+              formControlName="restName"
+              placeholder="Ingrese el nombre del establecimiento"
+              class="w-full"
+            />
+            @if (form.get('restName')?.invalid && form.get('restName')?.touched) {
+              <small class="text-red-500">El nombre es requerido (mínimo 3 caracteres)</small>
+            }
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- País -->
+            <div>
+              <label for="restCountryId" class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                País <span class="text-red-500">*</span>
+              </label>
+              <p-select
+                inputId="restCountryId"
+                formControlName="restCountryId"
+                [options]="countries()"
+                optionLabel="countryName"
+                optionValue="countryId"
+                placeholder="Elija un País"
+                [filter]="true"
+                styleClass="w-full"
+                [showClear]="true"
+              />
+              @if (form.get('restCountryId')?.invalid && form.get('restCountryId')?.touched) {
+                <small class="text-red-500">El país es requerido</small>
+              }
+            </div>
+
+            <!-- Ciudad -->
+            <div>
+              <label for="restCityId" class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                Ciudad <span class="text-red-500">*</span>
+              </label>
+              <p-select
+                inputId="restCityId"
+                formControlName="restCityId"
+                [options]="availableCities()"
+                optionLabel="cityName"
+                optionValue="cityId"
+                placeholder="Elija una Ciudad"
+                [filter]="true"
+                styleClass="w-full"
+                [showClear]="true"
+                [disabled]="!form.get('restCountryId')?.value"
+              />
+              @if (form.get('restCityId')?.invalid && form.get('restCityId')?.touched) {
+                <small class="text-red-500">La ciudad es requerida</small>
+              }
+              @if (!form.get('restCountryId')?.value) {
+                <small class="text-gray-500">Primero seleccione un país</small>
+              }
+            </div>
+
+            <!-- Marca -->
+            <div>
+              <label for="restBrandId" class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                Marca <span class="text-red-500">*</span>
+              </label>
+              <p-select
+                inputId="restBrandId"
+                formControlName="restBrandId"
+                [options]="brands()"
+                optionLabel="nameBrand"
+                optionValue="idBrand"
+                placeholder="Nombre de la Marca"
+                [filter]="true"
+                styleClass="w-full"
+                [showClear]="true"
+              />
+              @if (form.get('restBrandId')?.invalid && form.get('restBrandId')?.touched) {
+                <small class="text-red-500">La marca es requerida</small>
+              }
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Código de Restaurante -->
+            <div>
+              <label for="restCodPostGC" class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                Código de Restaurante <span class="text-red-500">*</span>
+              </label>
+              <input
+                id="restCodPostGC"
+                type="text"
+                pInputText
+                formControlName="restCodPostGC"
+                placeholder="Ingrese el Código"
+                class="w-full"
+              />
+              @if (form.get('restCodPostGC')?.invalid && form.get('restCodPostGC')?.touched) {
+                <small class="text-red-500">El código es requerido</small>
+              }
+            </div>
+
+            <!-- Acrónimo -->
+            <div>
+              <label for="restShortName" class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                Acrónimo <span class="text-red-500">*</span>
+              </label>
+              <input
+                id="restShortName"
+                type="text"
+                pInputText
+                formControlName="restShortName"
+                placeholder="Ingrese el Acrónimo"
+                class="w-full"
+              />
+              @if (form.get('restShortName')?.invalid && form.get('restShortName')?.touched) {
+                <small class="text-red-500">El acrónimo es requerido</small>
+              }
+            </div>
+
+            <!-- Base de Operación -->
+            <div class="flex items-end pb-2">
+              <div class="flex items-center gap-2">
+                <p-checkbox
+                  inputId="isHeadquarter"
+                  formControlName="isHeadquarter"
+                  [binary]="true"
+                />
+                <label for="isHeadquarter" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Base de Operación
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dirección -->
+          <div>
+            <label for="restAddress" class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+              Dirección del Establecimiento <span class="text-red-500">*</span>
+            </label>
+            <input
+              id="restAddress"
+              type="text"
+              pInputText
+              formControlName="restAddress"
+              placeholder="Ingrese la dirección completa"
+              class="w-full"
+            />
+            @if (form.get('restAddress')?.invalid && form.get('restAddress')?.touched) {
+              <small class="text-red-500">La dirección es requerida</small>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Control de Acceso Section -->
+      <div class="mb-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">Control de Acceso</h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- PIN de Acceso -->
+          <div>
+            <label for="accessPIN" class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+              PIN de Acceso <span class="text-red-500">*</span>
+            </label>
+            <div class="flex gap-2">
+              <input
+                id="accessPIN"
+                [type]="showPin() ? 'text' : 'password'"
+                pInputText
+                formControlName="accessPIN"
+                placeholder="Ingrese el PIN"
+                class="flex-1"
+              />
+              <p-button
+                type="button"
+                [icon]="showPin() ? 'pi pi-eye-slash' : 'pi pi-eye'"
+                [outlined]="true"
+                severity="secondary"
+                (onClick)="togglePinVisibility()"
+              />
+            </div>
+            @if (form.get('accessPIN')?.invalid && form.get('accessPIN')?.touched) {
+              <small class="text-red-500">El PIN es requerido (mínimo 4 caracteres)</small>
+            }
+          </div>
+
+          <!-- Enlace del Restaurante -->
+          <div>
+            <label for="link" class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+              Enlace del Restaurante
+            </label>
+            <input
+              id="link"
+              type="text"
+              pInputText
+              formControlName="link"
+              placeholder="Ingresa la URL"
+              class="w-full"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Ubicación Section -->
+      <div class="mb-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">Ubicación</h3>
+
+        <!-- Google Maps Placeholder -->
+        <div class="mb-4">
+          <div class="border border-gray-300 rounded-lg p-8 bg-gray-50 dark:bg-gray-800 text-center">
+            <i class="pi pi-map-marker text-4xl text-gray-400 mb-3"></i>
+            <p class="text-gray-600 dark:text-gray-400 mb-2">
+              Google Maps Integration - Coming Soon
+            </p>
+            <p class="text-sm text-gray-500">
+              Haga clic en el mapa para seleccionar la ubicación del restaurante
+            </p>
+          </div>
+        </div>
+
+        <!-- Coordenadas (readonly) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label for="restLat" class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+              Latitud
+            </label>
+            <p-inputNumber
+              inputId="restLat"
+              formControlName="restLat"
+              mode="decimal"
+              [minFractionDigits]="2"
+              [maxFractionDigits]="8"
+              placeholder="0.00000000"
+              styleClass="w-full"
+              [readonly]="true"
+            />
+            <small class="text-gray-500">Se actualizará automáticamente desde el mapa</small>
+          </div>
+
+          <div>
+            <label for="restLon" class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+              Longitud
+            </label>
+            <p-inputNumber
+              inputId="restLon"
+              formControlName="restLon"
+              mode="decimal"
+              [minFractionDigits]="2"
+              [maxFractionDigits]="8"
+              placeholder="0.00000000"
+              styleClass="w-full"
+              [readonly]="true"
+            />
+            <small class="text-gray-500">Se actualizará automáticamente desde el mapa</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estado y Logo Section -->
+      <div class="mb-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Estado Activo -->
+          <div class="flex items-center gap-2">
+            <p-checkbox
+              inputId="restStatus"
+              formControlName="restStatus"
+              [binary]="true"
+            />
+            <label for="restStatus" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Restaurante Activo
+            </label>
+          </div>
+
+          <!-- URL Logo -->
+          <div>
+            <label for="restUrllogo" class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+              URL del Logo
+            </label>
+            <input
+              id="restUrllogo"
+              type="text"
+              pInputText
+              formControlName="restUrllogo"
+              placeholder="https://example.com/logo.png"
+              class="w-full"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+        <p-button
+          label="Cancelar"
+          icon="pi pi-times"
+          [outlined]="true"
+          severity="secondary"
+          type="button"
+          (onClick)="cancel()"
+          [disabled]="isSaving()"
+        />
+        @if (mode() !== 'view') {
+          <p-button
+            [label]="mode() === 'create' ? 'Crear Restaurante' : 'Guardar Cambios'"
+            icon="pi pi-save"
+            type="submit"
+            [loading]="isSaving()"
+            [disabled]="form.invalid"
+          />
+        }
+      </div>
+    </form>
+  }
+</div>

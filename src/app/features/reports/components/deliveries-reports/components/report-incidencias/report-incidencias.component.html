@@ -104,17 +104,15 @@
 
         <!-- Botón -->
         <div class="flex items-end">
-          <button
-            pButton
+          <p-button
             type="button"
             label="Generar Reporte"
             icon="pi pi-file"
             [loading]="isLoading()"
             [disabled]="isLoading()"
             (click)="generateReport()"
-            severity="success"
             class="w-full"
-          ></button>
+          ></p-button>
         </div>
       </div>
 

@@ -1,0 +1,130 @@
+<p-drawer
+  [visible]="visible()"
+  position="right"
+  [style]="{ width: '400px' }"
+  (onHide)="handleClose()"
+  header="Filtros Avanzados"
+>
+  <div class="h-full flex flex-col">
+    <!-- Filter Form -->
+    <div class="flex-1 overflow-y-auto px-1">
+      <div class="grid grid-cols-1 gap-4">
+        <!-- Countries Filter -->
+        <div>
+          <label for="countries" class="block text-sm font-medium text-gray-700 mb-2">
+            Países
+          </label>
+          <p-multiSelect
+            id="countries"
+            [(ngModel)]="localCountries"
+            [options]="countries()"
+            optionLabel="countryName"
+            optionValue="countryId"
+            placeholder="Seleccionar países"
+            [filter]="true"
+            filterPlaceHolder="Buscar..."
+            [showClear]="true"
+            display="chip"
+            styleClass="w-full"
+            (onChange)="onCountryChange($event.value)"
+          />
+          @if (localCountries().length > 0) {
+            <small class="block mt-2 text-xs text-gray-500">
+              <i class="pi pi-check-circle mr-1"></i>
+              {{ localCountries().length }} país(es) seleccionado(s)
+            </small>
+          }
+        </div>
+
+        <!-- Cities Filter -->
+        <div>
+          <label for="cities" class="block text-sm font-medium text-gray-700 mb-2">
+            Ciudades
+          </label>
+          <p-multiSelect
+            id="cities"
+            [(ngModel)]="localCities"
+            [options]="availableCities()"
+            optionLabel="cityName"
+            optionValue="cityId"
+            placeholder="Seleccionar ciudades"
+            [filter]="true"
+            filterPlaceHolder="Buscar..."
+            [showClear]="true"
+            [disabled]="localCountries().length === 0"
+            display="chip"
+            styleClass="w-full"
+          />
+          @if (localCountries().length === 0) {
+            <small class="block mt-2 text-xs text-amber-600">
+              <i class="pi pi-info-circle mr-1"></i>
+              Primero selecciona al menos un país
+            </small>
+          } @else if (localCities().length > 0) {
+            <small class="block mt-2 text-xs text-gray-500">
+              <i class="pi pi-check-circle mr-1"></i>
+              {{ localCities().length }} ciudad(es) seleccionada(s)
+            </small>
+          } @else if (availableCities().length === 0) {
+            <small class="block mt-2 text-xs text-gray-500">
+              <i class="pi pi-info-circle mr-1"></i>
+              No hay ciudades disponibles para los países seleccionados
+            </small>
+          }
+        </div>
+
+        <!-- Filter Summary -->
+        @if (filterCount() > 0) {
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div class="flex items-start gap-2">
+              <i class="pi pi-filter text-blue-600 mt-1"></i>
+              <div class="flex-1">
+                <div class="font-semibold text-sm text-blue-900 mb-2">
+                  Resumen de Filtros
+                </div>
+                <div class="space-y-1 text-sm text-blue-800">
+                  <div class="flex justify-between">
+                    <span>Total de filtros:</span>
+                    <span class="font-semibold">{{ filterCount() }}</span>
+                  </div>
+                  @if (localCountries().length > 0) {
+                    <div class="flex justify-between">
+                      <span>Países:</span>
+                      <span class="font-semibold">{{ localCountries().length }}</span>
+                    </div>
+                  }
+                  @if (localCities().length > 0) {
+                    <div class="flex justify-between">
+                      <span>Ciudades:</span>
+                      <span class="font-semibold">{{ localCities().length }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Actions Footer -->
+    <div class="grid grid-cols-2 gap-3 pt-4 border-t border-gray-200 mt-4">
+      <p-button
+        label="Limpiar"
+        icon="pi pi-times"
+        [outlined]="true"
+        severity="secondary"
+        styleClass="w-full"
+        (onClick)="clearFilters()"
+        [disabled]="filterCount() === 0"
+      />
+      <p-button
+        label="Aplicar"
+        icon="pi pi-check"
+        styleClass="w-full"
+        (onClick)="applyFilters()"
+        [disabled]="!hasChanges()"
+      />
+    </div>
+  </div>
+</p-drawer>

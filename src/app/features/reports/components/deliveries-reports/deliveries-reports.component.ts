@@ -127,14 +127,14 @@ export class DeliveriesReportsComponent {
     },
     {
       id: 9,
-      name: 'BipPay',
-      icon: 'pi pi-wallet'
-    },
-    {
-      id: 10,
       name: 'Base de Drivers',
       icon: 'pi pi-building'
-    }
+    },
+    // {
+    //   id: 10,
+    //   name: 'BipPay',
+    //   icon: 'pi pi-wallet'
+    // },
   ];
 
   // ============================================================================
