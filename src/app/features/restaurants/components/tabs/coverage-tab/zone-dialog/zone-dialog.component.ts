@@ -5,6 +5,7 @@ import {
   effect,
   inject,
   signal,
+  computed,
   ChangeDetectionStrategy
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -15,6 +16,9 @@ import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
+
+// Components
+import { GoogleMapsEditorComponent, type ZoneEditorData } from '../google-maps-editor/google-maps-editor.component';
 
 import type {
   CoverageZone,
@@ -31,7 +35,8 @@ import type {
     DialogModule,
     ButtonModule,
     InputTextModule,
-    InputNumberModule
+    InputNumberModule,
+    GoogleMapsEditorComponent
   ],
   templateUrl: './zone-dialog.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -44,6 +49,7 @@ export class ZoneDialogComponent {
   readonly mode = input.required<'create' | 'edit'>();
   readonly zone = input<CoverageZone | null>(null);
   readonly isRestaurant = input.required<boolean>();
+  readonly restaurantCoords = input.required<{ lat: number; lon: number }>();
 
   // Outputs
   readonly onClose = output<void>();
@@ -51,6 +57,20 @@ export class ZoneDialogComponent {
 
   // State
   readonly isSaving = signal<boolean>(false);
+
+  // Computed: Zone data for Google Maps Editor
+  readonly zoneEditorData = computed<ZoneEditorData | null>(() => {
+    const formValue = this.zoneForm.value;
+    const lat = formValue.zoneLat || 0;
+    const lon = formValue.zoneLon || 0;
+    const radius = formValue.zoneRadius || 0;
+
+    // Only return data if we have valid coordinates
+    if (lat !== 0 && lon !== 0) {
+      return { lat, lon, radius };
+    }
+    return null;
+  });
 
   // Form
   readonly zoneForm = this.fb.group({
@@ -92,6 +112,17 @@ export class ZoneDialogComponent {
       zoneLon: zone.zoneLon,
       zoneMinAmount: zone.zoneMinAmount
     });
+  }
+
+  /**
+   * Handle zone changes from Google Maps Editor
+   */
+  onZoneChangeFromMap(data: ZoneEditorData): void {
+    this.zoneForm.patchValue({
+      zoneLat: data.lat,
+      zoneLon: data.lon,
+      zoneRadius: Math.round(data.radius)
+    }, { emitEvent: false });
   }
 
   /**

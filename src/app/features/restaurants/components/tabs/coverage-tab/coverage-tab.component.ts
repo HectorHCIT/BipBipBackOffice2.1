@@ -24,6 +24,7 @@ import type {
   UpdateCoverageZoneRequest
 } from '../../../models/coverage-zone.model';
 import { ZoneDialogComponent } from './zone-dialog/zone-dialog.component';
+import { MapboxViewerComponent, type MapZone, type MapMarker } from '@shared/components/mapbox-viewer/mapbox-viewer.component';
 
 @Component({
   selector: 'app-coverage-tab',
@@ -33,7 +34,8 @@ import { ZoneDialogComponent } from './zone-dialog/zone-dialog.component';
     ButtonModule,
     TableModule,
     TabsModule,
-    ZoneDialogComponent
+    ZoneDialogComponent,
+    MapboxViewerComponent
   ],
   templateUrl: './coverage-tab.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -56,9 +58,47 @@ export class CoverageTabComponent implements OnInit {
   readonly restaurantZones = signal<CoverageZone[]>([]);
   readonly driverZones = signal<CoverageZone[]>([]);
 
+  // Restaurant coordinates (from detail)
+  readonly restaurantCoords = signal<{ lat: number; lon: number }>({ lat: 14.065070, lon: -87.192136 });
+
   // Computed
   readonly hasRestaurantZones = computed(() => this.restaurantZones().length > 0);
   readonly hasDriverZones = computed(() => this.driverZones().length > 0);
+
+  // Computed: Convert zones to MapZone format for Mapbox
+  readonly restaurantMapZones = computed<MapZone[]>(() =>
+    this.restaurantZones().map(zone => ({
+      id: zone.zoneId,
+      name: zone.zoneName,
+      lat: zone.zoneLat,
+      lon: zone.zoneLon,
+      radius: zone.zoneRadius,
+      color: '#fb0021'
+    }))
+  );
+
+  readonly driverMapZones = computed<MapZone[]>(() =>
+    this.driverZones().map(zone => ({
+      id: zone.zoneId,
+      name: zone.zoneName,
+      lat: zone.zoneLat,
+      lon: zone.zoneLon,
+      radius: zone.zoneRadius,
+      color: '#2196f3'
+    }))
+  );
+
+  // Computed: Restaurant marker for map
+  readonly restaurantMarker = computed<MapMarker>(() => {
+    const coords = this.restaurantCoords();
+    const detail = this.restaurantService.restaurantDetail();
+    return {
+      lat: coords.lat,
+      lon: coords.lon,
+      title: detail?.restName || 'Restaurante',
+      icon: detail?.restUrllogo
+    };
+  });
 
   ngOnInit(): void {
     this.loadCoverageZones();
@@ -74,6 +114,12 @@ export class CoverageTabComponent implements OnInit {
     this.restaurantService.getRestaurantDetail(restId).subscribe({
       next: (detail) => {
         if (detail) {
+          // Set restaurant coordinates
+          this.restaurantCoords.set({
+            lat: detail.restLat || 14.065070,
+            lon: detail.restLon || -87.192136
+          });
+
           // Convert restaurant zones
           const restZones: CoverageZone[] = (detail.restDeliveriesZones || []).map((zone: RESTDeliveriesZone) => ({
             zoneId: zone.delZoneId,
@@ -244,5 +290,26 @@ export class CoverageTabComponent implements OnInit {
    */
   formatCoordinates(lat: number, lon: number): string {
     return `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
+  }
+
+  /**
+   * Handle zone click from map
+   */
+  onMapZoneClick(zoneId: number): void {
+    // Find the zone in the appropriate array
+    const zone = this.selectedZoneType() === 'restaurant'
+      ? this.restaurantZones().find(z => z.zoneId === zoneId)
+      : this.driverZones().find(z => z.zoneId === zoneId);
+
+    if (zone) {
+      this.openEditDialog(zone);
+    }
+  }
+
+  /**
+   * Handle tab change
+   */
+  onTabChange(event: any): void {
+    this.selectedZoneType.set(event.index === 0 ? 'restaurant' : 'driver');
   }
 }

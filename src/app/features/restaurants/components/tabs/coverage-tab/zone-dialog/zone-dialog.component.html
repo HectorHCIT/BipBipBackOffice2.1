@@ -4,7 +4,7 @@
   [modal]="true"
   [draggable]="false"
   [resizable]="false"
-  [style]="{ width: '600px' }"
+  [style]="{ width: '900px', 'max-width': '95vw' }"
   (onHide)="closeDialog()"
 >
   <form [formGroup]="zoneForm" class="flex flex-col gap-4">
@@ -26,6 +26,25 @@
       }
     </div>
 
+    <!-- Google Maps Editor -->
+    <div class="flex flex-col gap-2">
+      <label class="font-medium text-sm">
+        Ubicación en el Mapa <span class="text-red-500">*</span>
+      </label>
+      <app-google-maps-editor
+        [restaurantCoords]="restaurantCoords()"
+        [zoneData]="zoneEditorData()"
+        [minRadius]="100"
+        [maxRadius]="50000"
+        (onZoneChange)="onZoneChangeFromMap($event)"
+      />
+      <small class="text-gray-500">
+        <i class="pi pi-info-circle mr-1"></i>
+        Haz clic en el mapa para colocar la zona o arrastra el círculo para moverla.
+        Usa los marcadores blancos para ajustar el radio.
+      </small>
+    </div>
+
     <!-- Zone Radius -->
     <div class="flex flex-col gap-2">
       <label for="zoneRadius" class="font-medium text-sm">
@@ -45,7 +64,7 @@
       @if (isFieldInvalid('zoneRadius')) {
         <small class="text-red-500">{{ getFieldError('zoneRadius') }}</small>
       }
-      <small class="text-gray-500">Mínimo: 100m, Máximo: 50,000m (50km)</small>
+      <small class="text-gray-500">Ajusta manualmente o arrastra los marcadores en el mapa</small>
     </div>
 
     <!-- Coordinates Row -->
@@ -116,15 +135,6 @@
       }
     </div>
 
-    <!-- Info Message -->
-    <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-      <div class="flex items-start gap-2 text-blue-700 text-sm">
-        <i class="pi pi-info-circle mt-0.5"></i>
-        <p>
-          Las coordenadas definen el centro de la zona circular. El radio determina el área de cobertura desde ese punto.
-        </p>
-      </div>
-    </div>
   </form>
 
   <ng-template #footer>

@@ -1,4 +1,4 @@
-import { Component, signal, computed, inject } from '@angular/core';
+import { Component, signal, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -41,7 +41,8 @@ import { AuthService } from '@core/services/auth.service';
   ],
   providers: [MessageService],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.scss'
+  styleUrl: './login.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LoginComponent {
   // Dependency Injection
@@ -81,6 +82,12 @@ export class LoginComponent {
       password: ['', [Validators.required]]
     });
 
+    // Trigger animations after init (usar Promise.resolve para evitar ExpressionChangedAfterItHasBeenCheckedError)
+    Promise.resolve().then(() => {
+      this.fadeInState.set('visible');
+      this.slideInState.set('visible');
+    });
+
     // Subscribe to form changes to update isFormValid signal
     this.loginForm.valueChanges.subscribe(() => {
       this.isFormValid.set(this.loginForm.valid);
@@ -90,12 +97,6 @@ export class LoginComponent {
     this.loginForm.statusChanges.subscribe(() => {
       this.isFormValid.set(this.loginForm.valid);
     });
-
-    // Trigger animations after init
-    setTimeout(() => {
-      this.fadeInState.set('visible');
-      this.slideInState.set('visible');
-    }, 100);
   }
 
   /**
@@ -112,10 +113,8 @@ export class LoginComponent {
     this.authService.login(this.loginForm.value).subscribe({
       next: (response: any) => {
         if (response) {
-          // Esperar más tiempo para asegurar que authSave() completó
-          // authSave() usa requestAnimationFrame, necesitamos dar tiempo suficiente
+          // Esperar a que authSave() complete (usa requestAnimationFrame)
           setTimeout(() => {
-            // Verificar que el token se guardó correctamente
             const token = this.authService.getJwtToken();
             const userName = this.authService.userFullName();
 
@@ -143,7 +142,7 @@ export class LoginComponent {
                 life: 5000
               });
             }
-          }, 500); // Incrementado de 300ms a 500ms
+          }, 500);
         } else {
           this.stopLoading();
           this.messageService.add({

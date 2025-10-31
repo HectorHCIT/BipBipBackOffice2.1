@@ -6,25 +6,32 @@
     </h3>
   </div>
 
-  <!-- Info Message -->
-  <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-    <div class="flex items-start gap-2 text-blue-700">
-      <i class="pi pi-info-circle mt-0.5"></i>
-      <div class="text-sm">
-        <p class="font-medium mb-1">Zonas de Cobertura sin Mapa</p>
-        <p>Las zonas de cobertura definen el área de entrega del restaurante. El mapa interactivo se agregará próximamente. Por ahora, puede gestionar las zonas ingresando las coordenadas manualmente.</p>
-      </div>
-    </div>
-  </div>
-
   <!-- Loading State -->
   @if (isLoading()) {
     <div class="flex justify-center items-center py-8">
       <i class="pi pi-spin pi-spinner text-4xl text-primary"></i>
     </div>
   } @else {
+    <!-- Mapbox Viewer -->
+    <div class="mb-6">
+      <app-mapbox-viewer
+        [zones]="selectedZoneType() === 'restaurant' ? restaurantMapZones() : driverMapZones()"
+        [restaurantMarker]="restaurantMarker()"
+        [centerCoords]="restaurantCoords()"
+        [initialZoom]="13"
+        (onZoneClick)="onMapZoneClick($event)"
+      />
+      <p class="text-sm text-gray-500 mt-2">
+        <i class="pi pi-info-circle mr-1"></i>
+        Haz clic en una zona del mapa para editarla
+      </p>
+    </div>
+
     <!-- Tabs for Restaurant vs Driver Zones -->
-    <p-tabs [value]="0">
+    <p-tabs
+      [value]="selectedZoneType() === 'restaurant' ? 0 : 1"
+      (onChange)="onTabChange($event)"
+    >
       <p-tablist>
         <p-tab [value]="0">
           <i class="pi pi-building mr-2"></i>
@@ -189,6 +196,7 @@
       [mode]="dialogMode()"
       [zone]="editingZone()"
       [isRestaurant]="selectedZoneType() === 'restaurant'"
+      [restaurantCoords]="restaurantCoords()"
       (onClose)="closeDialog()"
       (onSave)="onZoneSave($event)"
     />
