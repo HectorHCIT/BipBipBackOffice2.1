@@ -14,6 +14,20 @@ import type {
   UpdateRestaurantRequest,
   Brand
 } from '../models/restaurant.model';
+import type {
+  Scale,
+  CreateScaleRequest,
+  UpdateScaleRequest
+} from '../models/scale.model';
+import type {
+  RESTSchedule,
+  UpdateSchedule
+} from '../models/schedule.model';
+import type {
+  RestaurantConfig,
+  CreateConfigRequest,
+  UpdateConfigRequest
+} from '../models/restaurant-config.model';
 
 @Injectable({
   providedIn: 'root'
@@ -42,6 +56,18 @@ export class RestaurantService {
   readonly restaurantDetail = signal<RestaurantDetails | null>(null);
   readonly isLoadingDetail = signal<boolean>(false);
 
+  // Scales
+  readonly scales = signal<Scale[]>([]);
+  readonly isLoadingScales = signal<boolean>(false);
+
+  // Schedules
+  readonly schedules = signal<RESTSchedule[]>([]);
+  readonly isLoadingSchedules = signal<boolean>(false);
+
+  // Configurations
+  readonly restaurantConfig = signal<RestaurantConfig | null>(null);
+  readonly isLoadingConfig = signal<boolean>(false);
+
   /**
    * Get restaurants list with pagination and filters
    */
@@ -50,31 +76,38 @@ export class RestaurantService {
 
     // Build query params
     const params: string[] = [];
-    params.push(`page=${filters.page + 1}`); // API uses 1-based pagination
+
+    // Required parameters
+    params.push(`pageNumber=${filters.page + 1}`); // API uses 1-based pagination
     params.push(`pageSize=${filters.pageSize}`);
 
-    if (filters.statusActive !== undefined) {
-      params.push(`statusActive=${filters.statusActive}`);
+    // Optional: StatusActive (only send if true)
+    if (filters.statusActive === true) {
+      params.push(`StatusActive=true`);
     }
 
-    if (filters.statusInactive !== undefined) {
-      params.push(`statusInactive=${filters.statusInactive}`);
+    // Optional: StatusInactive (only send if true)
+    if (filters.statusInactive === true) {
+      params.push(`StatusInactive=true`);
     }
 
+    // Optional: Countries array
     if (filters.countries && filters.countries.length > 0) {
       filters.countries.forEach(countryId => {
-        params.push(`countries=${countryId}`);
+        params.push(`Countries=${countryId}`);
       });
     }
 
+    // Optional: Cities array
     if (filters.cities && filters.cities.length > 0) {
       filters.cities.forEach(cityId => {
-        params.push(`cities=${cityId}`);
+        params.push(`Cities=${cityId}`);
       });
     }
 
+    // Optional: CustomParameter (search)
     if (filters.search && filters.search.trim()) {
-      params.push(`search=${encodeURIComponent(filters.search.trim())}`);
+      params.push(`CustomParameter=${encodeURIComponent(filters.search.trim())}`);
     }
 
     const url = `Restaurant/RestaurantsList?${params.join('&')}`;
@@ -183,6 +216,97 @@ export class RestaurantService {
     return this.dataService.get$<Brand[]>('Brand/BrandList').pipe(
       tap(brands => {
         this.brands.set(brands);
+      })
+    );
+  }
+
+  /**
+   * Get scales list for a restaurant
+   */
+  getScales(restId: number): Observable<Scale[]> {
+    this.isLoadingScales.set(true);
+    return this.dataService.get$<Scale[]>(`Restaurant/scales?idStore=${restId}`).pipe(
+      tap({
+        next: (scales) => {
+          this.scales.set(scales);
+          this.isLoadingScales.set(false);
+        },
+        error: () => {
+          this.isLoadingScales.set(false);
+        }
+      })
+    );
+  }
+
+  /**
+   * Create a new scale
+   */
+  createScale(restId: number, data: CreateScaleRequest): Observable<Scale> {
+    return this.dataService.post$<Scale>(`Restaurant/scales?idStore=${restId}`, data);
+  }
+
+  /**
+   * Update an existing scale
+   */
+  updateScale(data: UpdateScaleRequest): Observable<Scale> {
+    return this.dataService.put$<Scale>('Restaurant/scales', data);
+  }
+
+  /**
+   * Delete a scale
+   */
+  deleteScale(restId: number, scaleId: number): Observable<any> {
+    return this.dataService.delete$(`Restaurant/scales?idStore=${restId}&idScale=${scaleId}`);
+  }
+
+  /**
+   * Update restaurant schedules
+   * Updates operating hours for specified channels
+   */
+  updateSchedule(restId: number, data: UpdateSchedule[]): Observable<any> {
+    return this.dataService.put$(`Restaurant/EditScheduleStore?IdStore=${restId}`, data);
+  }
+
+  /**
+   * Get restaurant configurations
+   */
+  getRestaurantConfigs(restId: number): Observable<RestaurantConfig> {
+    this.isLoadingConfig.set(true);
+    return this.dataService.get$<RestaurantConfig>(`Restaurant/${restId}/configs`).pipe(
+      tap({
+        next: (config) => {
+          this.restaurantConfig.set(config);
+          this.isLoadingConfig.set(false);
+        },
+        error: () => {
+          this.isLoadingConfig.set(false);
+        }
+      })
+    );
+  }
+
+  /**
+   * Create restaurant configurations
+   */
+  createRestaurantConfigs(restId: number, data: CreateConfigRequest): Observable<RestaurantConfig> {
+    return this.dataService.post$<RestaurantConfig>(`Restaurant/${restId}/configs`, data).pipe(
+      tap({
+        next: (config) => {
+          this.restaurantConfig.set(config);
+        }
+      })
+    );
+  }
+
+  /**
+   * Update restaurant configurations
+   */
+  updateRestaurantConfigs(restId: number, data: UpdateConfigRequest): Observable<RestaurantConfig> {
+    return this.dataService.put$<RestaurantConfig>(`Restaurant/${restId}/configs`, data).pipe(
+      tap({
+        next: (config) => {
+          this.restaurantConfig.set(config);
+        }
       })
     );
   }

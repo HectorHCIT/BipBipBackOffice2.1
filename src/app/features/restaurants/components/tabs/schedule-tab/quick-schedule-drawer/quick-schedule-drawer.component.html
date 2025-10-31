@@ -1,0 +1,212 @@
+<p-drawer
+  [visible]="visible()"
+  position="right"
+  [modal]="true"
+  styleClass="!w-full lg:!w-[40rem]"
+  (onHide)="handleClose()"
+>
+  <ng-template #header>
+    <div class="flex items-center gap-3">
+      <i class="pi pi-bolt text-2xl text-primary"></i>
+      <span class="font-semibold text-lg">Configuración Rápida</span>
+    </div>
+  </ng-template>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-6">
+    <!-- Time Selection Section -->
+    <div class="border rounded-lg p-4"
+         [class.border-red-200]="hasTimeError()"
+         [class.bg-red-50]="hasTimeError()">
+      <h4 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+        <i class="pi pi-clock"></i>
+        Horario
+      </h4>
+
+      <div class="flex flex-col sm:grid sm:grid-cols-2 gap-3">
+        <!-- Start Time -->
+        <div class="flex-1 min-w-0">
+          <label for="startTime" class="block mb-2 text-sm font-medium">
+            Hora Inicio <span class="text-red-500">*</span>
+          </label>
+          <p-datepicker
+            inputId="startTime"
+            formControlName="startTime"
+            [timeOnly]="true"
+            hourFormat="12"
+            [showIcon]="true"
+            iconDisplay="button"
+            placeholder="HH:MM AM/PM"
+            class="w-full"
+            appendTo="body"
+          />
+        </div>
+
+        <!-- End Time -->
+        <div class="flex-1 min-w-0">
+          <label for="endTime" class="block mb-2 text-sm font-medium">
+            Hora Fin <span class="text-red-500">*</span>
+          </label>
+          <p-datepicker
+            inputId="endTime"
+            formControlName="endTime"
+            [timeOnly]="true"
+            hourFormat="12"
+            [showIcon]="true"
+            iconDisplay="button"
+            placeholder="HH:MM AM/PM"
+            class="w-full"
+            appendTo="body"
+          />
+        </div>
+      </div>
+
+      @if (hasTimeError()) {
+        <div class="mt-3 flex items-center gap-2 text-red-700 text-sm">
+          <i class="pi pi-exclamation-circle"></i>
+          <span>{{ timeErrorMessage() }}</span>
+        </div>
+      }
+    </div>
+
+    <!-- Days Selection Section -->
+    <div class="border border-gray-200 rounded-lg p-4"
+         [class.border-red-200]="hasDaysError()"
+         [class.bg-red-50]="hasDaysError()">
+      <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-3">
+        <h4 class="font-semibold text-gray-800 flex items-center gap-2 m-0">
+          <i class="pi pi-calendar"></i>
+          Días de la Semana
+        </h4>
+        <div class="flex flex-wrap gap-2">
+          <p-button
+            label="Lun-Vie"
+            size="small"
+            [outlined]="true"
+            severity="secondary"
+            (onClick)="selectWeekdays()"
+            type="button"
+          />
+          <p-button
+            label="Fin de Semana"
+            size="small"
+            [outlined]="true"
+            severity="secondary"
+            (onClick)="selectWeekend()"
+            type="button"
+          />
+          <p-button
+            label="Todos"
+            size="small"
+            [outlined]="true"
+            severity="secondary"
+            (onClick)="selectAllDays()"
+            type="button"
+          />
+        </div>
+      </div>
+
+      <!-- Days Grid -->
+      <div class="grid grid-cols-2 gap-2" formArrayName="selectedDays">
+        @for (day of DAYS; track day.id; let i = $index) {
+          <div class="flex items-center gap-2">
+            <p-checkbox
+              [formControlName]="i"
+              [inputId]="'day_' + day.id"
+              [binary]="true"
+            />
+            <label [for]="'day_' + day.id" class="cursor-pointer">
+              {{ day.name }}
+            </label>
+          </div>
+        }
+      </div>
+
+      @if (hasDaysError()) {
+        <div class="mt-3 flex items-center gap-2 text-red-700 text-sm">
+          <i class="pi pi-exclamation-circle"></i>
+          <span>Debe seleccionar al menos un día</span>
+        </div>
+      }
+    </div>
+
+    <!-- Channels Selection Section -->
+    <div class="border border-gray-200 rounded-lg p-4"
+         [class.border-red-200]="hasChannelsError()"
+         [class.bg-red-50]="hasChannelsError()">
+      <div class="flex justify-between items-center mb-3">
+        <h4 class="font-semibold text-gray-800 flex items-center gap-2 m-0">
+          <i class="pi pi-globe"></i>
+          Canales de Servicio
+        </h4>
+        <p-button
+          label="Seleccionar Todos"
+          size="small"
+          [outlined]="true"
+          severity="secondary"
+          (onClick)="selectAllChannels()"
+          type="button"
+        />
+      </div>
+
+      <!-- Channels List -->
+      <div class="flex flex-col gap-2">
+        @for (channelId of availableChannels(); track channelId) {
+          <div class="flex items-center gap-2 p-2 rounded hover:bg-gray-50">
+            <p-checkbox
+              [formControlName]="'channel_' + channelId"
+              [inputId]="'channel_' + channelId"
+              [binary]="true"
+            />
+            <label [for]="'channel_' + channelId" class="flex items-center gap-2 cursor-pointer flex-1">
+              <i [class]="CHANNELS[channelId]?.icon"
+                 [style.color]="CHANNELS[channelId]?.color"></i>
+              <span>{{ CHANNELS[channelId]?.name }}</span>
+            </label>
+          </div>
+        }
+      </div>
+
+      @if (hasChannelsError()) {
+        <div class="mt-3 flex items-center gap-2 text-red-700 text-sm">
+          <i class="pi pi-exclamation-circle"></i>
+          <span>Debe seleccionar al menos un canal</span>
+        </div>
+      }
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <div class="flex items-start gap-2">
+        <i class="pi pi-info-circle mt-0.5"></i>
+        <div class="text-sm">
+          <p class="font-medium mb-1">Información:</p>
+          <ul class="list-disc list-inside space-y-1">
+            <li>Seleccione el horario que desea aplicar</li>
+            <li>Marque los días donde aplicará</li>
+            <li>Seleccione los canales afectados</li>
+            <li>Los horarios existentes serán reemplazados</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <ng-template #footer>
+    <div class="flex justify-end gap-2">
+      <p-button
+        label="Cancelar"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="handleClose()"
+        type="button"
+      />
+      <p-button
+        label="Aplicar Horario"
+        icon="pi pi-check"
+        (onClick)="onSubmit()"
+        [disabled]="!canSubmit()"
+        type="button"
+      />
+    </div>
+  </ng-template>
+</p-drawer>

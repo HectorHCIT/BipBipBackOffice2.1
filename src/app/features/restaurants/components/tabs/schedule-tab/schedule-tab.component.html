@@ -1,0 +1,182 @@
+<div class="p-4">
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-4">
+    <h3 class="text-lg font-semibold text-gray-800">
+      Horarios de Atención
+    </h3>
+    <div class="flex gap-2">
+      <p-button
+        label="Configuración Rápida"
+        icon="pi pi-bolt"
+        [outlined]="true"
+        severity="secondary"
+        (onClick)="openQuickSchedule()"
+      />
+      <p-button
+        label="Guardar"
+        icon="pi pi-save"
+        (onClick)="onSubmit()"
+        [loading]="isSaving()"
+      />
+    </div>
+  </div>
+
+  <!-- Info Message when no schedules -->
+  @if (!hasSchedules()) {
+    <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+      <div class="flex items-start gap-2 text-blue-700">
+        <i class="pi pi-info-circle mt-0.5"></i>
+        <div class="text-sm">
+          <p class="font-medium mb-1">No hay horarios configurados</p>
+          <p>Use la "Configuración Rápida" para configurar múltiples días a la vez, o active los días individualmente en las tablas.</p>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Schedules Form (Always show) -->
+  <form [formGroup]="form" class="flex flex-col gap-6">
+      <div formArrayName="channels" class="flex flex-col gap-6">
+        @for (channel of getChannelsArray().controls; track $index; let channelIndex = $index) {
+          <div [formGroupName]="channelIndex" class="border border-gray-200 rounded-lg overflow-hidden">
+            <!-- Channel Header -->
+            <div class="bg-gray-50 px-4 py-3 flex items-center justify-between border-b border-gray-200">
+              <div class="flex items-center gap-3">
+                <i [class]="CHANNELS[getChannelGroup(channelIndex).get('channelId')?.value]?.icon || 'pi pi-circle'"
+                   [style.color]="CHANNELS[getChannelGroup(channelIndex).get('channelId')?.value]?.color"
+                   class="text-xl"></i>
+                <div>
+                  <h4 class="font-semibold text-gray-800 m-0">
+                    {{ getChannelGroup(channelIndex).get('channel')?.value }}
+                  </h4>
+                  <span class="text-sm text-gray-500">
+                    {{ getActiveDaysCount(channelIndex) }} días activos
+                  </span>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-sm text-gray-600">Canal Activo</span>
+                <p-checkbox
+                  [binary]="true"
+                  [ngModel]="getChannelGroup(channelIndex).get('active')?.value"
+                  [ngModelOptions]="{standalone: true}"
+                  (onChange)="toggleChannelActive(channelIndex)"
+                />
+              </div>
+            </div>
+
+            <!-- Days Table -->
+            <p-table
+              [value]="getDaysArray(channelIndex).controls"
+              [tableStyle]="{ 'min-width': '100%' }"
+              class="p-datatable-sm"
+            >
+              <ng-template #header>
+                <tr>
+                  <th style="width: 50px"></th>
+                  <th class="text-left" style="width: 150px">Día</th>
+                  <th class="text-center" style="width: 150px">Hora Inicio</th>
+                  <th class="text-center" style="width: 150px">Hora Fin</th>
+                  <th class="text-center" style="width: 100px">Duración</th>
+                  <th class="text-center" style="width: 100px">Acciones</th>
+                </tr>
+              </ng-template>
+              <ng-template #body let-dayControl let-dayIndex="rowIndex">
+                <tr [formGroup]="getDayGroup(channelIndex, dayIndex)">
+                  <!-- Active Checkbox -->
+                  <td class="text-center">
+                    <p-checkbox
+                      formControlName="active"
+                      [binary]="true"
+                      (onChange)="toggleDayActive(channelIndex, dayIndex)"
+                    />
+                  </td>
+
+                  <!-- Day Name -->
+                  <td>
+                    <div class="flex items-center gap-2">
+                      <span class="font-medium">{{ DAYS[dayIndex].name }}</span>
+                      @if (getDayGroup(channelIndex, dayIndex).get('active')?.value) {
+                        <span class="px-2 py-1 bg-green-100 text-green-700 text-xs rounded">Abierto</span>
+                      } @else {
+                        <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">Cerrado</span>
+                      }
+                    </div>
+                  </td>
+
+                  <!-- Start Time (Display Only) -->
+                  <td class="text-center">
+                    @if (getDayGroup(channelIndex, dayIndex).get('active')?.value) {
+                      <span class="text-sm font-medium">
+                        {{ formatTimeDisplay(getDayGroup(channelIndex, dayIndex).get('hourInit')?.value) }}
+                      </span>
+                    } @else {
+                      <span class="text-gray-400">—</span>
+                    }
+                  </td>
+
+                  <!-- End Time (Display Only) -->
+                  <td class="text-center">
+                    @if (getDayGroup(channelIndex, dayIndex).get('active')?.value) {
+                      <span class="text-sm font-medium">
+                        {{ formatTimeDisplay(getDayGroup(channelIndex, dayIndex).get('hourEnd')?.value) }}
+                      </span>
+                    } @else {
+                      <span class="text-gray-400">—</span>
+                    }
+                  </td>
+
+                  <!-- Duration -->
+                  <td class="text-center">
+                    <span class="text-sm text-gray-600">
+                      {{ getScheduleDuration(
+                           getDayGroup(channelIndex, dayIndex).get('hourInit')?.value,
+                           getDayGroup(channelIndex, dayIndex).get('hourEnd')?.value
+                         ) }}
+                    </span>
+                  </td>
+
+                  <!-- Actions -->
+                  <td class="text-center">
+                    @if (getDayGroup(channelIndex, dayIndex).get('active')?.value) {
+                      <p-button
+                        icon="pi pi-pencil"
+                        [outlined]="true"
+                        severity="secondary"
+                        size="small"
+                        (onClick)="openEditDaySchedule(channelIndex, dayIndex)"
+                        [title]="'Editar horario'"
+                      />
+                    }
+                  </td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </div>
+        }
+      </div>
+  </form>
+
+  <!-- Quick Schedule Drawer -->
+  @if (showQuickSchedule()) {
+    <app-quick-schedule-drawer
+      [visible]="showQuickSchedule()"
+      [availableChannels]="ALLOWED_CHANNEL_IDS"
+      (onClose)="closeQuickSchedule()"
+      (onApply)="onQuickScheduleApplied($event)"
+    />
+  }
+
+  <!-- Edit Day Dialog -->
+  @if (showEditDialog() && editingChannelIndex() >= 0 && editingDayIndex() >= 0) {
+    <app-edit-day-dialog
+      [visible]="showEditDialog()"
+      [dayName]="DAYS[editingDayIndex()].name"
+      [channelName]="CHANNELS[getChannelGroup(editingChannelIndex()).get('channelId')?.value]?.name || ''"
+      [startTime]="getDayGroup(editingChannelIndex(), editingDayIndex()).get('hourInit')?.value"
+      [endTime]="getDayGroup(editingChannelIndex(), editingDayIndex()).get('hourEnd')?.value"
+      (onClose)="closeEditDialog()"
+      (onSave)="onEditDialogSave($event)"
+    />
+  }
+</div>

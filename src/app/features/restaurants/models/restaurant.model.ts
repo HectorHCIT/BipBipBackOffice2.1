@@ -130,6 +130,9 @@ export interface RestaurantDetails {
   restCityName?: string;
   restBrandName?: string;
   restBrandLogo?: string;
+
+  // Schedules - from schedule.model.ts
+  restSchedules?: import('./schedule.model').RESTSchedule[];
 }
 
 /**

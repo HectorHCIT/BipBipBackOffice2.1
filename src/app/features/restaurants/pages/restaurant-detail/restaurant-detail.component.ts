@@ -18,6 +18,9 @@ import { MessageService, MenuItem } from 'primeng/api';
 
 import { RestaurantService } from '../../services/restaurant.service';
 import { InformationTabComponent } from '../../components/tabs/information-tab/information-tab.component';
+import { ScaleTabComponent } from '../../components/tabs/scale-tab/scale-tab.component';
+import { ScheduleTabComponent } from '../../components/tabs/schedule-tab/schedule-tab.component';
+import { ConfigTabComponent } from '../../components/tabs/config-tab/config-tab.component';
 
 @Component({
   selector: 'app-restaurant-detail',
@@ -28,7 +31,10 @@ import { InformationTabComponent } from '../../components/tabs/information-tab/i
     BreadcrumbModule,
     ButtonModule,
     ToastModule,
-    InformationTabComponent
+    InformationTabComponent,
+    ScheduleTabComponent,
+    ScaleTabComponent,
+    ConfigTabComponent
   ],
   templateUrl: './restaurant-detail.component.html',
   providers: [MessageService],

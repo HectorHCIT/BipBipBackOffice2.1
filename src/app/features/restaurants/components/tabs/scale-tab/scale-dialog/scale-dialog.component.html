@@ -1,0 +1,181 @@
+<p-dialog
+  [visible]="visible()"
+  [modal]="true"
+  [closable]="!isSaving()"
+  [closeOnEscape]="!isSaving()"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '500px' }"
+  (onHide)="handleClose()"
+>
+  <ng-template #header>
+    <div class="flex items-center gap-3">
+      <i class="pi pi-chart-line text-2xl text-primary"></i>
+      <span class="font-semibold text-lg">{{ getDialogTitle() }}</span>
+    </div>
+  </ng-template>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
+    <!-- Range Section -->
+    <div class="grid grid-cols-2 gap-4">
+      <!-- Minimum Distance -->
+      <div>
+        <label for="minimum" class="block mb-2 font-medium">
+          Distancia Mínima (km) <span class="text-red-500">*</span>
+        </label>
+        <input
+          id="minimum"
+          type="text"
+          pInputText
+          formControlName="minimum"
+          placeholder="0.00"
+          class="w-full"
+          [class.ng-invalid]="hasError('minimum')"
+          [class.ng-dirty]="hasError('minimum')"
+        />
+        @if (hasError('minimum')) {
+          <small class="text-red-500 mt-1 block">
+            {{ getErrorMessage('minimum') }}
+          </small>
+        }
+      </div>
+
+      <!-- Maximum Distance -->
+      <div>
+        <label for="maximum" class="block mb-2 font-medium">
+          Distancia Máxima (km) <span class="text-red-500">*</span>
+        </label>
+        <input
+          id="maximum"
+          type="text"
+          pInputText
+          formControlName="maximum"
+          placeholder="5.00"
+          class="w-full"
+          [class.ng-invalid]="hasError('maximum')"
+          [class.ng-dirty]="hasError('maximum')"
+        />
+        @if (hasError('maximum')) {
+          <small class="text-red-500 mt-1 block">
+            {{ getErrorMessage('maximum') }}
+          </small>
+        }
+      </div>
+    </div>
+
+    <!-- Range Validation Error -->
+    @if (hasRangeError()) {
+      <div class="error-card">
+        <div class="flex items-center gap-2">
+          <i class="pi pi-exclamation-circle"></i>
+          <span class="text-sm">
+            La distancia máxima debe ser mayor que la mínima
+          </span>
+        </div>
+      </div>
+    }
+
+    <!-- Pricing Section -->
+    <div class="grid grid-cols-2 gap-4">
+      <!-- Customer Charge -->
+      <div>
+        <label for="customerCharge" class="block mb-2 font-medium">
+          Cobro Cliente (L) <span class="text-red-500">*</span>
+        </label>
+        <p-inputNumber
+          inputId="customerCharge"
+          formControlName="customerCharge"
+          mode="currency"
+          currency="HNL"
+          locale="es-HN"
+          [minFractionDigits]="2"
+          [maxFractionDigits]="2"
+          [min]="0"
+          class="w-full"
+          [class.ng-invalid]="hasError('customerCharge')"
+          [class.ng-dirty]="hasError('customerCharge')"
+        />
+        @if (hasError('customerCharge')) {
+          <small class="text-red-500 mt-1 block">
+            {{ getErrorMessage('customerCharge') }}
+          </small>
+        }
+        <small class="text-gray-500 mt-1 block">
+          Monto que se cobrará al cliente
+        </small>
+      </div>
+
+      <!-- Delivery Payment -->
+      <div>
+        <label for="deliveryPayment" class="block mb-2 font-medium">
+          Pago Delivery (L) <span class="text-red-500">*</span>
+        </label>
+        <p-inputNumber
+          inputId="deliveryPayment"
+          formControlName="deliveryPayment"
+          mode="currency"
+          currency="HNL"
+          locale="es-HN"
+          [minFractionDigits]="2"
+          [maxFractionDigits]="2"
+          [min]="0"
+          class="w-full"
+          [class.ng-invalid]="hasError('deliveryPayment')"
+          [class.ng-dirty]="hasError('deliveryPayment')"
+        />
+        @if (hasError('deliveryPayment')) {
+          <small class="text-red-500 mt-1 block">
+            {{ getErrorMessage('deliveryPayment') }}
+          </small>
+        }
+        <small class="text-gray-500 mt-1 block">
+          Monto que recibirá el repartidor
+        </small>
+      </div>
+    </div>
+
+    <!-- Active Status -->
+    <div class="flex items-center gap-2">
+      <p-checkbox
+        inputId="active"
+        formControlName="active"
+        [binary]="true"
+      />
+      <label for="active" class="font-medium">Escala Activa</label>
+    </div>
+
+    <!-- Info Message -->
+    <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+      <div class="flex items-start gap-2 text-blue-700">
+        <i class="pi pi-info-circle mt-0.5"></i>
+        <div class="text-sm">
+          <p class="font-medium mb-1">Información:</p>
+          <ul class="list-disc list-inside space-y-1">
+            <li>Las escalas definen el cobro por entrega según la distancia</li>
+            <li>No deben existir rangos superpuestos</li>
+            <li>Los rangos deben ser consecutivos para cubrir todas las distancias</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <ng-template #footer>
+    <div class="flex justify-end gap-2">
+      <p-button
+        label="Cancelar"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="handleClose()"
+        [disabled]="isSaving()"
+      />
+      <p-button
+        [label]="mode() === 'create' ? 'Crear' : 'Guardar'"
+        icon="pi pi-check"
+        (onClick)="onSubmit()"
+        [loading]="isSaving()"
+        [disabled]="form.invalid"
+      />
+    </div>
+  </ng-template>
+</p-dialog>

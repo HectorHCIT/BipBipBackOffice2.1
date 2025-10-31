@@ -1,0 +1,730 @@
+<div class="p-4">
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-4">
+    <h3 class="text-lg font-semibold text-gray-800">
+      Configuraciones Operacionales
+    </h3>
+    <p-button
+      label="Guardar"
+      icon="pi pi-save"
+      (onClick)="onSubmit()"
+      [loading]="isSaving()"
+      [disabled]="form.invalid || isLoading()"
+    />
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="flex justify-center items-center py-8">
+      <i class="pi pi-spin pi-spinner text-4xl text-primary"></i>
+    </div>
+  } @else {
+    <form [formGroup]="form" class="flex flex-col gap-6">
+
+      <!-- General Information Section -->
+      <fieldset class="border border-gray-300 rounded-lg p-4">
+        <legend class="text-base font-semibold text-gray-700 px-2">Información General</legend>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Restaurant Code -->
+          <div class="flex flex-col gap-2">
+            <label for="restaurantCode" class="text-sm font-medium text-gray-700">
+              Código de Restaurante
+            </label>
+            <input
+              pInputText
+              id="restaurantCode"
+              formControlName="restaurantCode"
+              placeholder="Ej: REST001"
+            />
+          </div>
+
+          <!-- Neighborhood -->
+          <div class="flex flex-col gap-2">
+            <label for="neighborhood" class="text-sm font-medium text-gray-700">
+              Barrio / Colonia
+            </label>
+            <input
+              pInputText
+              id="neighborhood"
+              formControlName="neighborhood"
+              placeholder="Ej: Centro"
+            />
+          </div>
+
+          <!-- Preparing Time -->
+          <div class="flex flex-col gap-2">
+            <label for="preparingTime" class="text-sm font-medium text-gray-700">
+              Tiempo de Preparación (minutos)
+            </label>
+            <p-inputnumber
+              inputId="preparingTime"
+              formControlName="preparingTime"
+              [min]="0"
+              [showButtons]="true"
+              suffix=" min"
+            />
+            @if (hasError('preparingTime')) {
+              <small class="text-red-600">{{ getErrorMessage('preparingTime') }}</small>
+            }
+          </div>
+
+          <!-- Status Toggles -->
+          <div class="flex flex-col gap-3">
+            <div class="flex items-center gap-2">
+              <p-checkbox
+                inputId="active"
+                formControlName="active"
+                [binary]="true"
+              />
+              <label for="active" class="text-sm font-medium text-gray-700">
+                Restaurante Activo
+              </label>
+            </div>
+            <div class="flex items-center gap-2">
+              <p-checkbox
+                inputId="publish"
+                formControlName="publish"
+                [binary]="true"
+              />
+              <label for="publish" class="text-sm font-medium text-gray-700">
+                Publicado
+              </label>
+            </div>
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- Order Configuration Section -->
+      <fieldset class="border border-gray-300 rounded-lg p-4">
+        <legend class="text-base font-semibold text-gray-700 px-2">Configuración de Pedidos</legend>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Multi Order Quantity -->
+          <div class="flex flex-col gap-2">
+            <label for="cantMultiOrder" class="text-sm font-medium text-gray-700">
+              Cantidad Multi-Orden <span class="text-red-500">*</span>
+            </label>
+            <p-inputnumber
+              inputId="cantMultiOrder"
+              formControlName="cantMultiOrder"
+              [min]="1"
+              [showButtons]="true"
+            />
+            @if (hasError('cantMultiOrder')) {
+              <small class="text-red-600">{{ getErrorMessage('cantMultiOrder') }}</small>
+            }
+          </div>
+
+          <!-- Minimum Next Order -->
+          <div class="flex flex-col gap-2">
+            <label for="minNextOrder" class="text-sm font-medium text-gray-700">
+              Mínimo Próximo Pedido <span class="text-red-500">*</span>
+            </label>
+            <p-inputnumber
+              inputId="minNextOrder"
+              formControlName="minNextOrder"
+              [min]="0"
+              [showButtons]="true"
+            />
+            @if (hasError('minNextOrder')) {
+              <small class="text-red-600">{{ getErrorMessage('minNextOrder') }}</small>
+            }
+          </div>
+
+          <!-- Maximum Products -->
+          <div class="flex flex-col gap-2">
+            <label for="maxProducts" class="text-sm font-medium text-gray-700">
+              Productos Máximos por Pedido <span class="text-red-500">*</span>
+            </label>
+            <p-inputnumber
+              inputId="maxProducts"
+              formControlName="maxProducts"
+              [min]="1"
+              [showButtons]="true"
+            />
+            @if (hasError('maxProducts')) {
+              <small class="text-red-600">{{ getErrorMessage('maxProducts') }}</small>
+            }
+          </div>
+
+          <!-- Maximum Wait Time -->
+          <div class="flex flex-col gap-2">
+            <label for="orderMaxAwaitTime" class="text-sm font-medium text-gray-700">
+              Tiempo Máximo de Espera (minutos) <span class="text-red-500">*</span>
+            </label>
+            <p-inputnumber
+              inputId="orderMaxAwaitTime"
+              formControlName="orderMaxAwaitTime"
+              [min]="1"
+              [showButtons]="true"
+              suffix=" min"
+            />
+            @if (hasError('orderMaxAwaitTime')) {
+              <small class="text-red-600">{{ getErrorMessage('orderMaxAwaitTime') }}</small>
+            }
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- Payment Configuration Section -->
+      <fieldset class="border border-gray-300 rounded-lg p-4">
+        <legend class="text-base font-semibold text-gray-700 px-2">Configuración de Pagos</legend>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Allow BipPay -->
+          <div class="flex items-center gap-2">
+            <p-checkbox
+              inputId="allowBipPay"
+              formControlName="allowBipPay"
+              [binary]="true"
+            />
+            <label for="allowBipPay" class="text-sm font-medium text-gray-700">
+              Permitir BipPay
+            </label>
+          </div>
+
+          <!-- POS GC BPay Code -->
+          <div class="flex flex-col gap-2">
+            <label for="codePosGCBPay" class="text-sm font-medium text-gray-700">
+              Código POS GC BPay
+            </label>
+            <input
+              pInputText
+              id="codePosGCBPay"
+              formControlName="codePosGCBPay"
+              placeholder="Código POS"
+            />
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- Delivery Configuration Section -->
+      <fieldset class="border border-gray-300 rounded-lg p-4">
+        <legend class="text-base font-semibold text-gray-700 px-2">Configuración de Delivery</legend>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Client Delivery Radius 1 -->
+          <div class="flex flex-col gap-2">
+            <label for="radioClientDelivery1" class="text-sm font-medium text-gray-700">
+              Radio de Entrega Cliente 1 (km) <span class="text-red-500">*</span>
+            </label>
+            <p-inputnumber
+              inputId="radioClientDelivery1"
+              formControlName="radioClientDelivery1"
+              [min]="0"
+              [minFractionDigits]="1"
+              [maxFractionDigits]="2"
+              [showButtons]="true"
+              suffix=" km"
+            />
+            @if (hasError('radioClientDelivery1')) {
+              <small class="text-red-600">{{ getErrorMessage('radioClientDelivery1') }}</small>
+            }
+          </div>
+
+          <!-- Client Delivery Radius 2 -->
+          <div class="flex flex-col gap-2">
+            <label for="radioClientDelivery2" class="text-sm font-medium text-gray-700">
+              Radio de Entrega Cliente 2 (km) <span class="text-red-500">*</span>
+            </label>
+            <p-inputnumber
+              inputId="radioClientDelivery2"
+              formControlName="radioClientDelivery2"
+              [min]="0"
+              [minFractionDigits]="1"
+              [maxFractionDigits]="2"
+              [showButtons]="true"
+              suffix=" km"
+            />
+            @if (hasError('radioClientDelivery2')) {
+              <small class="text-red-600">{{ getErrorMessage('radioClientDelivery2') }}</small>
+            }
+          </div>
+
+          <!-- Express Shipping Value -->
+          <div class="flex flex-col gap-2">
+            <label for="expressShippingValue" class="text-sm font-medium text-gray-700">
+              Valor Envío Express (L) <span class="text-red-500">*</span>
+            </label>
+            <p-inputnumber
+              inputId="expressShippingValue"
+              formControlName="expressShippingValue"
+              [min]="0"
+              [minFractionDigits]="2"
+              [maxFractionDigits]="2"
+              [showButtons]="true"
+              prefix="L "
+            />
+            @if (hasError('expressShippingValue')) {
+              <small class="text-red-600">{{ getErrorMessage('expressShippingValue') }}</small>
+            }
+          </div>
+
+          <!-- Express Fee Driver -->
+          <div class="flex flex-col gap-2">
+            <label for="expressFeeDriver" class="text-sm font-medium text-gray-700">
+              Tarifa Express Conductor (L) <span class="text-red-500">*</span>
+            </label>
+            <p-inputnumber
+              inputId="expressFeeDriver"
+              formControlName="expressFeeDriver"
+              [min]="0"
+              [minFractionDigits]="2"
+              [maxFractionDigits]="2"
+              [showButtons]="true"
+              prefix="L "
+            />
+            @if (hasError('expressFeeDriver')) {
+              <small class="text-red-600">{{ getErrorMessage('expressFeeDriver') }}</small>
+            }
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- Advanced Features Section -->
+      <fieldset class="border border-gray-300 rounded-lg p-4">
+        <legend class="text-base font-semibold text-gray-700 px-2">Características Avanzadas</legend>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Enable Signal Service -->
+          <div class="flex items-center gap-2">
+            <p-checkbox
+              inputId="enableSignalService"
+              formControlName="enableSignalService"
+              [binary]="true"
+            />
+            <label for="enableSignalService" class="text-sm font-medium text-gray-700">
+              Habilitar Servicio de Señalización
+            </label>
+          </div>
+
+          <!-- Apply Dynamic Value -->
+          <div class="flex items-center gap-2">
+            <p-checkbox
+              inputId="applyDynamicValue"
+              formControlName="applyDynamicValue"
+              [binary]="true"
+            />
+            <label for="applyDynamicValue" class="text-sm font-medium text-gray-700">
+              Aplicar Valor Dinámico
+            </label>
+          </div>
+
+          <!-- Dynamic Value Customer -->
+          <div class="flex flex-col gap-2">
+            <label for="dynamicValueCustomer" class="text-sm font-medium text-gray-700">
+              Valor Dinámico Cliente (L)
+            </label>
+            <p-inputnumber
+              inputId="dynamicValueCustomer"
+              formControlName="dynamicValueCustomer"
+              [min]="0"
+              [minFractionDigits]="2"
+              [maxFractionDigits]="2"
+              [showButtons]="true"
+              prefix="L "
+            />
+            @if (hasError('dynamicValueCustomer')) {
+              <small class="text-red-600">{{ getErrorMessage('dynamicValueCustomer') }}</small>
+            }
+          </div>
+
+          <!-- Dynamic Value Driver -->
+          <div class="flex flex-col gap-2">
+            <label for="dynamicValueDriver" class="text-sm font-medium text-gray-700">
+              Valor Dinámico Conductor (L)
+            </label>
+            <p-inputnumber
+              inputId="dynamicValueDriver"
+              formControlName="dynamicValueDriver"
+              [min]="0"
+              [minFractionDigits]="2"
+              [maxFractionDigits]="2"
+              [showButtons]="true"
+              prefix="L "
+            />
+            @if (hasError('dynamicValueDriver')) {
+              <small class="text-red-600">{{ getErrorMessage('dynamicValueDriver') }}</small>
+            }
+          </div>
+
+          <!-- BPay Dev Mode -->
+          <div class="flex items-center gap-2">
+            <p-checkbox
+              inputId="bPayDev"
+              formControlName="bPayDev"
+              [binary]="true"
+            />
+            <label for="bPayDev" class="text-sm font-medium text-gray-700">
+              Modo Desarrollo BPay
+            </label>
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- Schedule Configs Section -->
+      <fieldset class="border border-gray-300 rounded-lg p-4">
+        <div class="flex justify-between items-center mb-3">
+          <legend class="text-base font-semibold text-gray-700">
+            Configuraciones de Tiempo por Canal
+          </legend>
+          <p-button
+            label="Agregar"
+            icon="pi pi-plus"
+            size="small"
+            (onClick)="openScheduleDialog()"
+          />
+        </div>
+
+        <p-table [value]="scheduleConfigs()" [tableStyle]="{'min-width': '100%'}">
+          <ng-template #header>
+            <tr>
+              <th>Canal</th>
+              <th>Tiempo (min)</th>
+              <th>Estado</th>
+              <th style="width: 100px">Acciones</th>
+            </tr>
+          </ng-template>
+          <ng-template #body let-config let-rowIndex="rowIndex">
+            <tr>
+              <td>{{ getChannelName(config.channelId) }}</td>
+              <td>{{ config.time }} minutos</td>
+              <td>
+                <span [class]="config.active ? 'text-green-600' : 'text-gray-400'">
+                  {{ config.active ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td>
+                <p-button
+                  icon="pi pi-trash"
+                  severity="danger"
+                  [outlined]="true"
+                  size="small"
+                  (onClick)="deleteScheduleConfig(rowIndex)"
+                  [title]="'Eliminar'"
+                />
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template #emptymessage>
+            <tr>
+              <td colspan="4" class="text-center text-gray-500 py-4">
+                No hay configuraciones de tiempo por canal
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </fieldset>
+
+      <!-- Driver Radius Configs Section -->
+      <fieldset class="border border-gray-300 rounded-lg p-4">
+        <div class="flex justify-between items-center mb-3">
+          <legend class="text-base font-semibold text-gray-700">
+            Configuraciones de Radio de Conductor
+          </legend>
+          <p-button
+            label="Agregar"
+            icon="pi pi-plus"
+            size="small"
+            (onClick)="openDriverRadiusDialog()"
+          />
+        </div>
+
+        <p-table [value]="driverRadiusConfigs()" [tableStyle]="{'min-width': '100%'}">
+          <ng-template #header>
+            <tr>
+              <th>Canal</th>
+              <th>Radio (m)</th>
+              <th>Tipo</th>
+              <th style="width: 100px">Acciones</th>
+            </tr>
+          </ng-template>
+          <ng-template #body let-config let-rowIndex="rowIndex">
+            <tr>
+              <td>{{ getChannelName(config.channelId) }}</td>
+              <td>{{ config.radius }}m</td>
+              <td>{{ config.typeRadius === 'R' ? 'Restaurante' : 'Cliente' }}</td>
+              <td>
+                <p-button
+                  icon="pi pi-trash"
+                  severity="danger"
+                  [outlined]="true"
+                  size="small"
+                  (onClick)="deleteDriverRadiusConfig(rowIndex)"
+                  [title]="'Eliminar'"
+                />
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template #emptymessage>
+            <tr>
+              <td colspan="4" class="text-center text-gray-500 py-4">
+                No hay configuraciones de radio de conductor
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </fieldset>
+
+      <!-- Payment Configs Section with Paginator -->
+      <fieldset class="border border-gray-300 rounded-lg p-4">
+        <div class="flex justify-between items-center mb-3">
+          <legend class="text-base font-semibold text-gray-700">
+            Configuraciones de Métodos de Pago
+          </legend>
+          <p-button
+            label="Agregar"
+            icon="pi pi-plus"
+            size="small"
+            (onClick)="openPaymentDialog()"
+          />
+        </div>
+
+        <p-table
+          [value]="paymentConfigs()"
+          [tableStyle]="{'min-width': '100%'}"
+          [paginator]="true"
+          [rows]="10"
+          [showCurrentPageReport]="true"
+          currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} registros"
+        >
+          <ng-template #header>
+            <tr>
+              <th>Canal</th>
+              <th>Método de Pago</th>
+              <th>Órdenes Máximas</th>
+              <th>Monto Efectivo</th>
+              <th style="width: 100px">Acciones</th>
+            </tr>
+          </ng-template>
+          <ng-template #body let-config let-rowIndex="rowIndex">
+            <tr>
+              <td>{{ getChannelName(config.channelId) }}</td>
+              <td>{{ getPaymentMethodName(config.paymentMethodId) }}</td>
+              <td>{{ config.maxOrders }}</td>
+              <td>{{ config.cashAmount }}</td>
+              <td>
+                <p-button
+                  icon="pi pi-trash"
+                  severity="danger"
+                  [outlined]="true"
+                  size="small"
+                  (onClick)="deletePaymentConfig(rowIndex)"
+                  [title]="'Eliminar'"
+                />
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template #emptymessage>
+            <tr>
+              <td colspan="5" class="text-center text-gray-500 py-4">
+                No hay configuraciones de métodos de pago
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </fieldset>
+
+      <!-- Footer Actions -->
+      <div class="flex justify-end gap-2 pt-4 border-t border-gray-200">
+        <p-button
+          label="Guardar Configuración"
+          icon="pi pi-save"
+          (onClick)="onSubmit()"
+          [loading]="isSaving()"
+          [disabled]="form.invalid"
+        />
+      </div>
+    </form>
+
+    <!-- Schedule Config Dialog -->
+    <p-dialog
+      [visible]="showScheduleDialog()"
+      [modal]="true"
+      [style]="{ width: '450px' }"
+      header="Agregar Configuración de Tiempo"
+      (onHide)="closeScheduleDialog()"
+    >
+      <form [formGroup]="scheduleDialogForm" class="flex flex-col gap-4">
+        <div class="flex flex-col gap-2">
+          <label for="scheduleChannel" class="text-sm font-medium">Canal <span class="text-red-500">*</span></label>
+          <p-select
+            inputId="scheduleChannel"
+            formControlName="channelId"
+            [options]="channels()"
+            optionLabel="description"
+            optionValue="id"
+            placeholder="Seleccione un canal"
+          />
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <label for="scheduleTime" class="text-sm font-medium">Tiempo (minutos) <span class="text-red-500">*</span></label>
+          <p-inputnumber
+            inputId="scheduleTime"
+            formControlName="time"
+            [min]="1"
+            [showButtons]="true"
+            suffix=" min"
+          />
+        </div>
+
+        <div class="flex items-center gap-2">
+          <p-checkbox
+            inputId="scheduleActive"
+            formControlName="active"
+            [binary]="true"
+          />
+          <label for="scheduleActive" class="text-sm font-medium">Activo</label>
+        </div>
+      </form>
+
+      <ng-template #footer>
+        <p-button
+          label="Cancelar"
+          [outlined]="true"
+          severity="secondary"
+          (onClick)="closeScheduleDialog()"
+        />
+        <p-button
+          label="Agregar"
+          (onClick)="onScheduleDialogSave()"
+          [disabled]="scheduleDialogForm.invalid"
+        />
+      </ng-template>
+    </p-dialog>
+
+    <!-- Driver Radius Config Dialog -->
+    <p-dialog
+      [visible]="showDriverRadiusDialog()"
+      [modal]="true"
+      [style]="{ width: '450px' }"
+      header="Agregar Configuración de Radio"
+      (onHide)="closeDriverRadiusDialog()"
+    >
+      <form [formGroup]="driverRadiusDialogForm" class="flex flex-col gap-4">
+        <div class="flex flex-col gap-2">
+          <label for="radiusChannel" class="text-sm font-medium">Canal <span class="text-red-500">*</span></label>
+          <p-select
+            inputId="radiusChannel"
+            formControlName="channelId"
+            [options]="channels()"
+            optionLabel="description"
+            optionValue="id"
+            placeholder="Seleccione un canal"
+          />
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <label for="radius" class="text-sm font-medium">Radio (metros) <span class="text-red-500">*</span></label>
+          <p-inputnumber
+            inputId="radius"
+            formControlName="radius"
+            [min]="1"
+            [showButtons]="true"
+            suffix=" m"
+          />
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <label for="typeRadius" class="text-sm font-medium">Tipo <span class="text-red-500">*</span></label>
+          <p-select
+            inputId="typeRadius"
+            formControlName="typeRadius"
+            [options]="[
+              { label: 'Restaurante', value: 'R' },
+              { label: 'Cliente', value: 'C' }
+            ]"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Seleccione tipo"
+          />
+        </div>
+      </form>
+
+      <ng-template #footer>
+        <p-button
+          label="Cancelar"
+          [outlined]="true"
+          severity="secondary"
+          (onClick)="closeDriverRadiusDialog()"
+        />
+        <p-button
+          label="Agregar"
+          (onClick)="onDriverRadiusDialogSave()"
+          [disabled]="driverRadiusDialogForm.invalid"
+        />
+      </ng-template>
+    </p-dialog>
+
+    <!-- Payment Config Dialog -->
+    <p-dialog
+      [visible]="showPaymentDialog()"
+      [modal]="true"
+      [style]="{ width: '450px' }"
+      header="Agregar Configuración de Pago"
+      (onHide)="closePaymentDialog()"
+    >
+      <form [formGroup]="paymentDialogForm" class="flex flex-col gap-4">
+        <div class="flex flex-col gap-2">
+          <label for="paymentChannel" class="text-sm font-medium">Canal <span class="text-red-500">*</span></label>
+          <p-select
+            inputId="paymentChannel"
+            formControlName="channelId"
+            [options]="channels()"
+            optionLabel="description"
+            optionValue="id"
+            placeholder="Seleccione un canal"
+          />
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <label for="paymentMethod" class="text-sm font-medium">Método de Pago <span class="text-red-500">*</span></label>
+          <p-select
+            inputId="paymentMethod"
+            formControlName="paymentMethodId"
+            [options]="paymentMethods()"
+            optionLabel="name"
+            optionValue="id"
+            placeholder="Seleccione método"
+          />
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <label for="maxOrders" class="text-sm font-medium">Órdenes Máximas <span class="text-red-500">*</span></label>
+          <p-inputnumber
+            inputId="maxOrders"
+            formControlName="maxOrders"
+            [min]="0"
+            [showButtons]="true"
+          />
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <label for="cashAmount" class="text-sm font-medium">Monto Efectivo <span class="text-red-500">*</span></label>
+          <p-inputnumber
+            inputId="cashAmount"
+            formControlName="cashAmount"
+            [min]="0"
+            [showButtons]="true"
+          />
+        </div>
+      </form>
+
+      <ng-template #footer>
+        <p-button
+          label="Cancelar"
+          [outlined]="true"
+          severity="secondary"
+          (onClick)="closePaymentDialog()"
+        />
+        <p-button
+          label="Agregar"
+          (onClick)="onPaymentDialogSave()"
+          [disabled]="paymentDialogForm.invalid"
+        />
+      </ng-template>
+    </p-dialog>
+  }
+</div>

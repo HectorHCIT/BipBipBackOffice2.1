@@ -80,31 +80,25 @@
         </div>
       </p-tabpanel>
 
-      <!-- Tab 3: Schedules (Coming soon) -->
+      <!-- Tab 3: Schedules -->
       <p-tabpanel value="2">
-        <div class="p-4 text-center text-gray-500">
-          <i class="pi pi-clock text-4xl mb-3 block"></i>
-          <p class="text-lg font-semibold">Horarios de Atención</p>
-          <p class="text-sm">Próximamente...</p>
-        </div>
+        @if (restaurantId()) {
+          <app-schedule-tab [restaurantId]="restaurantId()!" />
+        }
       </p-tabpanel>
 
-      <!-- Tab 4: Scale (Coming soon) -->
+      <!-- Tab 4: Scale -->
       <p-tabpanel value="3">
-        <div class="p-4 text-center text-gray-500">
-          <i class="pi pi-money-bill text-4xl mb-3 block"></i>
-          <p class="text-lg font-semibold">Escalas de Precio</p>
-          <p class="text-sm">Próximamente...</p>
-        </div>
+        @if (restaurantId()) {
+          <app-scale-tab [restaurantId]="restaurantId()!" />
+        }
       </p-tabpanel>
 
-      <!-- Tab 5: Configs (Coming soon) -->
+      <!-- Tab 5: Configurations -->
       <p-tabpanel value="4">
-        <div class="p-4 text-center text-gray-500">
-          <i class="pi pi-cog text-4xl mb-3 block"></i>
-          <p class="text-lg font-semibold">Configuraciones Operacionales</p>
-          <p class="text-sm">Próximamente...</p>
-        </div>
+        @if (restaurantId()) {
+          <app-config-tab [restaurantId]="restaurantId()!" />
+        }
       </p-tabpanel>
     </p-tabpanels>
   </p-tabs>

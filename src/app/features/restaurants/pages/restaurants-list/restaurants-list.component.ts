@@ -134,7 +134,16 @@ export class RestaurantsListComponent implements OnInit {
    * Handle page change event from paginator
    */
   onPageChange(event: any): void {
-    this.restaurantService.currentPage.set(event.page);
+    // Check if page size changed
+    if (event.rows !== this.pageSize()) {
+      // Page size changed - reset to first page
+      this.restaurantService.pageSize.set(event.rows);
+      this.restaurantService.currentPage.set(0);
+    } else {
+      // Just page number changed
+      this.restaurantService.currentPage.set(event.page);
+    }
+
     this.loadRestaurants();
   }
 

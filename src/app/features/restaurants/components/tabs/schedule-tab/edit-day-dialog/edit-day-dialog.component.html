@@ -1,0 +1,99 @@
+<p-dialog
+  [visible]="visible()"
+  [modal]="true"
+  [closable]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '90vw', 'max-width': '35rem' }"
+  (onHide)="handleClose()"
+>
+  <ng-template #header>
+    <div class="flex items-center gap-3">
+      <i class="pi pi-clock text-2xl text-primary"></i>
+      <div>
+        <span class="font-semibold text-lg block">Editar Horario</span>
+        <span class="text-sm text-gray-600">{{ dayName() }} - {{ channelName() }}</span>
+      </div>
+    </div>
+  </ng-template>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
+    <!-- Time Selection -->
+    <div class="flex flex-col sm:grid sm:grid-cols-2 gap-4">
+      <!-- Start Time -->
+      <div class="flex-1 min-w-0">
+        <label for="startTime" class="block mb-2 font-medium text-sm">
+          Hora Inicio <span class="text-red-500">*</span>
+        </label>
+        <p-datepicker
+          inputId="startTime"
+          formControlName="startTime"
+          [timeOnly]="true"
+          hourFormat="12"
+          [showIcon]="true"
+          iconDisplay="input"
+          placeholder="HH:MM AM/PM"
+          class="w-full"
+          appendTo="body"
+        />
+      </div>
+
+      <!-- End Time -->
+      <div class="flex-1 min-w-0">
+        <label for="endTime" class="block mb-2 font-medium text-sm">
+          Hora Fin <span class="text-red-500">*</span>
+        </label>
+        <p-datepicker
+          inputId="endTime"
+          formControlName="endTime"
+          [timeOnly]="true"
+          hourFormat="12"
+          [showIcon]="true"
+          iconDisplay="input"
+          placeholder="HH:MM AM/PM"
+          class="w-full"
+          appendTo="body"
+        />
+      </div>
+    </div>
+
+    <!-- Error Message -->
+    @if (hasError()) {
+      <div class="error-card">
+        <div class="flex items-center gap-2">
+          <i class="pi pi-exclamation-circle"></i>
+          <span class="text-sm">{{ errorMessage() }}</span>
+        </div>
+      </div>
+    }
+
+    <!-- Info Message -->
+    <div class="info-card">
+      <div class="flex items-start gap-2">
+        <i class="pi pi-info-circle mt-0.5"></i>
+        <div class="text-sm">
+          <p>Configure el horario de atención para este día específico.</p>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <ng-template #footer>
+    <div class="flex justify-end gap-2">
+      <p-button
+        label="Cancelar"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="handleClose()"
+        type="button"
+      />
+      <p-button
+        label="Guardar"
+        icon="pi pi-check"
+        (onClick)="onSubmit()"
+        [disabled]="form.invalid || hasError()"
+        type="button"
+      />
+    </div>
+  </ng-template>
+</p-dialog>
