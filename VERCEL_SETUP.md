@@ -67,7 +67,9 @@ El proceso de build en Vercel ejecuta automáticamente:
 1. `npm install` - Instala las dependencias
 2. `npm run build:prod` - Ejecuta el build de producción
    - Esto ejecuta automáticamente `npm run generate:env:prod` (prebuild hook)
-   - El script `generate-env.js` crea el archivo `src/environments/environment.ts` con las variables de entorno configuradas en Vercel
+   - El script `generate-env.js` detecta que está en un entorno CI/CD (no encuentra `.env.prod`)
+   - Usa automáticamente las variables de entorno del sistema (`process.env`) que Vercel proporciona
+   - Crea el archivo `src/environments/environment.ts` con todas las variables configuradas
 
 ## Deployment
 
@@ -120,7 +122,7 @@ Si el nombre del proyecto cambia en `angular.json`, actualiza también el `outpu
 
 ### Error: No se encontró el archivo .env
 
-El script `generate-env.js` intenta leer archivos `.env` localmente. En Vercel, las variables se pasan directamente como variables de entorno del sistema, por lo que el script creará el archivo `environment.ts` usando `process.env`.
+✅ **Este es el comportamiento esperado en Vercel**. El script `generate-env.js` detecta automáticamente que está en un entorno CI/CD cuando no encuentra archivos `.env` y usa las variables de entorno del sistema (`process.env`) proporcionadas por Vercel.
 
 ### Build fallido
 

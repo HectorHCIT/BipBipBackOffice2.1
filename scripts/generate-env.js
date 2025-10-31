@@ -1,12 +1,14 @@
 /**
- * Script para generar environment.ts desde variables de entorno .env
+ * Script para generar environment.ts desde variables de entorno .env o process.env
  *
- * Este script lee el archivo .env y genera el archivo src/environments/environment.ts
- * con las variables de entorno correspondientes.
+ * Este script lee el archivo .env (si existe) o las variables de entorno del sistema
+ * y genera el archivo src/environments/environment.ts con las variables correspondientes.
  *
  * Uso:
- *   node scripts/generate-env.js
- *   node scripts/generate-env.js --prod (para usar .env.prod)
+ *   node scripts/generate-env.js           (usa .env o process.env)
+ *   node scripts/generate-env.js --prod    (usa .env.prod o process.env)
+ *
+ * En entornos CI/CD como Vercel, usa automáticamente las variables del sistema.
  */
 
 const fs = require('fs');
@@ -17,32 +19,38 @@ const isProd = process.argv.includes('--prod');
 const envFile = isProd ? '.env.prod' : '.env';
 const envPath = path.join(__dirname, '..', envFile);
 
-console.log(`📝 Generando environment.ts desde ${envFile}...`);
-
-// Verificar que existe el archivo .env
-if (!fs.existsSync(envPath)) {
-  console.error(`❌ Error: No se encontró el archivo ${envFile}`);
-  console.error(`   Crea el archivo ${envFile} en la raíz del proyecto`);
-  process.exit(1);
-}
-
-// Leer archivo .env
-const envContent = fs.readFileSync(envPath, 'utf-8');
+console.log(`📝 Generando environment.ts...`);
 
 // Parsear variables de entorno
-const envVars = {};
-envContent.split('\n').forEach(line => {
-  // Ignorar comentarios y líneas vacías
-  if (line.trim() === '' || line.trim().startsWith('#')) {
-    return;
-  }
+let envVars = {};
+let source = 'process.env (variables del sistema)';
 
-  const [key, ...valueParts] = line.split('=');
-  if (key && valueParts.length > 0) {
-    const value = valueParts.join('=').trim();
-    envVars[key.trim()] = value;
-  }
-});
+// Intentar leer archivo .env si existe
+if (fs.existsSync(envPath)) {
+  console.log(`📄 Leyendo desde archivo: ${envFile}`);
+  source = envFile;
+
+  const envContent = fs.readFileSync(envPath, 'utf-8');
+  envContent.split('\n').forEach(line => {
+    // Ignorar comentarios y líneas vacías
+    if (line.trim() === '' || line.trim().startsWith('#')) {
+      return;
+    }
+
+    const [key, ...valueParts] = line.split('=');
+    if (key && valueParts.length > 0) {
+      const value = valueParts.join('=').trim();
+      envVars[key.trim()] = value;
+    }
+  });
+} else {
+  // En CI/CD (como Vercel), usar las variables de entorno del sistema
+  console.log(`⚙️  Archivo ${envFile} no encontrado, usando variables del sistema`);
+  console.log(`🔧 Modo CI/CD detectado`);
+
+  // Usar process.env directamente
+  envVars = process.env;
+}
 
 // Función helper para obtener valor o string vacío
 const getEnvValue = (key) => {
@@ -58,12 +66,12 @@ const environmentContent = `/**
  * 🚨 ESTE ARCHIVO ES GENERADO AUTOMÁTICAMENTE
  * 🚨 NO EDITAR MANUALMENTE
  *
- * Generado desde: ${envFile}
+ * Generado desde: ${source}
  * Fecha: ${new Date().toISOString()}
  *
  * Para modificar las variables de entorno:
- * 1. Edita el archivo ${envFile}
- * 2. Ejecuta: npm run generate:env
+ * - Desarrollo local: Edita el archivo ${envFile} y ejecuta npm run generate:env
+ * - Vercel/CI: Configura las variables en el dashboard del servicio
  */
 
 export const environment = {
