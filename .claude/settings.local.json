@@ -10,7 +10,8 @@
       "Bash(npx tsc:*)",
       "Bash(cat:*)",
       "Bash(git log:*)",
-      "Bash(npm view:*)"
+      "Bash(npm view:*)",
+      "Bash(curl:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
