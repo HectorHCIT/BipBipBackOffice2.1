@@ -4,7 +4,7 @@
   "devCommand": "npm run start",
   "installCommand": "npm install",
   "framework": "angular",
-  "outputDirectory": "dist/bip-bip-back-office2.1/browser",
+  "outputDirectory": "dist/BipBipBackOffice2.1/browser",
   "rewrites": [
     {
       "source": "/(.*)",
