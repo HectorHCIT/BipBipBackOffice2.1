@@ -1,0 +1,196 @@
+<div class="p-4">
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-4">
+    <h3 class="text-lg font-semibold text-gray-800">
+      Gestión de Zonas de Cobertura
+    </h3>
+  </div>
+
+  <!-- Info Message -->
+  <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+    <div class="flex items-start gap-2 text-blue-700">
+      <i class="pi pi-info-circle mt-0.5"></i>
+      <div class="text-sm">
+        <p class="font-medium mb-1">Zonas de Cobertura sin Mapa</p>
+        <p>Las zonas de cobertura definen el área de entrega del restaurante. El mapa interactivo se agregará próximamente. Por ahora, puede gestionar las zonas ingresando las coordenadas manualmente.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="flex justify-center items-center py-8">
+      <i class="pi pi-spin pi-spinner text-4xl text-primary"></i>
+    </div>
+  } @else {
+    <!-- Tabs for Restaurant vs Driver Zones -->
+    <p-tabs [value]="0">
+      <p-tablist>
+        <p-tab [value]="0">
+          <i class="pi pi-building mr-2"></i>
+          Zonas del Restaurante
+        </p-tab>
+        <p-tab [value]="1">
+          <i class="pi pi-car mr-2"></i>
+          Zonas del Conductor
+        </p-tab>
+      </p-tablist>
+
+      <p-tabpanels>
+        <!-- Restaurant Zones Tab -->
+        <p-tabpanel [value]="0">
+          <div class="flex justify-between items-center mb-4">
+            <p class="text-sm text-gray-600">
+              {{ restaurantZones().length }} zona(s) configurada(s)
+            </p>
+            <p-button
+              label="Agregar Zona"
+              icon="pi pi-plus"
+              (onClick)="openCreateDialog('restaurant')"
+            />
+          </div>
+
+          <p-table
+            [value]="restaurantZones()"
+            [tableStyle]="{'min-width': '100%'}"
+          >
+            <ng-template #header>
+              <tr>
+                <th>Nombre</th>
+                <th>Radio</th>
+                <th>Centro (Lat, Lon)</th>
+                <th>Monto Mínimo</th>
+                <th style="width: 150px">Acciones</th>
+              </tr>
+            </ng-template>
+            <ng-template #body let-zone>
+              <tr>
+                <td>
+                  <div class="flex items-center gap-2">
+                    <i class="pi pi-map-marker text-blue-600"></i>
+                    <span class="font-medium">{{ zone.zoneName }}</span>
+                  </div>
+                </td>
+                <td>{{ formatRadius(zone.zoneRadius) }}</td>
+                <td class="text-sm text-gray-600">{{ formatCoordinates(zone.zoneLat, zone.zoneLon) }}</td>
+                <td>L {{ zone.zoneMinAmount | number:'1.2-2' }}</td>
+                <td>
+                  <div class="flex gap-2">
+                    <p-button
+                      icon="pi pi-pencil"
+                      [outlined]="true"
+                      severity="secondary"
+                      size="small"
+                      (onClick)="openEditDialog(zone)"
+                      [title]="'Editar'"
+                    />
+                    <p-button
+                      icon="pi pi-trash"
+                      [outlined]="true"
+                      severity="danger"
+                      size="small"
+                      (onClick)="deleteZone(zone)"
+                      [title]="'Eliminar'"
+                    />
+                  </div>
+                </td>
+              </tr>
+            </ng-template>
+            <ng-template #emptymessage>
+              <tr>
+                <td colspan="5" class="text-center text-gray-500 py-8">
+                  <i class="pi pi-map-marker text-4xl mb-3 block text-gray-400"></i>
+                  <p class="font-medium">No hay zonas del restaurante configuradas</p>
+                  <p class="text-sm mt-1">Haga clic en "Agregar Zona" para crear una nueva zona de cobertura</p>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </p-tabpanel>
+
+        <!-- Driver Zones Tab -->
+        <p-tabpanel [value]="1">
+          <div class="flex justify-between items-center mb-4">
+            <p class="text-sm text-gray-600">
+              {{ driverZones().length }} zona(s) configurada(s)
+            </p>
+            <p-button
+              label="Agregar Zona"
+              icon="pi pi-plus"
+              (onClick)="openCreateDialog('driver')"
+            />
+          </div>
+
+          <p-table
+            [value]="driverZones()"
+            [tableStyle]="{'min-width': '100%'}"
+          >
+            <ng-template #header>
+              <tr>
+                <th>Nombre</th>
+                <th>Radio</th>
+                <th>Centro (Lat, Lon)</th>
+                <th>Monto Mínimo</th>
+                <th style="width: 150px">Acciones</th>
+              </tr>
+            </ng-template>
+            <ng-template #body let-zone>
+              <tr>
+                <td>
+                  <div class="flex items-center gap-2">
+                    <i class="pi pi-map-marker text-green-600"></i>
+                    <span class="font-medium">{{ zone.zoneName }}</span>
+                  </div>
+                </td>
+                <td>{{ formatRadius(zone.zoneRadius) }}</td>
+                <td class="text-sm text-gray-600">{{ formatCoordinates(zone.zoneLat, zone.zoneLon) }}</td>
+                <td>L {{ zone.zoneMinAmount | number:'1.2-2' }}</td>
+                <td>
+                  <div class="flex gap-2">
+                    <p-button
+                      icon="pi pi-pencil"
+                      [outlined]="true"
+                      severity="secondary"
+                      size="small"
+                      (onClick)="openEditDialog(zone)"
+                      [title]="'Editar'"
+                    />
+                    <p-button
+                      icon="pi pi-trash"
+                      [outlined]="true"
+                      severity="danger"
+                      size="small"
+                      (onClick)="deleteZone(zone)"
+                      [title]="'Eliminar'"
+                    />
+                  </div>
+                </td>
+              </tr>
+            </ng-template>
+            <ng-template #emptymessage>
+              <tr>
+                <td colspan="5" class="text-center text-gray-500 py-8">
+                  <i class="pi pi-car text-4xl mb-3 block text-gray-400"></i>
+                  <p class="font-medium">No hay zonas del conductor configuradas</p>
+                  <p class="text-sm mt-1">Haga clic en "Agregar Zona" para crear una nueva zona de cobertura</p>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
+  }
+
+  <!-- Zone Dialog -->
+  @if (showDialog()) {
+    <app-zone-dialog
+      [visible]="showDialog()"
+      [mode]="dialogMode()"
+      [zone]="editingZone()"
+      [isRestaurant]="selectedZoneType() === 'restaurant'"
+      (onClose)="closeDialog()"
+      (onSave)="onZoneSave($event)"
+    />
+  }
+</div>

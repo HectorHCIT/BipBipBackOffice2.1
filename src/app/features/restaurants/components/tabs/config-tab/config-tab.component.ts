@@ -7,7 +7,7 @@ import {
   ChangeDetectionStrategy
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 
 // PrimeNG
 import { ButtonModule } from 'primeng/button';
@@ -17,6 +17,7 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { TableModule } from 'primeng/table';
 import { DialogModule } from 'primeng/dialog';
 import { SelectModule } from 'primeng/select';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { MessageService } from 'primeng/api';
 
 import { RestaurantService } from '../../../services/restaurant.service';
@@ -36,13 +37,15 @@ import type {
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    FormsModule,
     ButtonModule,
     InputTextModule,
     InputNumberModule,
     CheckboxModule,
     TableModule,
     DialogModule,
-    SelectModule
+    SelectModule,
+    ToggleSwitchModule
   ],
   templateUrl: './config-tab.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -364,6 +367,17 @@ export class ConfigTabComponent implements OnInit {
   getPaymentMethodName(paymentMethodId: number): string {
     const method = this.paymentMethods().find(pm => pm.id === paymentMethodId);
     return method?.name || `Método ${paymentMethodId}`;
+  }
+
+  /**
+   * Toggle schedule config active status
+   */
+  toggleScheduleConfigActive(index: number, newValue: boolean): void {
+    const currentConfigs = this.scheduleConfigs();
+    const updatedConfigs = currentConfigs.map((config, i) =>
+      i === index ? { ...config, active: newValue } : config
+    );
+    this.scheduleConfigs.set(updatedConfigs);
   }
 
   /**

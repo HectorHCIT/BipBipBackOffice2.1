@@ -390,10 +390,11 @@
             <tr>
               <td>{{ getChannelName(config.channelId) }}</td>
               <td>{{ config.time }} minutos</td>
-              <td>
-                <span [class]="config.active ? 'text-green-600' : 'text-gray-400'">
-                  {{ config.active ? 'Activo' : 'Inactivo' }}
-                </span>
+              <td class="text-center">
+                <p-toggleswitch
+                  [ngModel]="config.active"
+                  (ngModelChange)="toggleScheduleConfigActive(rowIndex, $event)"
+                />
               </td>
               <td>
                 <p-button
@@ -639,6 +640,7 @@
             optionLabel="label"
             optionValue="value"
             placeholder="Seleccione tipo"
+            appendTo="body"
           />
         </div>
       </form>

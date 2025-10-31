@@ -71,13 +71,11 @@
         />
       </p-tabpanel>
 
-      <!-- Tab 2: Coverage (Coming soon) -->
+      <!-- Tab 2: Coverage -->
       <p-tabpanel value="1">
-        <div class="p-4 text-center text-gray-500">
-          <i class="pi pi-map-marker text-4xl mb-3 block"></i>
-          <p class="text-lg font-semibold">Gestión de Zonas de Cobertura</p>
-          <p class="text-sm">Próximamente...</p>
-        </div>
+        @if (restaurantId()) {
+          <app-coverage-tab [restaurantId]="restaurantId()!" />
+        }
       </p-tabpanel>
 
       <!-- Tab 3: Schedules -->

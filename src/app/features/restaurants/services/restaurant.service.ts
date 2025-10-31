@@ -28,6 +28,10 @@ import type {
   CreateConfigRequest,
   UpdateConfigRequest
 } from '../models/restaurant-config.model';
+import type {
+  CreateCoverageZoneRequest,
+  UpdateCoverageZoneRequest
+} from '../models/coverage-zone.model';
 
 @Injectable({
   providedIn: 'root'
@@ -309,5 +313,26 @@ export class RestaurantService {
         }
       })
     );
+  }
+
+  /**
+   * Create a new coverage zone
+   */
+  createCoverageZone(restId: number, data: CreateCoverageZoneRequest): Observable<any> {
+    return this.dataService.post$(`Restaurant/${restId}/zone`, data);
+  }
+
+  /**
+   * Update an existing coverage zone
+   */
+  updateCoverageZone(zoneId: number, restId: number, data: UpdateCoverageZoneRequest): Observable<any> {
+    return this.dataService.put$(`Restaurant/${restId}/zone/${zoneId}`, data);
+  }
+
+  /**
+   * Delete a coverage zone
+   */
+  deleteCoverageZone(zoneId: number): Observable<any> {
+    return this.dataService.delete$(`Restaurant/zone/${zoneId}`);
   }
 }

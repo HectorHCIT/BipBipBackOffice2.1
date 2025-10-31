@@ -8,7 +8,8 @@
       "Bash(ls:*)",
       "Bash(rm:*)",
       "Bash(npx tsc:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(git log:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

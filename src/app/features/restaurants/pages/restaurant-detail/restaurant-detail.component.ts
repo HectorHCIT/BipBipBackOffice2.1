@@ -21,6 +21,7 @@ import { InformationTabComponent } from '../../components/tabs/information-tab/i
 import { ScaleTabComponent } from '../../components/tabs/scale-tab/scale-tab.component';
 import { ScheduleTabComponent } from '../../components/tabs/schedule-tab/schedule-tab.component';
 import { ConfigTabComponent } from '../../components/tabs/config-tab/config-tab.component';
+import { CoverageTabComponent } from '../../components/tabs/coverage-tab/coverage-tab.component';
 
 @Component({
   selector: 'app-restaurant-detail',
@@ -32,6 +33,7 @@ import { ConfigTabComponent } from '../../components/tabs/config-tab/config-tab.
     ButtonModule,
     ToastModule,
     InformationTabComponent,
+    CoverageTabComponent,
     ScheduleTabComponent,
     ScaleTabComponent,
     ConfigTabComponent

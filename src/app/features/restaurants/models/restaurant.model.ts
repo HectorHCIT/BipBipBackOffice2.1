@@ -133,6 +133,10 @@ export interface RestaurantDetails {
 
   // Schedules - from schedule.model.ts
   restSchedules?: import('./schedule.model').RESTSchedule[];
+
+  // Coverage zones - from coverage-zone.model.ts
+  restDeliveriesZones?: import('./coverage-zone.model').RESTDeliveriesZone[];
+  driverRestDelZones?: import('./coverage-zone.model').DriverRESTDelZone[];
 }
 
 /**

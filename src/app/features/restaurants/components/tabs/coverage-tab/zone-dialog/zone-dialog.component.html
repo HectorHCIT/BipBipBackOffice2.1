@@ -1,0 +1,145 @@
+<p-dialog
+  [header]="getDialogTitle()"
+  [visible]="visible()"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '600px' }"
+  (onHide)="closeDialog()"
+>
+  <form [formGroup]="zoneForm" class="flex flex-col gap-4">
+    <!-- Zone Name -->
+    <div class="flex flex-col gap-2">
+      <label for="zoneName" class="font-medium text-sm">
+        Nombre de la Zona <span class="text-red-500">*</span>
+      </label>
+      <input
+        pInputText
+        id="zoneName"
+        formControlName="zoneName"
+        placeholder="Ej: Zona Centro"
+        [class.ng-invalid]="isFieldInvalid('zoneName')"
+        [class.ng-dirty]="isFieldInvalid('zoneName')"
+      />
+      @if (isFieldInvalid('zoneName')) {
+        <small class="text-red-500">{{ getFieldError('zoneName') }}</small>
+      }
+    </div>
+
+    <!-- Zone Radius -->
+    <div class="flex flex-col gap-2">
+      <label for="zoneRadius" class="font-medium text-sm">
+        Radio (metros) <span class="text-red-500">*</span>
+      </label>
+      <p-inputnumber
+        inputId="zoneRadius"
+        formControlName="zoneRadius"
+        [min]="100"
+        [max]="50000"
+        [step]="100"
+        placeholder="Ej: 5000"
+        suffix=" m"
+        [class.ng-invalid]="isFieldInvalid('zoneRadius')"
+        [class.ng-dirty]="isFieldInvalid('zoneRadius')"
+      />
+      @if (isFieldInvalid('zoneRadius')) {
+        <small class="text-red-500">{{ getFieldError('zoneRadius') }}</small>
+      }
+      <small class="text-gray-500">Mínimo: 100m, Máximo: 50,000m (50km)</small>
+    </div>
+
+    <!-- Coordinates Row -->
+    <div class="grid grid-cols-2 gap-4">
+      <!-- Latitude -->
+      <div class="flex flex-col gap-2">
+        <label for="zoneLat" class="font-medium text-sm">
+          Latitud <span class="text-red-500">*</span>
+        </label>
+        <p-inputnumber
+          inputId="zoneLat"
+          formControlName="zoneLat"
+          [minFractionDigits]="6"
+          [maxFractionDigits]="6"
+          [min]="-90"
+          [max]="90"
+          [step]="0.000001"
+          placeholder="Ej: 14.065070"
+          [class.ng-invalid]="isFieldInvalid('zoneLat')"
+          [class.ng-dirty]="isFieldInvalid('zoneLat')"
+        />
+        @if (isFieldInvalid('zoneLat')) {
+          <small class="text-red-500">{{ getFieldError('zoneLat') }}</small>
+        }
+      </div>
+
+      <!-- Longitude -->
+      <div class="flex flex-col gap-2">
+        <label for="zoneLon" class="font-medium text-sm">
+          Longitud <span class="text-red-500">*</span>
+        </label>
+        <p-inputnumber
+          inputId="zoneLon"
+          formControlName="zoneLon"
+          [minFractionDigits]="6"
+          [maxFractionDigits]="6"
+          [min]="-180"
+          [max]="180"
+          [step]="0.000001"
+          placeholder="Ej: -87.192136"
+          [class.ng-invalid]="isFieldInvalid('zoneLon')"
+          [class.ng-dirty]="isFieldInvalid('zoneLon')"
+        />
+        @if (isFieldInvalid('zoneLon')) {
+          <small class="text-red-500">{{ getFieldError('zoneLon') }}</small>
+        }
+      </div>
+    </div>
+
+    <!-- Minimum Amount -->
+    <div class="flex flex-col gap-2">
+      <label for="zoneMinAmount" class="font-medium text-sm">
+        Monto Mínimo (Lempiras) <span class="text-red-500">*</span>
+      </label>
+      <p-inputnumber
+        inputId="zoneMinAmount"
+        formControlName="zoneMinAmount"
+        [min]="0"
+        [minFractionDigits]="2"
+        [maxFractionDigits]="2"
+        placeholder="Ej: 100.00"
+        prefix="L "
+        [class.ng-invalid]="isFieldInvalid('zoneMinAmount')"
+        [class.ng-dirty]="isFieldInvalid('zoneMinAmount')"
+      />
+      @if (isFieldInvalid('zoneMinAmount')) {
+        <small class="text-red-500">{{ getFieldError('zoneMinAmount') }}</small>
+      }
+    </div>
+
+    <!-- Info Message -->
+    <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+      <div class="flex items-start gap-2 text-blue-700 text-sm">
+        <i class="pi pi-info-circle mt-0.5"></i>
+        <p>
+          Las coordenadas definen el centro de la zona circular. El radio determina el área de cobertura desde ese punto.
+        </p>
+      </div>
+    </div>
+  </form>
+
+  <ng-template #footer>
+    <div class="flex justify-end gap-2">
+      <p-button
+        label="Cancelar"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="closeDialog()"
+      />
+      <p-button
+        [label]="mode() === 'create' ? 'Crear' : 'Actualizar'"
+        (onClick)="saveZone()"
+        [disabled]="zoneForm.invalid"
+      />
+    </div>
+  </ng-template>
+</p-dialog>
