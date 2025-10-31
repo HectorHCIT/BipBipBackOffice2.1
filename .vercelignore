@@ -1,0 +1,31 @@
+# Environment files (should be configured in Vercel Dashboard)
+.env
+.env.*
+.env.local
+.env.prod
+
+# Node modules
+node_modules
+
+# Build files
+dist
+.angular
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test files
+coverage
+*.spec.ts
+
+# Git
+.git
+.gitignore
