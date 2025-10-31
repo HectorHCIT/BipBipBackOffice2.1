@@ -13,10 +13,17 @@ El proyecto utiliza un script de generación de variables de entorno (`scripts/g
 
 ### Configurar Variables en Vercel Dashboard
 
-Debes configurar las siguientes variables de entorno en el dashboard de Vercel (Settings → Environment Variables):
+Debes configurar las siguientes variables de entorno en el dashboard de Vercel:
+
+**Ruta:** Project Settings → Environment Variables
+
+**IMPORTANTE:** Configura cada variable para los tres entornos:
+- ✅ Production
+- ✅ Preview
+- ✅ Development
 
 #### Generales
-- `PRODUCTION` → `true`
+- `PRODUCTION` → `true` (ya está configurado en vercel.json para build)
 
 #### API URLs
 - `API_URL` → URL de tu API principal

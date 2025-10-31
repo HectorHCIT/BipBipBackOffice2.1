@@ -40,30 +40,9 @@
       ]
     }
   ],
-  "env": {
-    "PRODUCTION": "@production",
-    "API_URL": "@api_url",
-    "API_URL_REPORTS": "@api_url_reports",
-    "API_URL_SIGNALR": "@api_url_signalr",
-    "INVOICES_URL": "@invoices_url",
-    "MAPBOX_TOKEN": "@mapbox_token",
-    "GOOGLE_MAPS_API_KEY": "@google_maps_api_key",
-    "S3_BUCKET_IMAGES": "@s3_bucket_images",
-    "S3_BUCKET_BRANDS": "@s3_bucket_brands",
-    "KPI_CHATS": "@kpi_chats",
-    "API_KEY_SIGNAL": "@api_key_signal",
-    "WEATHER_API_KEY": "@weather_api_key",
-    "X_API_KEY": "@x_api_key",
-    "FIREBASE_API_KEY": "@firebase_api_key",
-    "FIREBASE_AUTH_DOMAIN": "@firebase_auth_domain",
-    "FIREBASE_PROJECT_ID": "@firebase_project_id",
-    "FIREBASE_STORAGE_BUCKET": "@firebase_storage_bucket",
-    "FIREBASE_MESSAGING_SENDER_ID": "@firebase_messaging_sender_id",
-    "FIREBASE_APP_ID": "@firebase_app_id",
-    "FIREBASE_MEASUREMENT_ID": "@firebase_measurement_id",
-    "FIREBASE_DATABASE_URL": "@firebase_database_url",
-    "EMBEDDABLE_API_URL": "@embeddable_api_url",
-    "EMBEDDABLE_API_KEY": "@embeddable_api_key",
-    "EMBEDDABLE_USER_ID": "@embeddable_user_id"
+  "build": {
+    "env": {
+      "PRODUCTION": "true"
+    }
   }
 }
