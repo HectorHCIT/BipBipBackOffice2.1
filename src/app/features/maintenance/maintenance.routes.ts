@@ -7,9 +7,9 @@ import { Routes } from '@angular/router';
  * - Brands (Marcas) ✅
  * - Currencies and Countries (Monedas y Países) ✅
  * - Prices per Kilometer Delivery (Precios por Kilómetro) ✅
+ * - Credentials and Permissions (Credenciales y Permisos) ✅
  * - App Configs (Configuraciones de App) - TODO
  * - Automatic Assignment (Asignación Automática) - TODO
- * - Credentials and Permissions (Credenciales y Permisos) - TODO
  * - Differentiated Payment (Pagos Diferenciados) - TODO
  *
  * Estructura:
@@ -42,6 +42,11 @@ export const MAINTENANCE_ROUTES: Routes = [
     path: 'prices-per-kilometer-delivery',
     loadChildren: () => import('./prices-per-kilometer/prices.routes').then(m => m.PRICES_ROUTES),
     title: 'Precios por Kilómetro'
+  },
+  {
+    path: 'credentials-and-permissions',
+    loadChildren: () => import('./credentials-and-permissions/credentials-permissions.routes').then(m => m.credentialsPermissionsRoutes),
+    title: 'Credenciales y Permisos'
   }
   // TODO: Agregar más submódulos de mantenimiento aquí
   /*
@@ -54,11 +59,6 @@ export const MAINTENANCE_ROUTES: Routes = [
     path: 'automatic-assignment',
     loadChildren: () => import('./automatic-assignment/automatic-assignment.routes').then(m => m.AUTOMATIC_ASSIGNMENT_ROUTES),
     title: 'Asignación Automática'
-  },
-  {
-    path: 'credentials-and-permissions',
-    loadChildren: () => import('./credentials-and-permissions/credentials.routes').then(m => m.CREDENTIALS_ROUTES),
-    title: 'Credenciales y Permisos'
   },
   {
     path: 'differentiated-payment',
