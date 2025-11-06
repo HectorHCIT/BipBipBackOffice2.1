@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy, signal, computed, inject, effect, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
 import { DrawerModule } from 'primeng/drawer';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
@@ -67,6 +67,10 @@ export class CredentialsFormComponent {
   readonly countries = signal<Country[]>([]);
   readonly cities = signal<City[]>([]);
   readonly roles = signal<{ id: string; name: string }[]>([]);
+  readonly brands = signal<{ id: number; name: string; logo: string }[]>([]);
+
+  // Signal for selected country to trigger reactivity
+  readonly selectedCountryId = signal<number | null>(null);
 
   // Computed signals
   readonly isEditMode = computed(() => this.credential() !== null);
@@ -82,18 +86,25 @@ export class CredentialsFormComponent {
       label: c.name,
       value: c.id,
       flag: c.countryUrlFlag,
-      countryId: c.countryCode
+      countryCode: c.countryCode
     }))
   );
   readonly filteredCityOptions = computed(() => {
-    const selectedCountry = this.form.controls.countryId.value;
+    const selectedCountry = this.selectedCountryId();
     if (!selectedCountry) return [];
-    return this.cityOptions().filter(c => c.countryId === selectedCountry);
+    return this.cityOptions().filter(c => c.countryCode === selectedCountry);
   });
   readonly roleOptions = computed(() =>
     this.roles().map(r => ({
       label: r.name,
       value: r.id
+    }))
+  );
+  readonly brandOptions = computed(() =>
+    this.brands().map(b => ({
+      label: b.name,
+      value: b.id,
+      logo: b.logo
     }))
   );
 
@@ -116,6 +127,35 @@ export class CredentialsFormComponent {
   // Original data for comparison in edit mode
   private originalData: Credential | null = null;
 
+  /**
+   * Custom password validator
+   * Requirements: min 10 chars, uppercase, lowercase, number, special char
+   */
+  private passwordValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value;
+      if (!value) return null;
+
+      const hasMinLength = value.length >= 10;
+      const hasUpperCase = /[A-Z]/.test(value);
+      const hasLowerCase = /[a-z]/.test(value);
+      const hasNumber = /[0-9]/.test(value);
+      const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(value);
+
+      const valid = hasMinLength && hasUpperCase && hasLowerCase && hasNumber && hasSpecialChar;
+
+      return valid ? null : {
+        passwordStrength: {
+          hasMinLength,
+          hasUpperCase,
+          hasLowerCase,
+          hasNumber,
+          hasSpecialChar
+        }
+      };
+    };
+  }
+
   constructor() {
     // Initialize form with validators
     this.form = this.fb.nonNullable.group({
@@ -124,16 +164,17 @@ export class CredentialsFormComponent {
       userEmail: ['', [Validators.required, Validators.email]],
       userPhone: [''],
       userAddress: [''],
-      userPassword: ['', [Validators.required, Validators.minLength(8)]],
+      userPassword: ['', [Validators.required, this.passwordValidator()]],
       roleId: ['', [Validators.required]],
       countryId: [null as number | null, [Validators.required]],
-      cityId: [null as number | null, [Validators.required]]
+      cityId: [{ value: null as number | null, disabled: true }, [Validators.required]]
     });
 
     // Load initial data
     this.loadCountries();
     this.loadCities();
     this.loadRoles();
+    this.loadBrands();
 
     // Effect to load credential data when credential input changes
     effect(() => {
@@ -151,7 +192,20 @@ export class CredentialsFormComponent {
    */
   private loadCountries(): void {
     const countriesList = this.globalData.countries();
-    this.countries.set(countriesList || []);
+    if (countriesList.length === 0) {
+      // Force load if empty
+      this.globalData.forceRefresh('countries');
+    } else {
+      this.countries.set(countriesList);
+    }
+
+    // Setup effect to update when global data changes
+    effect(() => {
+      const updatedCountries = this.globalData.countries();
+      if (updatedCountries.length > 0) {
+        this.countries.set(updatedCountries);
+      }
+    });
   }
 
   /**
@@ -159,7 +213,41 @@ export class CredentialsFormComponent {
    */
   private loadCities(): void {
     const citiesList = this.globalData.cities();
-    this.cities.set(citiesList || []);
+    if (citiesList.length === 0) {
+      // Force load if empty
+      this.globalData.forceRefresh('cities');
+    } else {
+      this.cities.set(citiesList);
+    }
+
+    // Setup effect to update when global data changes
+    effect(() => {
+      const updatedCities = this.globalData.cities();
+      if (updatedCities.length > 0) {
+        this.cities.set(updatedCities);
+      }
+    });
+  }
+
+  /**
+   * Load brands from data service
+   */
+  private loadBrands(): void {
+    const brandsList = this.globalData.brands();
+    if (brandsList.length === 0) {
+      // Force load if empty
+      this.globalData.forceRefresh('brands');
+    } else {
+      this.brands.set(brandsList.map(b => ({ id: b.id, name: b.name, logo: b.logo })));
+    }
+
+    // Setup effect to update when global data changes
+    effect(() => {
+      const updatedBrands = this.globalData.brands();
+      if (updatedBrands.length > 0) {
+        this.brands.set(updatedBrands.map(b => ({ id: b.id, name: b.name, logo: b.logo })));
+      }
+    });
   }
 
   /**
@@ -192,6 +280,16 @@ export class CredentialsFormComponent {
     // Load full credential details
     this.credentialService.getCredentialById(credential.userId).subscribe({
       next: (credentialDetail) => {
+        // Find country from city
+        const city = this.cities().find(c => c.id === credentialDetail.cityId);
+        const countryId = city?.countryCode || credentialDetail.countryId;
+
+        // Update selected country signal to filter cities BEFORE patching
+        this.selectedCountryId.set(countryId);
+
+        // Enable city select BEFORE patching so the value is applied
+        this.form.controls.cityId.enable();
+
         // Set form values
         this.form.patchValue({
           userName: credentialDetail.userName,
@@ -201,7 +299,7 @@ export class CredentialsFormComponent {
           userAddress: credentialDetail.userAddress,
           userPassword: '', // Don't load password
           roleId: credentialDetail.roleId,
-          countryId: credentialDetail.countryId,
+          countryId: countryId,
           cityId: credentialDetail.cityId
         });
 
@@ -230,19 +328,19 @@ export class CredentialsFormComponent {
   }
 
   /**
-   * Get country ID from city ID
-   */
-  private getCityCountryId(cityId: number): number | null {
-    const city = this.cities().find(c => c.id === cityId);
-    return city ? city.countryCode : null;
-  }
-
-  /**
    * Handle country change
    */
   onCountryChange(event: any): void {
+    // Update signal to trigger filtering
+    this.selectedCountryId.set(event.value);
     // Reset city when country changes
     this.form.controls.cityId.setValue(null);
+    // Enable city select when country is selected
+    if (event.value) {
+      this.form.controls.cityId.enable();
+    } else {
+      this.form.controls.cityId.disable();
+    }
   }
 
   /**
@@ -471,9 +569,10 @@ export class CredentialsFormComponent {
     this.imagePreview.set(null);
     this.imageFile.set(null);
     this.originalData = null;
+    this.selectedCountryId.set(null);
 
     // Restore password validators for create mode
-    this.form.controls.userPassword.setValidators([Validators.required, Validators.minLength(8)]);
+    this.form.controls.userPassword.setValidators([Validators.required, this.passwordValidator()]);
     this.form.controls.userPassword.updateValueAndValidity();
   }
 

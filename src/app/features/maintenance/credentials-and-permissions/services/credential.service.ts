@@ -76,7 +76,7 @@ export class CredentialService {
   /**
    * Get single credential by ID
    */
-  getCredentialById(userId: number): Observable<Credential> {
+  getCredentialById(userId: string): Observable<Credential> {
     this.isLoading.set(true);
 
     return this.dataService.get$<ApiUserRecord>(`Users/${userId}`).pipe(
@@ -124,11 +124,11 @@ export class CredentialService {
   /**
    * Update existing credential
    */
-  updateCredential(userId: number, request: UpdateCredentialRequest): Observable<Credential> {
+  updateCredential(userId: string, request: UpdateCredentialRequest): Observable<Credential> {
     this.isLoading.set(true);
 
     const apiRequest: ApiUpdateUserRequest = {
-      id: userId.toString(),
+      id: userId,
       userName: request.userName,
       email: request.userEmail,
       phoneNumber: request.userPhone,
@@ -165,7 +165,7 @@ export class CredentialService {
   /**
    * Toggle credential active status
    */
-  toggleCredentialStatus(userId: number, isActive: boolean): Observable<void> {
+  toggleCredentialStatus(userId: string, isActive: boolean): Observable<void> {
     this.isLoading.set(true);
 
     return this.dataService.put$<void>(`Users/${userId}/status?status=${isActive}`, {}).pipe(
@@ -213,7 +213,7 @@ export class CredentialService {
    */
   private mapApiRecordToCredential(record: ApiUserRecord): Credential {
     return {
-      userId: parseInt(record.id, 10),
+      userId: record.id,
       userName: record.userName,
       userLastName: '', // API doesn't provide last name separately
       userFullName: record.userName,

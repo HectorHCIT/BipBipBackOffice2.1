@@ -12,8 +12,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { type Credential, type CredentialFilterCriteria } from '../../../models';
 import { CredentialService } from '../../../services/credential.service';
 import { CredentialsFormComponent } from '../../forms/credentials-form/credentials-form.component';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject } from 'rxjs';
 
 /**
  * CredentialsTabComponent
@@ -74,17 +73,6 @@ export class CredentialsTabComponent implements OnDestroy {
   readonly selectedCredentialForEdit = signal<Credential | null>(null);
 
   constructor() {
-    // Setup search with debounce
-    this.searchControl.valueChanges
-      .pipe(
-        debounceTime(1000),
-        distinctUntilChanged(),
-        takeUntil(this.destroy$)
-      )
-      .subscribe(() => {
-        this.loadCredentials();
-      });
-
     // Load initial data
     this.loadCredentials();
   }
@@ -123,6 +111,14 @@ export class CredentialsTabComponent implements OnDestroy {
       return (parts[0][0] + parts[1][0]).toUpperCase();
     }
     return name.substring(0, 2).toUpperCase();
+  }
+
+  /**
+   * Handle search button click
+   */
+  onSearch(): void {
+    this.currentPage.set(0);
+    this.loadCredentials();
   }
 
   /**

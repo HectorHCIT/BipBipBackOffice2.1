@@ -9,7 +9,7 @@
  * Main credential interface representing a user in the system
  */
 export interface Credential {
-  userId: number;
+  userId: string;
   userName: string;
   userLastName: string;
   userFullName: string;

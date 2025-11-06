@@ -10,7 +10,7 @@ import { Routes } from '@angular/router';
  * - Credentials and Permissions (Credenciales y Permisos) ✅
  * - App Configs (Configuraciones de App) - TODO
  * - Automatic Assignment (Asignación Automática) - TODO
- * - Differentiated Payment (Pagos Diferenciados) - TODO
+ * - Differentiated Payment (Pagos Diferenciados) ✅
  *
  * Estructura:
  * /maintenance/brands -> BrandsComponent
@@ -34,7 +34,7 @@ export const MAINTENANCE_ROUTES: Routes = [
     title: 'Gestión de Marcas'
   },
   {
-    path: 'currencies',
+    path: 'currencies-and-countries',
     loadChildren: () => import('./currencies/currencies.routes').then(m => m.CURRENCIES_ROUTES),
     title: 'Gestión de Monedas y Países'
   },
@@ -47,6 +47,11 @@ export const MAINTENANCE_ROUTES: Routes = [
     path: 'credentials-and-permissions',
     loadChildren: () => import('./credentials-and-permissions/credentials-permissions.routes').then(m => m.credentialsPermissionsRoutes),
     title: 'Credenciales y Permisos'
+  },
+  {
+    path: 'differentiated-payment',
+    loadChildren: () => import('./differentiated-payment/differentiated-payment.routes').then(m => m.PAYMENT_ROUTES),
+    title: 'Pagos Diferenciados'
   }
   // TODO: Agregar más submódulos de mantenimiento aquí
   /*
@@ -59,11 +64,6 @@ export const MAINTENANCE_ROUTES: Routes = [
     path: 'automatic-assignment',
     loadChildren: () => import('./automatic-assignment/automatic-assignment.routes').then(m => m.AUTOMATIC_ASSIGNMENT_ROUTES),
     title: 'Asignación Automática'
-  },
-  {
-    path: 'differentiated-payment',
-    loadChildren: () => import('./differentiated-payment/payment.routes').then(m => m.PAYMENT_ROUTES),
-    title: 'Pagos Diferenciados'
   }
   */
 ];

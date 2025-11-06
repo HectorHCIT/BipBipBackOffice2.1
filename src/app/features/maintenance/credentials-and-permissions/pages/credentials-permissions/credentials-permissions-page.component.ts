@@ -1,5 +1,7 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { MenuItem } from 'primeng/api';
 import { TabsModule } from 'primeng/tabs';
+import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { CredentialsTabComponent } from '../../components/tabs/credentials-tab/credentials-tab.component';
 import { RolesTabComponent } from '../../components/tabs/roles-tab/roles-tab.component';
 
@@ -15,12 +17,16 @@ import { RolesTabComponent } from '../../components/tabs/roles-tab/roles-tab.com
   selector: 'app-credentials-permissions-page',
   imports: [
     TabsModule,
+    BreadcrumbModule,
     CredentialsTabComponent,
     RolesTabComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="container mx-auto p-6">
+      <!-- Breadcrumb -->
+      <p-breadcrumb [model]="breadcrumbItems" [home]="breadcrumbHome" styleClass="mb-4" />
+
       <!-- Page Header -->
       <div class="mb-6">
         <h1 class="text-3xl font-bold text-gray-800">
@@ -65,4 +71,11 @@ import { RolesTabComponent } from '../../components/tabs/roles-tab/roles-tab.com
     }
   `]
 })
-export class CredentialsPermissionsPageComponent {}
+export class CredentialsPermissionsPageComponent {
+  // Breadcrumb
+  readonly breadcrumbHome: MenuItem = { icon: 'pi pi-home', routerLink: '/' };
+  readonly breadcrumbItems: MenuItem[] = [
+    { label: 'Mantenimiento', routerLink: '/maintenance' },
+    { label: 'Credenciales y Permisos' }
+  ];
+}
