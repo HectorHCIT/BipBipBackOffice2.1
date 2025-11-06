@@ -1,0 +1,241 @@
+<p-drawer
+  [(visible)]="visibleModel"
+  (visibleChange)="onVisibleChange($event)"
+  [header]="channelId() ? 'Editar Canal' : 'Nuevo Canal'"
+  position="right"
+  styleClass="w-full md:!w-[30rem]"
+  [blockScroll]="true"
+>
+  <form [formGroup]="channelForm" (ngSubmit)="onSubmit()">
+    <div class="flex flex-col gap-6">
+      <!-- Icon Upload Section -->
+      <div class="border-b border-surface-200 pb-6">
+        <label class="block text-sm font-medium mb-3">
+          Cargar logo del canal
+        </label>
+
+        <!-- Upload Area -->
+        <div class="flex flex-col gap-3">
+          <!-- Drag & Drop Area with dashed border -->
+          <div class="border-2 border-dashed border-surface-300 rounded-lg p-6 flex flex-col items-center justify-center gap-3 min-h-[160px]">
+            @if (previewUrl()) {
+              <img
+                [src]="previewUrl()!"
+                alt="Preview"
+                class="w-24 h-24 object-contain rounded-lg"
+              />
+            } @else {
+              <i class="pi pi-cloud-upload text-4xl text-muted-color"></i>
+              <p class="text-sm text-muted-color text-center">
+                Arrastra y suelta una imagen aquí
+              </p>
+            }
+
+            <!-- Button centered at bottom -->
+            <p-fileUpload
+              mode="basic"
+              chooseLabel="Seleccionar imagen"
+              accept="image/*"
+              [maxFileSize]="2097152"
+              [auto]="false"
+              (onSelect)="onFileSelect($event)"
+              [disabled]="uploadingIcon() || isSaving()"
+              [chooseIcon]="uploadingIcon() ? 'pi pi-spin pi-spinner' : 'pi pi-upload'"
+            />
+          </div>
+
+          <small class="text-muted-color">
+            Resolución recomendada: 72x72 px • Máximo 2MB
+          </small>
+
+          @if (uploadingIcon()) {
+            <small class="text-primary">
+              <i class="pi pi-spin pi-spinner"></i> Subiendo imagen...
+            </small>
+          }
+        </div>
+      </div>
+
+      <!-- Basic Information -->
+      <div class="grid grid-cols-1 gap-4">
+        <!-- Nombre del canal -->
+        <div>
+          <label for="channelName" class="block text-sm font-medium mb-2">
+            Nombre del canal *
+          </label>
+          <input
+            pInputText
+            id="channelName"
+            formControlName="channelName"
+            placeholder="Nombre del canal"
+            class="w-full"
+            [class.p-invalid]="hasError('channelName', 'required')"
+          />
+          @if (hasError('channelName', 'required')) {
+            <small class="text-red-500 mt-1 block">El nombre es requerido</small>
+          }
+        </div>
+
+        <!-- Nombre completo del canal -->
+        <div>
+          <label for="fullNameTypeChannel" class="block text-sm font-medium mb-2">
+            Nombre completo del canal
+          </label>
+          <input
+            pInputText
+            id="fullNameTypeChannel"
+            formControlName="fullNameTypeChannel"
+            placeholder="Nombre completo"
+            class="w-full"
+          />
+        </div>
+
+        <!-- Tipo de canal -->
+        <div>
+          <label for="typeChannel" class="block text-sm font-medium mb-2">
+            Tipo de canal *
+          </label>
+          <input
+            pInputText
+            id="typeChannel"
+            formControlName="typeChannel"
+            placeholder="Tipo de canal"
+            class="w-full"
+            [class.p-invalid]="hasError('typeChannel', 'required')"
+          />
+          @if (hasError('typeChannel', 'required')) {
+            <small class="text-red-500 mt-1 block">El tipo es requerido</small>
+          }
+        </div>
+
+        <!-- Descripción del canal -->
+        <div>
+          <label for="descTypeChannel" class="block text-sm font-medium mb-2">
+            Descripción del canal
+          </label>
+          <textarea
+            pInputTextarea
+            id="descTypeChannel"
+            formControlName="descTypeChannel"
+            rows="3"
+            placeholder="Descripción"
+            class="w-full"
+            [maxlength]="200"
+            [class.p-invalid]="hasError('descTypeChannel', 'maxlength')"
+          ></textarea>
+          <div class="flex justify-between mt-1">
+            @if (hasError('descTypeChannel', 'maxlength')) {
+              <small class="text-red-500">Máximo 200 caracteres</small>
+            } @else {
+              <small class="text-muted-color">{{ channelForm.get('descTypeChannel')?.value?.length || 0 }}/200</small>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Instructions -->
+      <div>
+        <label for="instructionsChannel" class="block text-sm font-medium mb-2">
+          Instrucciones
+        </label>
+        <textarea
+          pInputTextarea
+          id="instructionsChannel"
+          formControlName="instructionsChannel"
+          rows="4"
+          placeholder="Instrucciones para usar este canal..."
+          class="w-full"
+          [class.p-invalid]="hasError('instructionsChannel', 'maxlength')"
+        ></textarea>
+        @if (hasError('instructionsChannel', 'maxlength')) {
+          <small class="text-red-500 mt-1 block">Máximo 500 caracteres</small>
+        }
+      </div>
+
+      <!-- Toggles -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-surface-200 pt-4">
+        <!-- Active -->
+        <div class="flex items-center gap-3">
+          <p-toggleSwitch
+            id="isActiveChannel"
+            formControlName="isActiveChannel"
+          />
+          <label for="isActiveChannel" class="text-sm font-medium">
+            Canal activo
+          </label>
+        </div>
+
+        <!-- Visible -->
+        <div class="flex items-center gap-3">
+          <p-toggleSwitch
+            id="isVisibleChannel"
+            formControlName="isVisibleChannel"
+          />
+          <label for="isVisibleChannel" class="text-sm font-medium">
+            Visible en app
+          </label>
+        </div>
+      </div>
+
+      <!-- Associated Brands -->
+      <div class="border-t border-surface-200 pt-4">
+        <label class="block text-sm font-medium mb-3">
+          Marcas Asociadas
+        </label>
+
+        @if (isLoading()) {
+          <div class="text-center py-4">
+            <i class="pi pi-spin pi-spinner text-2xl text-muted-color"></i>
+          </div>
+        } @else if (brands().length === 0) {
+          <div class="text-center py-4 text-muted-color">
+            <i class="pi pi-inbox text-2xl block mb-2"></i>
+            <p>No hay marcas disponibles</p>
+          </div>
+        } @else {
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            @for (brand of brands(); track brand.idBrand) {
+              <div class="flex items-center gap-3 p-3 border border-surface-200 rounded-lg transition-colors">
+                <p-checkbox
+                  [inputId]="'brand-' + brand.idBrand"
+                  [binary]="true"
+                  [(ngModel)]="brand.isSelected"
+                  [ngModelOptions]="{standalone: true}"
+                  (onChange)="toggleBrand(brand.idBrand)"
+                />
+                <img
+                  [src]="brand.logoUrl"
+                  [alt]="brand.brandName"
+                  class="w-8 h-8 rounded-full object-cover border-2 border-surface-300"
+                />
+                <label [for]="'brand-' + brand.idBrand" class="text-sm font-medium cursor-pointer flex-1">
+                  {{ brand.brandName }}
+                </label>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </form>
+
+  <!-- Footer Actions -->
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end gap-3 p-4 border-t border-surface-200">
+      <p-button
+        label="Cancelar"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="closeDrawer()"
+        [disabled]="isSaving()"
+      />
+      <p-button
+        label="Guardar"
+        severity="primary"
+        (onClick)="onSubmit()"
+        [loading]="isSaving()"
+        [disabled]="channelForm.invalid || uploadingIcon()"
+      />
+    </div>
+  </ng-template>
+</p-drawer>

@@ -15,5 +15,22 @@
       "timestamp": 1762441224587,
       "ttl": 86400000
     }
+  ],
+  [
+    "drawer",
+    {
+      "data": {
+        "name": "drawer",
+        "description": "Drawer is a container component displayed as an overlay.",
+        "importStatement": "import { Drawer } from 'primeng/drawer';",
+        "moduleImport": "import { DrawerModule } from 'primeng/drawer';",
+        "basicUsage": "import { DrawerModule } from 'primeng/drawer';",
+        "properties": [],
+        "events": [],
+        "methods": []
+      },
+      "timestamp": 1762456820722,
+      "ttl": 86400000
+    }
   ]
 ]

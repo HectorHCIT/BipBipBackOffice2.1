@@ -1,0 +1,229 @@
+<div class="min-h-screen bg-gray-50 p-6">
+  <!-- Breadcrumb -->
+  <p-breadcrumb
+    [model]="breadcrumbItems"
+    [home]="home"
+    class="mb-4"
+  />
+
+  <!-- Header -->
+  <div class=" rounded-lg shadow-sm p-6 mb-6">
+    <div class="flex justify-between items-center mb-6">
+      <div>
+        <h1 class="text-3xl font-bold  mb-2">Gestión de Canales</h1>
+        <p class="">Administra los canales de comunicación con tus clientes</p>
+      </div>
+      <p-button
+        label="Nuevo Canal"
+        icon="pi pi-plus"
+        (onClick)="openNewChannelModal()"
+        [disabled]="isLoading()"
+      />
+    </div>
+
+    <!-- Filters -->
+    <div class="flex flex-col md:flex-row md:items-center gap-4 mb-4">
+      <!-- Status Filter Buttons -->
+      <div class="flex gap-4 flex-shrink-0">
+        <p-button
+          label="Todos"
+          [outlined]="statusFilter() !== 'all'"
+          [severity]="statusFilter() === 'all' ? 'primary' : 'secondary'"
+          (onClick)="setStatusFilter('all')"
+        />
+        <p-button
+          label="Activos"
+          [outlined]="statusFilter() !== 'active'"
+          [severity]="statusFilter() === 'active' ? 'success' : 'secondary'"
+          (onClick)="setStatusFilter('active')"
+        />
+        <p-button
+          label="Inactivos"
+          [outlined]="statusFilter() !== 'inactive'"
+          [severity]="statusFilter() === 'inactive' ? 'danger' : 'secondary'"
+          (onClick)="setStatusFilter('inactive')"
+        />
+      </div>
+
+      <!-- Spacer - Solo en desktop -->
+      <div class="flex-1 hidden md:block"></div>
+
+      <!-- Search Input - Ancho fijo en desktop -->
+      <div class="w-full md:w-80 flex-shrink-0">
+        <p-iconfield iconPosition="left">
+          <p-inputicon styleClass="pi pi-search" />
+          <input
+            pInputText
+            type="text"
+            [(ngModel)]="searchTerm"
+            placeholder="Buscar por nombre o tipo..."
+            class="w-full"
+          />
+        </p-iconfield>
+      </div>
+    </div>
+
+
+  </div>
+
+  <!-- Table -->
+  <div class="bg-white rounded-lg shadow-sm">
+    @if (isLoading()) {
+      <!-- Loading Skeleton -->
+      <div class="p-6">
+        @for (item of [1, 2, 3, 4, 5]; track item) {
+          <div class="mb-4">
+            <p-skeleton height="60px" />
+          </div>
+        }
+      </div>
+    } @else {
+      <p-table
+        [value]="filteredChannels()"
+        [paginator]="true"
+        [rows]="10"
+        [rowsPerPageOptions]="[10, 25, 50]"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} canales"
+        styleClass="p-datatable-striped"
+      >
+        <!-- Icon Column -->
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="width: 80px;">Icono</th>
+            <th>Nombre</th>
+            <th style="width: 150px;">Tipo</th>
+            <th style="width: 120px;">Estado</th>
+            <th style="width: 100px;">Posición</th>
+            <th>Marcas Asociadas</th>
+            <th style="width: 150px;">Acciones</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-channel>
+          <tr>
+            <!-- Icon -->
+            <td class="text-center">
+              @if (channel.iconUrlChannel) {
+                <img
+                  [src]="channel.iconUrlChannel"
+                  [alt]="channel.descriptionChannel"
+                  class="w-10 h-10 object-contain rounded-lg mx-auto"
+                />
+              } @else {
+                <div class="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center mx-auto">
+                  <i class="pi pi-image text-gray-400"></i>
+                </div>
+              }
+            </td>
+
+            <!-- Name -->
+            <td>
+              <div class="font-semibold ">{{ channel.descriptionChannel }}</div>
+              @if (!channel.isVisibleChannel) {
+                <span class="text-xs ">(Oculto en app)</span>
+              }
+            </td>
+
+            <!-- Type -->
+            <td>
+              <p-tag
+                [value]="channel.typeChannel"
+                severity="info"
+              />
+            </td>
+
+            <!-- Status -->
+            <td>
+              <div class="flex items-center gap-2">
+                <p-toggleSwitch
+                  [(ngModel)]="channel.isActiveChannel"
+                  (ngModelChange)="toggleChannelStatus(channel)"
+                />
+                <p-tag
+                  [value]="getStatusLabel(channel.isActiveChannel)"
+                  [severity]="getStatusSeverity(channel.isActiveChannel)"
+                />
+              </div>
+            </td>
+
+            <!-- Position -->
+            <td class="text-center">
+              <span class="text-gray-700 font-medium">{{ channel.positionChannel }}</span>
+            </td>
+
+            <!-- Associated Brands -->
+            <td>
+              <div class="flex flex-wrap gap-2">
+                @if (channel.brandsList.length > 0) {
+                  @for (brand of channel.brandsList; track brand.idBrand) {
+                    @if (brand.isSelected) {
+                      <img
+                        [src]="brand.logoUrl"
+                        [alt]="brand.brandName"
+                        [pTooltip]="brand.brandName"
+                        tooltipPosition="top"
+                        class="w-8 h-8 rounded-full object-cover border-2 border-gray-200"
+                      />
+                    }
+                  }
+                  @if (!hasSelectedBrands(channel)) {
+                    <span class="text-sm text-gray-500">Sin marcas</span>
+                  }
+                } @else {
+                  <span class="text-sm text-gray-500">Sin marcas</span>
+                }
+              </div>
+            </td>
+
+            <!-- Actions -->
+            <td>
+              <div class="flex gap-2">
+                <p-button
+                  icon="pi pi-pencil"
+                  [outlined]="true"
+                  severity="info"
+                  size="small"
+                  (onClick)="editChannel(channel)"
+                  pTooltip="Editar canal"
+                  tooltipPosition="top"
+                />
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+
+        <!-- Empty State -->
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="7" class="text-center py-8">
+              <div class="flex flex-col items-center gap-3">
+                <i class="pi pi-inbox text-4xl text-gray-400"></i>
+                <p class="text-gray-600">No se encontraron canales</p>
+                @if (statusFilter() !== 'all' || searchTerm()) {
+                  <p-button
+                    label="Limpiar filtros"
+                    [outlined]="true"
+                    size="small"
+                    (onClick)="statusFilter.set('all'); searchTerm.set('')"
+                  />
+                }
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    }
+  </div>
+
+  <!-- Toast for notifications -->
+  <p-toast position="top-right" />
+</div>
+
+<!-- Form Modal -->
+<app-channel-form
+  [visible]="showFormModal()"
+  [channelId]="selectedChannelId()"
+  (visibleChange)="onDrawerVisibilityChange($event)"
+  (onSave)="handleFormSave()"
+/>

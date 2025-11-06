@@ -1,0 +1,171 @@
+<div class="min-h-screen bg-gray-50 p-6">
+  <!-- Breadcrumb -->
+  <p-breadcrumb
+    [model]="breadcrumbItems"
+    [home]="home"
+    class="mb-4"
+  />
+
+  <!-- Header -->
+  <div class="rounded-lg shadow-sm p-6 mb-6">
+    <div class="flex justify-between items-center mb-6">
+      <div>
+        <h1 class="text-3xl font-bold mb-2">Preguntas Frecuentes</h1>
+        <p class="">Gestiona las preguntas frecuentes de la aplicación móvil</p>
+      </div>
+      <p-button
+        label="Nueva Pregunta"
+        icon="pi pi-plus"
+        (onClick)="openCreateDrawer()"
+        [disabled]="isLoading()"
+      />
+    </div>
+
+    <!-- Filters -->
+    <div class="flex flex-col md:flex-row md:items-center gap-4 mb-4">
+      <!-- Status Filter Buttons -->
+      <div class="flex gap-4 flex-shrink-0">
+        <p-button
+          label="Todos"
+          [outlined]="statusFilter() !== 'all'"
+          [severity]="statusFilter() === 'all' ? 'primary' : 'secondary'"
+          (onClick)="setStatusFilter('all')"
+        />
+        <p-button
+          label="Activos"
+          [outlined]="statusFilter() !== 'active'"
+          [severity]="statusFilter() === 'active' ? 'success' : 'secondary'"
+          (onClick)="setStatusFilter('active')"
+        />
+        <p-button
+          label="Inactivos"
+          [outlined]="statusFilter() !== 'inactive'"
+          [severity]="statusFilter() === 'inactive' ? 'danger' : 'secondary'"
+          (onClick)="setStatusFilter('inactive')"
+        />
+      </div>
+
+      <!-- Spacer -->
+      <div class="flex-1 hidden md:block"></div>
+
+      <!-- Search Input -->
+      <div class="w-full md:w-80 flex-shrink-0">
+        <p-iconfield iconPosition="left">
+          <p-inputicon styleClass="pi pi-search" />
+          <input
+            pInputText
+            type="text"
+            [(ngModel)]="searchTerm"
+            placeholder="Buscar pregunta..."
+            class="w-full"
+          />
+        </p-iconfield>
+      </div>
+    </div>
+  </div>
+
+  <!-- OrderList with Drag & Drop -->
+  <div class="bg-white rounded-lg shadow-sm p-6">
+    @if (isLoading()) {
+      <!-- Loading Skeleton -->
+      <div class="space-y-4">
+        @for (item of [1, 2, 3, 4, 5]; track item) {
+          <p-skeleton height="80px" />
+        }
+      </div>
+    } @else if (filteredFaqs().length === 0) {
+      <!-- Empty State -->
+      <div class="flex flex-col items-center gap-3 py-12">
+        <i class="pi pi-inbox text-6xl text-gray-400"></i>
+        <p class="text-gray-600 text-lg">No se encontraron preguntas frecuentes</p>
+        @if (statusFilter() !== 'all' || searchTerm()) {
+          <p-button
+            label="Limpiar filtros"
+            [outlined]="true"
+            size="small"
+            (onClick)="statusFilter.set('all'); searchTerm.set('')"
+          />
+        }
+      </div>
+    } @else {
+      <p-orderList
+        [value]="filteredFaqs()"
+        [dragdrop]="true"
+        (onReorder)="onReorder()"
+        [listStyle]="{ 'max-height': '600px' }"
+      >
+        <ng-template let-faq pTemplate="item">
+          <div class="flex items-center justify-between p-4 border-b border-surface-200 hover:bg-surface-50">
+            <!-- Drag Handle + Content -->
+            <div class="flex items-center gap-4 flex-1">
+              <!-- Drag Handle Icon -->
+              <i class="pi pi-bars text-gray-400 cursor-move"></i>
+
+              <!-- FAQ Content -->
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-3 mb-2">
+                  <span class="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                    #{{ faq.idFaq }}
+                  </span>
+                  <p-tag
+                    [value]="getStatusLabel(faq.isActive)"
+                    [severity]="getStatusSeverity(faq.isActive)"
+                    styleClass="text-xs"
+                  />
+                </div>
+
+                <h3 class="font-semibold text-gray-900 mb-1 truncate">
+                  {{ faq.faq }}
+                </h3>
+
+                <p class="text-sm text-gray-600 line-clamp-2">
+                  {{ faq.description }}
+                </p>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex items-center gap-2 ml-4">
+              <p-toggleSwitch
+                [ngModel]="faq.isActive"
+                (ngModelChange)="toggleFaqStatus(faq, $event)"
+                pTooltip="Cambiar estado"
+                tooltipPosition="top"
+              />
+
+              <p-button
+                icon="pi pi-pencil"
+                [outlined]="true"
+                severity="info"
+                size="small"
+                (onClick)="editFaq(faq)"
+                pTooltip="Editar pregunta"
+                tooltipPosition="top"
+              />
+            </div>
+          </div>
+        </ng-template>
+      </p-orderList>
+
+      <!-- Info Text -->
+      <div class="mt-4 text-center text-sm text-gray-500">
+        <i class="pi pi-info-circle mr-2"></i>
+        Arrastra las preguntas para reordenarlas. Total: {{ filteredFaqs().length }} pregunta(s)
+      </div>
+    }
+  </div>
+
+  <!-- Toast for notifications -->
+  <p-toast position="top-right" />
+
+  <!-- Confirm Dialog -->
+  <p-confirmDialog />
+</div>
+
+<!-- Form Drawer -->
+<app-faq-form
+  [visible]="showFormDrawer()"
+  [faqId]="selectedFaqId()"
+  (visibleChange)="onDrawerVisibilityChange($event)"
+  (onSave)="handleFormSave()"
+/>

@@ -1,0 +1,212 @@
+<div class="min-h-screen  p-6">
+  <!-- Breadcrumb -->
+  <p-breadcrumb
+    [model]="breadcrumbItems"
+    [home]="home"
+    class="mb-4"
+  />
+
+  <!-- Header -->
+  <div class="rounded-lg shadow-sm p-6 mb-6">
+    <div class="mb-6">
+      <h1 class="text-3xl font-bold mb-2">Gestión de Propinas</h1>
+      <p class="">Configure las propinas por país y moneda</p>
+    </div>
+
+    <!-- Info Banner -->
+    <div class=" border-l-4 border-blue-400 p-4 mb-6">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <i class="pi pi-info-circle text-blue-400 text-xl"></i>
+        </div>
+        <div class="ml-3">
+          <p class="text-sm text-blue-700">
+            Los países y monedas se generan automáticamente como inactivos cuando se crea un nuevo sistema monetario.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="flex flex-col md:flex-row md:items-center gap-4 mb-4">
+      <!-- Status Filter Buttons -->
+      <div class="flex gap-4 flex-shrink-0">
+        <p-button
+          label="Todos"
+          [outlined]="statusFilter() !== 'all'"
+          [severity]="statusFilter() === 'all' ? 'primary' : 'secondary'"
+          (onClick)="setStatusFilter('all')"
+        />
+        <p-button
+          label="Activos"
+          [outlined]="statusFilter() !== 'active'"
+          [severity]="statusFilter() === 'active' ? 'success' : 'secondary'"
+          (onClick)="setStatusFilter('active')"
+        />
+        <p-button
+          label="Inactivos"
+          [outlined]="statusFilter() !== 'inactive'"
+          [severity]="statusFilter() === 'inactive' ? 'danger' : 'secondary'"
+          (onClick)="setStatusFilter('inactive')"
+        />
+      </div>
+
+      <!-- Spacer -->
+      <div class="flex-1 hidden md:block"></div>
+
+      <!-- Search Input -->
+      <div class="w-full md:w-80 flex-shrink-0">
+        <p-iconfield iconPosition="left">
+          <p-inputicon styleClass="pi pi-search" />
+          <input
+            pInputText
+            type="text"
+            [(ngModel)]="searchTerm"
+            placeholder="Buscar por país..."
+            class="w-full"
+          />
+        </p-iconfield>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class=" rounded-lg shadow-sm">
+    @if (isLoading()) {
+      <!-- Loading Skeleton -->
+      <div class="p-6">
+        @for (item of [1, 2, 3, 4, 5]; track item) {
+          <div class="mb-4">
+            <p-skeleton height="60px" />
+          </div>
+        }
+      </div>
+    } @else {
+      <p-table
+        [value]="filteredTips()"
+        [paginator]="true"
+        [rows]="10"
+        [rowsPerPageOptions]="[10, 25, 50]"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} configuraciones"
+        styleClass="p-datatable-striped"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="width: 80px;">ID</th>
+            <th>País y Moneda</th>
+            <th style="width: 250px;">Propinas por Defecto</th>
+            <th style="width: 200px;">Propinas Personalizadas</th>
+            <th style="width: 120px;">Estado</th>
+            <th style="width: 100px;">Acciones</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-tip>
+          <tr>
+            <!-- ID -->
+            <td class="text-center">
+              <span class="font-medium text-gray-700">{{ tip.idCountry }}</span>
+            </td>
+
+            <!-- País y Moneda -->
+            <td>
+              <div class="font-semibold">{{ tip.nameCountry }}</div>
+              <div class="text-sm text-gray-500">
+                {{ tip.symbCurrency }} {{ tip.titleCurrency }}
+              </div>
+            </td>
+
+            <!-- Propinas por Defecto -->
+            <td>
+              @if (tip.tipDefault && tip.valueDefault && tip.valueDefault.length > 0) {
+                <div class="flex flex-wrap gap-2">
+                  @for (value of tip.valueDefault; track $index) {
+                    <p-tag
+                      [value]="tip.symbCurrency + ' ' + value"
+                      severity="info"
+                    />
+                  }
+                </div>
+              } @else {
+                <span class="text-sm text-gray-500">No configuradas</span>
+              }
+            </td>
+
+            <!-- Propinas Personalizadas -->
+            <td>
+              @if (tip.isCustomizedTips) {
+                <div>
+                  <span class="text-sm font-medium text-green-600">Habilitadas</span>
+                  <div class="text-xs text-gray-500">
+                    Mínimo: {{ tip.symbCurrency }} {{ tip.valueMinAmount }}
+                  </div>
+                </div>
+              } @else {
+                <span class="text-sm text-gray-500">Deshabilitadas</span>
+              }
+            </td>
+
+            <!-- Estado -->
+            <td>
+              <div class="flex items-center gap-2">
+                <p-toggleSwitch
+                  [(ngModel)]="tip.isActiveTip"
+                  (ngModelChange)="toggleTipStatus(tip)"
+                />
+                <p-tag
+                  [value]="getStatusLabel(tip.isActiveTip)"
+                  [severity]="getStatusSeverity(tip.isActiveTip)"
+                />
+              </div>
+            </td>
+
+            <!-- Acciones -->
+            <td>
+              <p-button
+                icon="pi pi-pencil"
+                [outlined]="true"
+                severity="info"
+                size="small"
+                (onClick)="editTip(tip)"
+                pTooltip="Editar configuración"
+                tooltipPosition="top"
+              />
+            </td>
+          </tr>
+        </ng-template>
+
+        <!-- Empty State -->
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="6" class="text-center py-8">
+              <div class="flex flex-col items-center gap-3">
+                <i class="pi pi-inbox text-4xl text-gray-400"></i>
+                <p class="text-gray-600">No se encontraron configuraciones</p>
+                @if (statusFilter() !== 'all' || searchTerm()) {
+                  <p-button
+                    label="Limpiar filtros"
+                    [outlined]="true"
+                    size="small"
+                    (onClick)="statusFilter.set('all'); searchTerm.set('')"
+                  />
+                }
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    }
+  </div>
+
+  <!-- Toast for notifications -->
+  <p-toast position="top-right" />
+</div>
+
+<!-- Form Drawer -->
+<app-tip-form
+  [visible]="showFormDrawer()"
+  [tipId]="selectedTipId()"
+  (visibleChange)="onDrawerVisibilityChange($event)"
+  (onSave)="handleFormSave()"
+/>

@@ -1,0 +1,186 @@
+<p-drawer
+  [(visible)]="visibleModel"
+  (visibleChange)="onVisibleChange($event)"
+  [header]="tipCountry() + ' (' + tipCurrency() + ')'"
+  position="right"
+  styleClass="w-full md:!w-[35rem]"
+  [blockScroll]="true"
+>
+  <form [formGroup]="tipForm" (ngSubmit)="onSubmit()">
+    <div class="flex flex-col gap-6">
+
+      <!-- Estado Toggle -->
+      <div class="flex items-center justify-between border-b border-surface-200 pb-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">Estado</label>
+          <p class="text-xs text-muted-color">Activar/desactivar propinas para este país</p>
+        </div>
+        <p-toggleSwitch
+          formControlName="isActiveTip"
+        />
+      </div>
+
+      <!-- Sección: Propinas Personalizadas -->
+      <div class="border-b border-surface-200 pb-6">
+        <h3 class="text-lg font-semibold mb-4">Propinas Personalizadas</h3>
+
+        <!-- Radio: Permitir propinas personalizadas -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium mb-3">
+            ¿Permitir al usuario añadir propinas personalizadas?
+          </label>
+          <div class="flex gap-6">
+            <div class="flex items-center">
+              <p-radiobutton
+                inputId="customTipsYes"
+                [value]="true"
+                formControlName="isCustomizedTips"
+              />
+              <label for="customTipsYes" class="ml-2 cursor-pointer">Sí</label>
+            </div>
+            <div class="flex items-center">
+              <p-radiobutton
+                inputId="customTipsNo"
+                [value]="false"
+                formControlName="isCustomizedTips"
+              />
+              <label for="customTipsNo" class="ml-2 cursor-pointer">No</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Input: Propina mínima -->
+        <div>
+          <label for="valueMinAmount" class="block text-sm font-medium mb-2">
+            Propina mínima
+          </label>
+          <p-inputNumber
+            inputId="valueMinAmount"
+            formControlName="valueMinAmount"
+            mode="decimal"
+            [minFractionDigits]="2"
+            [maxFractionDigits]="2"
+            [prefix]="currencySymbol() + ' '"
+            [min]="0"
+            class="w-full"
+            [class.p-invalid]="hasError('valueMinAmount', 'min')"
+          />
+          @if (hasError('valueMinAmount', 'min')) {
+            <small class="text-red-500 mt-1 block">El valor debe ser mayor o igual a 0</small>
+          }
+        </div>
+      </div>
+
+      <!-- Sección: Propinas por Defecto -->
+      <div>
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h3 class="text-lg font-semibold">Propinas por Defecto</h3>
+            <p class="text-xs text-muted-color mt-1">Agrega todas las propinas predefinidas que necesites</p>
+          </div>
+          <p-toggleSwitch
+            formControlName="tipDefault"
+          />
+        </div>
+
+        <!-- FormArray: propinas por defecto dinámicas -->
+        <div
+          formArrayName="defaultTips"
+          class="space-y-4"
+          [class.opacity-50]="!tipForm.get('tipDefault')?.value"
+        >
+          @if (defaultTips.length === 0 && tipForm.get('tipDefault')?.value) {
+            <div class="text-center py-8 border border-dashed border-surface-300 rounded-lg">
+              <p class="text-sm text-muted-color mb-3">No hay propinas configuradas</p>
+              <p-button
+                label="Agregar primera propina"
+                icon="pi pi-plus"
+                size="small"
+                (onClick)="addDefaultTip()"
+              />
+            </div>
+          }
+
+          @for (tipControl of defaultTips.controls; track $index) {
+            <div [formGroupName]="$index" class="border border-surface-200 rounded-lg p-4">
+              <div class="flex items-center gap-4">
+                <!-- Número de propina -->
+                <div class="flex-shrink-0">
+                  <span class="text-sm font-medium text-gray-600">Propina {{ $index + 1 }}</span>
+                </div>
+
+                <!-- Valor -->
+                <div class="flex-1">
+                  <p-inputNumber
+                    formControlName="value"
+                    mode="decimal"
+                    [minFractionDigits]="2"
+                    [maxFractionDigits]="2"
+                    [prefix]="currencySymbol() + ' '"
+                    [min]="0"
+                    placeholder="0.00"
+                    class="w-full"
+                  />
+                </div>
+
+                <!-- Toggle Publicar -->
+                <div class="flex items-center gap-2 flex-shrink-0">
+                  <label class="text-sm font-medium text-gray-600">Publicar</label>
+                  <p-toggleSwitch
+                    formControlName="isPublish"
+                  />
+                </div>
+
+                <!-- Botón Eliminar -->
+                <div class="flex-shrink-0">
+                  <p-button
+                    icon="pi pi-trash"
+                    severity="danger"
+                    [outlined]="true"
+                    size="small"
+                    (onClick)="removeDefaultTip($index)"
+                    pTooltip="Eliminar propina"
+                    tooltipPosition="top"
+                  />
+                </div>
+              </div>
+            </div>
+          }
+
+          @if (defaultTips.length > 0 && tipForm.get('tipDefault')?.value) {
+            <div class="flex justify-center">
+              <p-button
+                label="Agregar otra propina"
+                icon="pi pi-plus"
+                [outlined]="true"
+                size="small"
+                (onClick)="addDefaultTip()"
+              />
+            </div>
+          }
+        </div>
+      </div>
+
+    </div>
+  </form>
+
+  <!-- Footer Actions -->
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end gap-3 p-4 border-t border-surface-200">
+      <p-button
+        label="Cancelar"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="closeDrawer()"
+        [disabled]="isSaving()"
+      />
+      <p-button
+        label="Guardar Cambios"
+        severity="primary"
+        (onClick)="onSubmit()"
+        [loading]="isSaving()"
+        [disabled]="tipForm.invalid"
+      />
+    </div>
+  </ng-template>
+</p-drawer>

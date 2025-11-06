@@ -1,0 +1,94 @@
+<p-drawer
+  [(visible)]="visibleModel"
+  (visibleChange)="onVisibleChange($event)"
+  [header]="getFormTitle()"
+  position="right"
+  styleClass="w-full md:!w-[40rem]"
+  [blockScroll]="true"
+>
+  <form [formGroup]="faqForm" (ngSubmit)="onSubmit()">
+    <div class="flex flex-col gap-6">
+
+      <!-- Estado Toggle -->
+      <div class="flex items-center justify-between border-b border-surface-200 pb-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">Estado</label>
+          <p class="text-xs text-muted-color">Activar/desactivar esta pregunta frecuente</p>
+        </div>
+        <p-toggleSwitch
+          formControlName="isActive"
+        />
+      </div>
+
+      <!-- Pregunta -->
+      <div>
+        <label for="titleFaq" class="block text-sm font-medium mb-2">
+          Pregunta <span class="text-red-500">*</span>
+        </label>
+        <input
+          pInputText
+          id="titleFaq"
+          formControlName="titleFaq"
+          placeholder="¿Cuál es tu pregunta?"
+          class="w-full"
+          [class.p-invalid]="hasError('titleFaq', 'required') || hasError('titleFaq', 'maxlength')"
+        />
+        @if (hasError('titleFaq', 'required')) {
+          <small class="text-red-500 mt-1 block">La pregunta es requerida</small>
+        }
+        @if (hasError('titleFaq', 'maxlength')) {
+          <small class="text-red-500 mt-1 block">La pregunta no puede exceder 500 caracteres</small>
+        }
+        <small class="text-muted-color mt-1 block">
+          {{ faqForm.get('titleFaq')?.value?.length || 0 }}/500 caracteres
+        </small>
+      </div>
+
+      <!-- Respuesta -->
+      <div>
+        <label for="descFaq" class="block text-sm font-medium mb-2">
+          Respuesta <span class="text-red-500">*</span>
+        </label>
+        <textarea
+          pInputTextarea
+          id="descFaq"
+          formControlName="descFaq"
+          placeholder="Escribe la respuesta detallada..."
+          rows="8"
+          class="w-full"
+          [class.p-invalid]="hasError('descFaq', 'required') || hasError('descFaq', 'maxlength')"
+        ></textarea>
+        @if (hasError('descFaq', 'required')) {
+          <small class="text-red-500 mt-1 block">La respuesta es requerida</small>
+        }
+        @if (hasError('descFaq', 'maxlength')) {
+          <small class="text-red-500 mt-1 block">La respuesta no puede exceder 2000 caracteres</small>
+        }
+        <small class="text-muted-color mt-1 block">
+          {{ faqForm.get('descFaq')?.value?.length || 0 }}/2000 caracteres
+        </small>
+      </div>
+
+    </div>
+  </form>
+
+  <!-- Footer Actions -->
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end gap-3 p-4 border-t border-surface-200">
+      <p-button
+        label="Cancelar"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="closeDrawer()"
+        [disabled]="isSaving()"
+      />
+      <p-button
+        [label]="getButtonLabel()"
+        severity="primary"
+        (onClick)="onSubmit()"
+        [loading]="isSaving()"
+        [disabled]="faqForm.invalid"
+      />
+    </div>
+  </ng-template>
+</p-drawer>
