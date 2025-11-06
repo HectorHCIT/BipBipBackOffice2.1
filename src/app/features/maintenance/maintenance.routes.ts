@@ -8,8 +8,8 @@ import { Routes } from '@angular/router';
  * - Currencies and Countries (Monedas y Países) ✅
  * - Prices per Kilometer Delivery (Precios por Kilómetro) ✅
  * - Credentials and Permissions (Credenciales y Permisos) ✅
- * - App Configs (Configuraciones de App) - TODO
- * - Automatic Assignment (Asignación Automática) - TODO
+ * - App Configs (Configuraciones de App) ✅
+ * - Automatic Assignment (Asignación Automática) ✅
  * - Differentiated Payment (Pagos Diferenciados) ✅
  *
  * Estructura:
@@ -52,18 +52,16 @@ export const MAINTENANCE_ROUTES: Routes = [
     path: 'differentiated-payment',
     loadChildren: () => import('./differentiated-payment/differentiated-payment.routes').then(m => m.PAYMENT_ROUTES),
     title: 'Pagos Diferenciados'
-  }
-  // TODO: Agregar más submódulos de mantenimiento aquí
-  /*
-  {
-    path: 'app-configuration',
-    loadChildren: () => import('./app-configs/app-configs.routes').then(m => m.APP_CONFIGS_ROUTES),
-    title: 'Configuración de App'
   },
   {
     path: 'automatic-assignment',
     loadChildren: () => import('./automatic-assignment/automatic-assignment.routes').then(m => m.AUTOMATIC_ASSIGNMENT_ROUTES),
     title: 'Asignación Automática'
+  },
+  {
+    path: 'app-configuration',
+    loadChildren: () => import('./app-configuration/app-configuration.routes').then(m => m.APP_CONFIG_ROUTES),
+    title: 'Configuración de App'
   }
-  */
+  // TODO: Agregar más submódulos de mantenimiento aquí
 ];

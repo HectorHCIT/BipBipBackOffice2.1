@@ -18,6 +18,7 @@ import { CardModule } from 'primeng/card';
 import { ToastModule } from 'primeng/toast';
 import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { TagModule } from 'primeng/tag';
 import { MenuItem, MessageService, ConfirmationService } from 'primeng/api';
 
 // Services and models
@@ -25,7 +26,6 @@ import { SignalMonitoringService } from '../../services/signal-monitoring.servic
 import {
   IMonitoringSignalRRedis,
   CityList,
-  getPaymentMethodName,
 } from '../../models/signal-monitoring.model';
 
 @Component({
@@ -41,6 +41,7 @@ import {
     ToastModule,
     BreadcrumbModule,
     ConfirmDialogModule,
+    TagModule,
   ],
   templateUrl: './signal-monitoring.component.html',
   styleUrl: './signal-monitoring.component.scss',
@@ -76,9 +77,9 @@ export class SignalMonitoringComponent implements OnInit {
     }
 
     return orders.filter((order) => {
-      const orderNumber = order.idOrder.toString();
-      const restaurantName = order.store.name.toLowerCase();
-      const commandNumber = order.payment.idCommand.toString();
+      const orderNumber = order.numOrder.toString();
+      const restaurantName = order.store.store.toLowerCase();
+      const commandNumber = order.payment.command.toString();
 
       return (
         orderNumber.includes(search) ||
@@ -87,9 +88,6 @@ export class SignalMonitoringComponent implements OnInit {
       );
     });
   });
-
-  // Helper para acceder a la función desde el template
-  getPaymentMethodName = getPaymentMethodName;
 
   ngOnInit(): void {
     this.loadCities();
@@ -157,7 +155,7 @@ export class SignalMonitoringComponent implements OnInit {
    */
   confirmDelete(order: IMonitoringSignalRRedis): void {
     this.confirmationService.confirm({
-      message: `¿Está seguro de eliminar la orden #${order.idOrder} del restaurante ${order.store.name}?`,
+      message: `¿Está seguro de eliminar la orden #${order.numOrder} del restaurante ${order.store.store}?`,
       header: 'Confirmar Eliminación',
       icon: 'pi pi-exclamation-triangle',
       acceptLabel: 'Sí, eliminar',
@@ -179,12 +177,12 @@ export class SignalMonitoringComponent implements OnInit {
       return;
     }
 
-    this.signalMonitoringService.deleteOrder(cityId, order.idOrder).subscribe({
+    this.signalMonitoringService.deleteOrder(cityId, order.numOrder).subscribe({
       next: () => {
         this.messageService.add({
           severity: 'success',
           summary: 'Éxito',
-          detail: `Orden #${order.idOrder} eliminada correctamente`,
+          detail: `Orden #${order.numOrder} eliminada correctamente`,
         });
 
         // Recargar órdenes

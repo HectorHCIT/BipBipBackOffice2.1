@@ -27,65 +27,76 @@ export interface CityList {
  * Cliente de la orden
  */
 export interface Customer {
-  idCustomer: number;
+  id: number;
+  imageUrl: string;
   name: string;
-  phone: string;
   address: string;
-  lat: number;
-  lng: number;
+  phoneNumber: string;
+  alternativePhoneNumber: string;
+  latitude: number;
+  longitude: number;
 }
 
 /**
  * Tienda/Restaurante
  */
 export interface Store {
-  idStore: number;
-  idBrand: number;
-  name: string;
-  phone: string;
+  id: number;
+  store: string;
+  imageUrl: string;
   address: string;
-  lat: number;
-  lng: number;
+  latitude: number;
+  longitude: number;
 }
 
 /**
  * Información de pago
  */
 export interface Payment {
-  paymentType: number;
-  total: number;
+  command: number;
+  type: string; // 'cash', 'card', etc.
+  status: string;
+  totalOrder: number;
+  paymentWith: number;
   change: number;
-  idCommand: number;
 }
 
 /**
  * Estado de la orden en el historial
  */
 export interface OrderStatus {
-  idOrderStatus: number;
-  name: string;
-  description: string;
-  time: string;
+  Title: string;
+  date: string;
+  type: string;
 }
 
 /**
  * Estado actual de la orden
  */
 export interface CurrentStatus {
-  idOrderStatus: number;
-  name: string;
+  Title: string;
+  date: string;
+  type: string;
 }
 
 /**
  * Orden completa en Redis/SignalR
  */
 export interface IMonitoringSignalRRedis {
-  idOrder: number;
-  dateOrder: string;
+  numOrder: number;
+  deliveryCode: string | null;
+  driver: string;
+  tip: number;
+  deliveryExpress: boolean;
+  city: number;
+  time: string;
+  date: string;
+  channel: string;
+  channelId: string;
   customer: Customer;
   store: Store;
   payment: Payment;
-  status: OrderStatus[];
+  orderStatus: OrderStatus[];
   currentStatus: CurrentStatus;
 }
 

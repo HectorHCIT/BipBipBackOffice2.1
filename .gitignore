@@ -52,3 +52,4 @@ old/
 
 .env
 .env.prod
+swagger.json

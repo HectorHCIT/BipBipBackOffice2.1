@@ -1,0 +1,19 @@
+[
+  [
+    "accordion",
+    {
+      "data": {
+        "name": "accordion",
+        "description": "Accordion groups a collection of contents in tabs.",
+        "importStatement": "import { Accordion } from 'primeng/accordion';",
+        "moduleImport": "import { AccordionModule } from 'primeng/accordion';",
+        "basicUsage": "import { AccordionModule } from 'primeng/accordion';",
+        "properties": [],
+        "events": [],
+        "methods": []
+      },
+      "timestamp": 1762441224587,
+      "ttl": 86400000
+    }
+  ]
+]
