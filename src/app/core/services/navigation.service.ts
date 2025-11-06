@@ -1,4 +1,4 @@
-import { Injectable, signal, computed, inject } from '@angular/core';
+import { Injectable, signal, computed, inject, untracked } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { Firestore, collection, query, where, onSnapshot, Unsubscribe } from '@angular/fire/firestore';
@@ -302,39 +302,42 @@ export class NavigationService {
       return;
     }
 
-    // Query para SAC
-    const qSAC = query(
-      collection(this.firestore, 'SAC'),
-      where('userId', '==', userId)
-    );
+    // Ejecutar las llamadas a Firebase fuera del contexto de signals para evitar warnings
+    untracked(() => {
+      // Query para SAC
+      const qSAC = query(
+        collection(this.firestore, 'SAC'),
+        where('userId', '==', userId)
+      );
 
-    // Query para SACDriver
-    const qDriver = query(
-      collection(this.firestore, 'SACDriver'),
-      where('userId', '==', userId)
-    );
+      // Query para SACDriver
+      const qDriver = query(
+        collection(this.firestore, 'SACDriver'),
+        where('userId', '==', userId)
+      );
 
-    // Suscripción a SAC
-    const unsubSAC = onSnapshot(
-      qSAC,
-      (snap) => {
-        this._countSAC.set(snap.size);
-        this.updateChatBadges();
-      },
-      (err) => console.error('Error SAC:', err)
-    );
-    this.unsubscribes.push(unsubSAC);
+      // Suscripción a SAC
+      const unsubSAC = onSnapshot(
+        qSAC,
+        (snap) => {
+          this._countSAC.set(snap.size);
+          this.updateChatBadges();
+        },
+        (err) => console.error('Error SAC:', err)
+      );
+      this.unsubscribes.push(unsubSAC);
 
-    // Suscripción a SACDriver
-    const unsubDriver = onSnapshot(
-      qDriver,
-      (snap) => {
-        this._countSACDriver.set(snap.size);
-        this.updateChatBadges();
-      },
-      (err) => console.error('Error SACDriver:', err)
-    );
-    this.unsubscribes.push(unsubDriver);
+      // Suscripción a SACDriver
+      const unsubDriver = onSnapshot(
+        qDriver,
+        (snap) => {
+          this._countSACDriver.set(snap.size);
+          this.updateChatBadges();
+        },
+        (err) => console.error('Error SACDriver:', err)
+      );
+      this.unsubscribes.push(unsubDriver);
+    });
   }
 
   /**

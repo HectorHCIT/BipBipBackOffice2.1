@@ -64,94 +64,127 @@
     </div>
   </div>
 
-  <!-- OrderList with Drag & Drop -->
-  <div class="bg-white rounded-lg shadow-sm p-6">
+  <!-- Table with Drag & Drop -->
+  <div class="rounded-lg shadow-sm">
     @if (isLoading()) {
       <!-- Loading Skeleton -->
-      <div class="space-y-4">
+      <div class="p-6">
         @for (item of [1, 2, 3, 4, 5]; track item) {
-          <p-skeleton height="80px" />
-        }
-      </div>
-    } @else if (filteredFaqs().length === 0) {
-      <!-- Empty State -->
-      <div class="flex flex-col items-center gap-3 py-12">
-        <i class="pi pi-inbox text-6xl text-gray-400"></i>
-        <p class="text-gray-600 text-lg">No se encontraron preguntas frecuentes</p>
-        @if (statusFilter() !== 'all' || searchTerm()) {
-          <p-button
-            label="Limpiar filtros"
-            [outlined]="true"
-            size="small"
-            (onClick)="statusFilter.set('all'); searchTerm.set('')"
-          />
+          <div class="mb-4">
+            <p-skeleton height="60px" />
+          </div>
         }
       </div>
     } @else {
-      <p-orderList
-        [value]="filteredFaqs()"
-        [dragdrop]="true"
-        (onReorder)="onReorder()"
-        [listStyle]="{ 'max-height': '600px' }"
-      >
-        <ng-template let-faq pTemplate="item">
-          <div class="flex items-center justify-between p-4 border-b border-surface-200 hover:bg-surface-50">
-            <!-- Drag Handle + Content -->
-            <div class="flex items-center gap-4 flex-1">
-              <!-- Drag Handle Icon -->
-              <i class="pi pi-bars text-gray-400 cursor-move"></i>
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead class="bg-surface-50 border-b border-surface-200">
+            <tr>
+              <th class="p-4 text-left text-sm font-semibold" style="width: 50px;"></th>
+              <th class="p-4 text-left text-sm font-semibold" style="width: 80px;">ID</th>
+              <th class="p-4 text-left text-sm font-semibold">Pregunta</th>
+              <th class="p-4 text-left text-sm font-semibold">Respuesta</th>
+              <th class="p-4 text-left text-sm font-semibold" style="width: 120px;">Estado</th>
+              <th class="p-4 text-left text-sm font-semibold" style="width: 100px;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody
+            cdkDropList
+            (cdkDropListDropped)="onDrop($event)"
+            class="divide-y divide-surface-200"
+          >
+            @if (filteredFaqs().length === 0) {
+              <tr>
+                <td colspan="6" class="text-center py-8">
+                  <div class="flex flex-col items-center gap-3">
+                    <i class="pi pi-inbox text-4xl text-gray-400"></i>
+                    <p class="text-gray-600">No se encontraron preguntas frecuentes</p>
+                    @if (statusFilter() !== 'all' || searchTerm()) {
+                      <p-button
+                        label="Limpiar filtros"
+                        [outlined]="true"
+                        size="small"
+                        (onClick)="statusFilter.set('all'); searchTerm.set('')"
+                      />
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+            @for (faq of filteredFaqs(); track faq.idFaq) {
+              <tr
+                cdkDrag
+                class="hover:bg-surface-50 transition-colors"
+                [class.bg-surface-100]="!faq.isActive"
+              >
+                <!-- Drag Handle -->
+                <td class="p-4 text-center">
+                  <div cdkDragHandle class="cursor-move inline-flex">
+                    <i class="pi pi-bars text-gray-400"></i>
+                  </div>
+                </td>
 
-              <!-- FAQ Content -->
-              <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-3 mb-2">
-                  <span class="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                    #{{ faq.idFaq }}
-                  </span>
-                  <p-tag
-                    [value]="getStatusLabel(faq.isActive)"
-                    [severity]="getStatusSeverity(faq.isActive)"
-                    styleClass="text-xs"
+                <!-- ID -->
+                <td class="p-4 text-center">
+                  <span class="font-medium text-gray-700">{{ faq.idFaq }}</span>
+                </td>
+
+                <!-- Pregunta -->
+                <td class="p-4">
+                  <div class="font-semibold">{{ faq.faq }}</div>
+                </td>
+
+                <!-- Respuesta -->
+                <td class="p-4">
+                  <div class="text-sm text-gray-600 line-clamp-2">
+                    {{ faq.description }}
+                  </div>
+                </td>
+
+                <!-- Estado -->
+                <td class="p-4">
+                  <div class="flex items-center gap-2">
+                    <p-toggleSwitch
+                      [ngModel]="faq.isActive"
+                      (ngModelChange)="toggleFaqStatus(faq, $event)"
+                    />
+                    <p-tag
+                      [value]="getStatusLabel(faq.isActive)"
+                      [severity]="getStatusSeverity(faq.isActive)"
+                    />
+                  </div>
+                </td>
+
+                <!-- Acciones -->
+                <td class="p-4">
+                  <p-button
+                    icon="pi pi-pencil"
+                    [outlined]="true"
+                    severity="info"
+                    size="small"
+                    (onClick)="editFaq(faq)"
+                    pTooltip="Editar pregunta"
+                    tooltipPosition="top"
                   />
-                </div>
-
-                <h3 class="font-semibold text-gray-900 mb-1 truncate">
-                  {{ faq.faq }}
-                </h3>
-
-                <p class="text-sm text-gray-600 line-clamp-2">
-                  {{ faq.description }}
-                </p>
-              </div>
-            </div>
-
-            <!-- Actions -->
-            <div class="flex items-center gap-2 ml-4">
-              <p-toggleSwitch
-                [ngModel]="faq.isActive"
-                (ngModelChange)="toggleFaqStatus(faq, $event)"
-                pTooltip="Cambiar estado"
-                tooltipPosition="top"
-              />
-
-              <p-button
-                icon="pi pi-pencil"
-                [outlined]="true"
-                severity="info"
-                size="small"
-                (onClick)="editFaq(faq)"
-                pTooltip="Editar pregunta"
-                tooltipPosition="top"
-              />
-            </div>
-          </div>
-        </ng-template>
-      </p-orderList>
-
-      <!-- Info Text -->
-      <div class="mt-4 text-center text-sm text-gray-500">
-        <i class="pi pi-info-circle mr-2"></i>
-        Arrastra las preguntas para reordenarlas. Total: {{ filteredFaqs().length }} pregunta(s)
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
       </div>
+
+      <!-- Pagination -->
+      @if (filteredFaqs().length > 10) {
+        <div class="p-4 border-t border-surface-200">
+          <p-paginator
+            [rows]="10"
+            [totalRecords]="filteredFaqs().length"
+            [rowsPerPageOptions]="[10, 25, 50]"
+            [showCurrentPageReport]="true"
+            currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} preguntas"
+          />
+        </div>
+      }
     }
   </div>
 

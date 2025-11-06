@@ -1,0 +1,268 @@
+<div class="min-h-screen bg-gray-50 p-6">
+  <!-- Breadcrumb -->
+  <p-breadcrumb
+    [model]="breadcrumbItems"
+    [home]="home"
+    class="mb-4"
+  />
+
+  <!-- Header -->
+  <div class="rounded-lg shadow-sm p-6 mb-6">
+    <div class="mb-6">
+      <h1 class="text-3xl font-bold mb-2">Usuarios Registrados</h1>
+      <p class="text-gray-600">Gestiona los usuarios registrados en la aplicación móvil</p>
+    </div>
+
+    <!-- Status Filter Buttons -->
+    <div class="flex flex-wrap gap-3 mb-6">
+      <p-button
+        [label]="'Todos (' + metadata().totalCount + ')'"
+        [outlined]="statusFilter() !== 'all'"
+        [severity]="statusFilter() === 'all' ? 'primary' : 'secondary'"
+        (onClick)="setStatusFilter('all')"
+      />
+      <p-button
+        [label]="'Activos (' + metadata().totalActive + ')'"
+        [outlined]="statusFilter() !== 'active'"
+        [severity]="statusFilter() === 'active' ? 'success' : 'secondary'"
+        (onClick)="setStatusFilter('active')"
+      />
+      <p-button
+        [label]="'Inactivos (' + metadata().totalInactive + ')'"
+        [outlined]="statusFilter() !== 'inactive'"
+        [severity]="statusFilter() === 'inactive' ? 'danger' : 'secondary'"
+        (onClick)="setStatusFilter('inactive')"
+      />
+      <p-button
+        [label]="'Penalizados (' + metadata().totalLockedPenalty + ')'"
+        [outlined]="statusFilter() !== 'blocked'"
+        [severity]="statusFilter() === 'blocked' ? 'warn' : 'secondary'"
+        (onClick)="setStatusFilter('blocked')"
+      />
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="flex flex-col md:flex-row gap-4">
+      <!-- Search Input -->
+      <div class="flex-1">
+        <p-iconfield iconPosition="left">
+          <p-inputicon styleClass="pi pi-search" />
+          <input
+            pInputText
+            type="text"
+            [(ngModel)]="searchTerm"
+            (ngModelChange)="onSearchChange()"
+            placeholder="Buscar por nombre o teléfono..."
+            class="w-full"
+          />
+        </p-iconfield>
+      </div>
+
+      <!-- Filters Button -->
+      <p-button
+        label="Filtros"
+        icon="pi pi-filter"
+        [outlined]="true"
+        (onClick)="openFiltersDrawer()"
+        [badge]="hasActiveFilters() ? '●' : ''"
+        badgeClass="p-badge-danger"
+      />
+    </div>
+
+    <!-- Active Filters Tags -->
+    @if (hasActiveFilters()) {
+      <div class="mt-4 flex flex-wrap items-center gap-2">
+        <span class="text-sm font-medium text-gray-600">Filtros activos:</span>
+
+        @if (dateFrom() || dateTo()) {
+          <p-tag
+            [value]="(dateFrom() ? formatDate(dateFrom()!) : '...') + ' → ' + (dateTo() ? formatDate(dateTo()!) : '...')"
+            severity="info"
+            icon="pi pi-calendar"
+          />
+        }
+
+        @for (country of selectedCountries(); track country) {
+          <p-tag
+            value="País seleccionado"
+            severity="info"
+            icon="pi pi-map-marker"
+          />
+        }
+
+        @for (city of selectedCities(); track city) {
+          <p-tag
+            value="Ciudad seleccionada"
+            severity="success"
+            icon="pi pi-map"
+          />
+        }
+
+        <p-button
+          label="Limpiar filtros"
+          [text]="true"
+          size="small"
+          (onClick)="clearAllFilters()"
+        />
+      </div>
+    }
+  </div>
+
+  <!-- Table -->
+  <div class="rounded-lg shadow-sm">
+    @if (isLoading()) {
+      <!-- Loading Skeleton -->
+      <div class="p-6">
+        @for (item of [1, 2, 3, 4, 5]; track item) {
+          <div class="mb-4">
+            <p-skeleton height="80px" />
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead class="bg-surface-50 border-b border-surface-200">
+            <tr>
+              <th class="p-4 text-left text-sm font-semibold">Nombre</th>
+              <th class="p-4 text-left text-sm font-semibold">Teléfono</th>
+              <th class="p-4 text-left text-sm font-semibold">Email</th>
+              <th class="p-4 text-left text-sm font-semibold">País y Ciudad</th>
+              <th class="p-4 text-left text-sm font-semibold">Fecha de R.</th>
+              <th class="p-4 text-left text-sm font-semibold">Días de R.</th>
+              <th class="p-4 text-left text-sm font-semibold">Nivel y Pts</th>
+              <th class="p-4 text-left text-sm font-semibold">Estado</th>
+              <th class="p-4 text-left text-sm font-semibold" style="width: 100px;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-surface-200">
+            @if (users().length === 0) {
+              <tr>
+                <td colspan="9" class="text-center py-8">
+                  <div class="flex flex-col items-center gap-3">
+                    <i class="pi pi-inbox text-4xl "></i>
+                    <p class="">No se encontraron usuarios registrados</p>
+                    @if (statusFilter() !== 'all' || searchTerm() || hasActiveFilters()) {
+                      <p-button
+                        label="Limpiar filtros"
+                        [outlined]="true"
+                        size="small"
+                        (onClick)="statusFilter.set('all'); searchTerm.set(''); clearAllFilters()"
+                      />
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+            @for (user of users(); track user.customerId) {
+              <tr class="hover:bg-surface-50 transition-colors">
+                <!-- Nombre -->
+                <td class="p-4">
+                  <div
+                    class="font-semibold truncate max-w-[200px]"
+                    [pTooltip]="user.customerFullName"
+                    tooltipPosition="top"
+                  >
+                    {{ user.customerFullName }}
+                  </div>
+                </td>
+
+                <!-- Teléfono -->
+                <td class="p-4">
+                  <div class="text-sm">{{ user.customerPhone }}</div>
+                </td>
+
+                <!-- Email -->
+                <td class="p-4">
+                  <div
+                    class="text-sm truncate max-w-[200px]"
+                    [pTooltip]="user.email"
+                    tooltipPosition="top"
+                  >
+                    {{ user.email }}
+                  </div>
+                </td>
+
+                <!-- País y Ciudad -->
+                <td class="p-4">
+                  <div class="flex flex-col gap-1">
+                    <span class="text-sm font-medium">{{ user.countryName }}</span>
+                    <span class="text-xs ">{{ user.cityName }}</span>
+                  </div>
+                </td>
+
+                <!-- Fecha de Registro -->
+                <td class="p-4">
+                  <div class="text-sm">{{ formatDate(user.customerCreatedAt) }}</div>
+                </td>
+
+                <!-- Días Registrados -->
+                <td class="p-4">
+                  <div class="text-sm text-center">
+                    <span class="font-semibold text-primary">{{ user.daysRegistered }}</span>
+                  </div>
+                </td>
+
+                <!-- Nivel de Lealtad y Puntos -->
+                <td class="p-4">
+                  <div class="flex flex-col gap-1">
+                    <span class="text-sm font-medium">{{ user.nameLoyaltyLevel }}</span>
+                    <span class="text-xs text-gray-500">{{ user.pointsEarned }} pts</span>
+                  </div>
+                </td>
+
+                <!-- Estado -->
+                <td class="p-4">
+                  <p-tag
+                    [value]="getStatusLabel(user.customerStatus, user.isBlocked)"
+                    [severity]="getStatusSeverity(user.customerStatus, user.isBlocked)"
+                  />
+                </td>
+
+                <!-- Acciones -->
+                <td class="p-4">
+                  <p-button
+                    icon="pi pi-ellipsis-v"
+                    [text]="true"
+                    [rounded]="true"
+                    (onClick)="menu.toggle($event)"
+                  />
+                  <p-menu
+                    #menu
+                    [model]="getUserActions(user)"
+                    [popup]="true"
+                  />
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      @if (metadata().totalCount > 0) {
+        <div class="p-4 border-t border-surface-200">
+          <p-paginator
+            [first]="(currentPage() - 1) * pageSize()"
+            [rows]="pageSize()"
+            [totalRecords]="metadata().totalCount"
+            [rowsPerPageOptions]="[5, 10, 15, 20]"
+            [showCurrentPageReport]="true"
+            currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} usuarios"
+            (onPageChange)="onPageChange($event)"
+          />
+        </div>
+      }
+    }
+  </div>
+
+  <!-- Toast for notifications -->
+  <p-toast position="top-right" />
+</div>
+
+<!-- Filters Sidebar -->
+<app-filters-sidebar
+  [visible]="showFiltersDrawer()"
+  (visibleChange)="showFiltersDrawer.set($event)"
+  (onApplyFilters)="onFiltersApplied($event)"
+/>

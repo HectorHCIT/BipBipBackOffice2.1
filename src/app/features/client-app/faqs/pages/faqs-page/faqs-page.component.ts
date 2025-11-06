@@ -1,7 +1,8 @@
 import { Component, ChangeDetectionStrategy, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { OrderListModule } from 'primeng/orderlist';
+import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
+import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { IconFieldModule } from 'primeng/iconfield';
@@ -13,6 +14,7 @@ import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { SkeletonModule } from 'primeng/skeleton';
 import { TooltipModule } from 'primeng/tooltip';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { PaginatorModule } from 'primeng/paginator';
 import { MessageService, MenuItem, ConfirmationService } from 'primeng/api';
 
 import { FaqService } from '../../services/faq.service';
@@ -25,7 +27,8 @@ import { FaqFormComponent } from '../../components/faq-form/faq-form.component';
   imports: [
     CommonModule,
     FormsModule,
-    OrderListModule,
+    DragDropModule,
+    TableModule,
     ButtonModule,
     InputTextModule,
     IconFieldModule,
@@ -37,6 +40,7 @@ import { FaqFormComponent } from '../../components/faq-form/faq-form.component';
     SkeletonModule,
     TooltipModule,
     ConfirmDialogModule,
+    PaginatorModule,
     FaqFormComponent
   ],
   providers: [MessageService, ConfirmationService],
@@ -159,17 +163,38 @@ export class FaqsPageComponent implements OnInit {
     });
   }
 
-  onReorder(): void {
-    // Update all FAQ positions based on the new order
-    const faqs = this.filteredFaqs();
+  onDrop(event: CdkDragDrop<FaqList[]>): void {
+    // Get the current filtered list
+    const faqs = [...this.filteredFaqs()];
 
-    // Update each FAQ with its new position
+    // Move item in the array
+    moveItemInArray(faqs, event.previousIndex, event.currentIndex);
+
+    // Update the service state immediately for optimistic UI
+    const allFaqs = [...this.faqService.faqs()];
+    const updatedFaqs = allFaqs.map(faq => {
+      const newIndex = faqs.findIndex(f => f.idFaq === faq.idFaq);
+      if (newIndex !== -1) {
+        return { ...faq, sortOrderFaq: newIndex + 1 };
+      }
+      return faq;
+    });
+    this.faqService.faqs.set(updatedFaqs);
+
+    // Update each FAQ position in the backend
     faqs.forEach((faq, index) => {
       const newPosition = index + 1;
       if (faq.sortOrderFaq !== newPosition) {
         this.faqService.changeOrder(faq.idFaq, newPosition).subscribe({
           error: (error) => {
             console.error('Error updating FAQ order:', error);
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'No se pudo actualizar el orden de las preguntas'
+            });
+            // Reload on error to restore correct state
+            this.loadFaqs();
           }
         });
       }
@@ -180,9 +205,6 @@ export class FaqsPageComponent implements OnInit {
       summary: 'Éxito',
       detail: 'Orden actualizado correctamente'
     });
-
-    // Reload to get fresh data
-    setTimeout(() => this.loadFaqs(), 500);
   }
 
   getStatusLabel(isActive: boolean): string {

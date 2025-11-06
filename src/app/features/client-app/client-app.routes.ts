@@ -10,7 +10,7 @@ import { Routes } from '@angular/router';
  * - Channels (Canales de Comunicación) ✅
  * - Tips (Propinas) ✅
  * - FAQs (Preguntas Frecuentes) ✅
- * - Registered Users (Usuarios Registrados) 🔜
+ * - Registered Users (Usuarios Registrados) ✅
  * - SMS/Push Notifications (Notificaciones) 🔜
  */
 export const CLIENT_APP_ROUTES: Routes = [
@@ -33,6 +33,11 @@ export const CLIENT_APP_ROUTES: Routes = [
     path: 'frequently-question',
     loadChildren: () => import('./faqs/faqs.routes').then(m => m.FAQS_ROUTES),
     title: 'Preguntas Frecuentes'
+  },
+  {
+    path: 'user-registry',
+    loadChildren: () => import('./registered-users/registered-users.routes').then(m => m.REGISTERED_USERS_ROUTES),
+    title: 'Usuarios Registrados'
   }
-  // TODO: Agregar más submódulos aquí (Registered Users, Notifications)
+  // TODO: Agregar más submódulos aquí (Notifications)
 ];

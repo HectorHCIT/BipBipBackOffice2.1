@@ -69,7 +69,6 @@
             id="username"
             formControlName="userName"
             placeholder="Ingrese su nombre de usuario"
-            [disabled]="isLoading()"
             class="w-full"
           />
           @if (userName?.invalid && userName?.touched) {
@@ -91,7 +90,6 @@
             [toggleMask]="true"
             [feedback]="false"
             placeholder="Ingrese su contraseña"
-            [disabled]="isLoading()"
             styleClass="w-full"
             [inputStyleClass]="'w-full'"
           />

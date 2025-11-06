@@ -1,0 +1,187 @@
+<p-drawer
+  [(visible)]="visibleModel"
+  (visibleChange)="onVisibleChange($event)"
+  header="Filtros Avanzados"
+  position="right"
+  styleClass="w-full md:!w-[28rem]"
+  [blockScroll]="true"
+>
+  <form [formGroup]="filterForm" class="flex flex-col gap-6">
+    <!-- Date Range Filter -->
+    <div>
+      <h3 class="text-sm font-semibold mb-3">Rango de Fechas</h3>
+
+      <div class="flex flex-col gap-3">
+        <div>
+          <label for="from" class="block text-sm font-medium mb-2">Desde</label>
+          <p-datepicker
+            formControlName="from"
+            inputId="from"
+            [showIcon]="true"
+            iconDisplay="input"
+            [maxDate]="maxDate"
+            placeholder="Seleccionar fecha inicial"
+            styleClass="w-full"
+            dateFormat="dd/mm/yy"
+          />
+        </div>
+
+        <div>
+          <label for="to" class="block text-sm font-medium mb-2">Hasta</label>
+          <p-datepicker
+            formControlName="to"
+            inputId="to"
+            [showIcon]="true"
+            iconDisplay="input"
+            [maxDate]="maxDate"
+            placeholder="Seleccionar fecha final"
+            styleClass="w-full"
+            dateFormat="dd/mm/yy"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Countries Filter -->
+    <div>
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-sm font-semibold">Países</h3>
+        @if (countries().length > 0) {
+          <button
+            type="button"
+            class="text-xs text-primary cursor-pointer hover:underline"
+            (click)="selectAllCountries()"
+          >
+            Seleccionar todos
+          </button>
+        }
+      </div>
+
+      @if (isLoadingCountries()) {
+        <div class="flex items-center justify-center py-4">
+          <i class="pi pi-spinner pi-spin text-2xl text-gray-400"></i>
+        </div>
+      } @else {
+        <div class="flex flex-col gap-2 max-h-60 overflow-y-auto">
+          @for (country of countries(); track country.idCountry) {
+            <div class="flex items-center gap-2">
+              <p-checkbox
+                [binary]="true"
+                [ngModel]="isCountrySelected(country.idCountry)"
+                (ngModelChange)="onCountryChange(country.idCountry, { checked: $event })"
+                [ngModelOptions]="{ standalone: true }"
+                [inputId]="'country-' + country.idCountry"
+              />
+              <label
+                [for]="'country-' + country.idCountry"
+                class="text-sm cursor-pointer"
+              >
+                {{ country.countryName }}
+              </label>
+            </div>
+          }
+        </div>
+
+        <!-- Selected Countries Tags -->
+        @if (selectedCountries().length > 0) {
+          <div class="flex flex-wrap gap-2 mt-3">
+            @for (countryId of selectedCountries(); track countryId) {
+              <p-tag
+                [value]="getCountryName(countryId)"
+                severity="info"
+                styleClass="cursor-pointer"
+                (click)="removeCountry(countryId)"
+              >
+                <span class="flex items-center gap-1">
+                  {{ getCountryName(countryId) }}
+                  <i class="pi pi-times text-xs"></i>
+                </span>
+              </p-tag>
+            }
+          </div>
+        }
+      }
+    </div>
+
+    <!-- Cities Filter -->
+    @if (selectedCountries().length > 0) {
+      <div>
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-sm font-semibold">Ciudades</h3>
+          @if (filteredCities().length > 0) {
+            <button
+              type="button"
+              class="text-xs text-primary cursor-pointer hover:underline"
+              (click)="selectAllCities()"
+            >
+              Seleccionar todas
+            </button>
+          }
+        </div>
+
+        @if (isLoadingCities()) {
+          <div class="flex items-center justify-center py-4">
+            <i class="pi pi-spinner pi-spin text-2xl text-gray-400"></i>
+          </div>
+        } @else {
+          <div class="flex flex-col gap-2 max-h-60 overflow-y-auto">
+            @for (city of filteredCities(); track city.idCity) {
+              <div class="flex items-center gap-2">
+                <p-checkbox
+                  [binary]="true"
+                  [ngModel]="isCitySelected(city.idCity)"
+                  (ngModelChange)="onCityChange(city.idCity, { checked: $event })"
+                  [ngModelOptions]="{ standalone: true }"
+                  [inputId]="'city-' + city.idCity"
+                />
+                <label
+                  [for]="'city-' + city.idCity"
+                  class="text-sm cursor-pointer"
+                >
+                  {{ city.cityName }}
+                </label>
+              </div>
+            }
+          </div>
+
+          <!-- Selected Cities Tags -->
+          @if (selectedCities().length > 0) {
+            <div class="flex flex-wrap gap-2 mt-3">
+              @for (cityId of selectedCities(); track cityId) {
+                <p-tag
+                  [value]="getCityName(cityId)"
+                  severity="success"
+                  styleClass="cursor-pointer"
+                  (click)="removeCity(cityId)"
+                >
+                  <span class="flex items-center gap-1">
+                    {{ getCityName(cityId) }}
+                    <i class="pi pi-times text-xs"></i>
+                  </span>
+                </p-tag>
+              }
+            </div>
+          }
+        }
+      </div>
+    }
+  </form>
+
+  <!-- Footer Actions -->
+  <ng-template pTemplate="footer">
+    <div class="flex gap-3">
+      <p-button
+        label="Limpiar"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="clearFilters()"
+        styleClass="flex-1"
+      />
+      <p-button
+        label="Aplicar Filtros"
+        (onClick)="applyFilters()"
+        styleClass="flex-1"
+      />
+    </div>
+  </ng-template>
+</p-drawer>
