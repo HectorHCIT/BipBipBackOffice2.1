@@ -1,0 +1,81 @@
+<div class="p-4">
+  @if (isLoading()) {
+    <div class="flex justify-center items-center py-8">
+      <p-progressSpinner />
+    </div>
+  }
+
+  @if (error()) {
+    <p-message severity="error" [text]="error()!" styleClass="w-full mb-4" />
+  }
+
+  @if (loyalty()) {
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      <!-- Points Card -->
+      <p-card>
+        <ng-template pTemplate="header">
+          <div class="p-4 pb-0">
+            <h4 class="text-lg font-semibold m-0">Puntos Disponibles</h4>
+          </div>
+        </ng-template>
+        <div class="text-center">
+          <div class="text-4xl font-bold text-green-600 mb-2">
+            {{ loyalty()!.puntosDisponibles }}
+          </div>
+          <div class="text-sm text-gray-600">Puntos Acumulados</div>
+        </div>
+      </p-card>
+
+      <!-- Earned Points Card -->
+      <p-card>
+        <ng-template pTemplate="header">
+          <div class="p-4 pb-0">
+            <h4 class="text-lg font-semibold m-0">Puntos Ganados</h4>
+          </div>
+        </ng-template>
+        <div class="text-center">
+          <div class="text-4xl font-bold text-primary mb-2">
+            {{ loyalty()!.puntosObtenidos }}
+          </div>
+          <div class="text-sm text-gray-600">Puntos Totales Ganados</div>
+        </div>
+      </p-card>
+    </div>
+
+    <!-- Loyalty Level -->
+    <div class="mb-6">
+      <p-card>
+        <ng-template pTemplate="header">
+          <div class="p-4 pb-0">
+            <h4 class="text-lg font-semibold m-0">Nivel de Lealtad</h4>
+          </div>
+        </ng-template>
+        <div class="text-center">
+          <p-tag
+            [value]="loyalty()!.nivelLealtad"
+            severity="success"
+            styleClass="text-2xl px-4 py-2"
+          />
+        </div>
+      </p-card>
+    </div>
+
+    <!-- Benefits -->
+    @if (loyalty()!.benefits.length > 0) {
+      <div>
+        <h4 class="text-lg font-semibold mb-4">Beneficios</h4>
+        <p-message
+          severity="info"
+          text="Este usuario tiene beneficios activos"
+          styleClass="w-full"
+        />
+      </div>
+    } @else {
+      <p-message
+        severity="info"
+        text="No hay beneficios disponibles"
+        styleClass="w-full"
+      />
+    }
+  }
+</div>

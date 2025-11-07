@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, FormsModule } from '@angul
 import { DrawerModule } from 'primeng/drawer';
 import { ButtonModule } from 'primeng/button';
 import { DatePickerModule } from 'primeng/datepicker';
-import { CheckboxModule } from 'primeng/checkbox';
+import { MultiSelectModule } from 'primeng/multiselect';
 import { TagModule } from 'primeng/tag';
 import { MessageService } from 'primeng/api';
 
@@ -21,7 +21,7 @@ import { Country, City } from '../../models';
     DrawerModule,
     ButtonModule,
     DatePickerModule,
-    CheckboxModule,
+    MultiSelectModule,
     TagModule
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -56,7 +56,7 @@ export class FiltersSidebarComponent implements OnInit {
     if (selected.length === 0) {
       return [];
     }
-    return this.cities().filter(city => selected.includes(city.idCountry));
+    return this.cities().filter(city => selected.includes(city.codCountry));
   });
 
   readonly maxDate = new Date();
@@ -99,21 +99,24 @@ export class FiltersSidebarComponent implements OnInit {
     });
   }
 
-  onCountryChange(countryId: number, event: any): void {
-    const selected = [...this.selectedCountries()];
+  onCountryChange(selectedCountryIds: number[] | null): void {
+    // Handle null/undefined case (when clearing selection)
+    const newSelection = selectedCountryIds ?? [];
+    const previous = this.selectedCountries();
 
-    if (event.checked) {
-      selected.push(countryId);
+    const added = newSelection.filter(id => !previous.includes(id));
+    const removed = previous.filter(id => !newSelection.includes(id));
+
+    // Load cities for newly added countries
+    added.forEach(countryId => {
       this.loadCitiesForCountry(countryId);
-    } else {
-      const index = selected.indexOf(countryId);
-      if (index > -1) {
-        selected.splice(index, 1);
-      }
-      // Remove cities from this country
+    });
+
+    // Remove cities from deselected countries
+    if (removed.length > 0) {
       const citiesToRemove = this.cities()
-        .filter(city => city.idCountry === countryId)
-        .map(city => city.idCity);
+        .filter(city => removed.includes(city.codCountry))
+        .map(city => city.cityId);
 
       const updatedCities = this.selectedCities().filter(
         cityId => !citiesToRemove.includes(cityId)
@@ -121,7 +124,7 @@ export class FiltersSidebarComponent implements OnInit {
       this.selectedCities.set(updatedCities);
     }
 
-    this.selectedCountries.set(selected);
+    this.selectedCountries.set(newSelection);
   }
 
   private loadCitiesForCountry(countryId: number): void {
@@ -130,7 +133,7 @@ export class FiltersSidebarComponent implements OnInit {
       next: (cities) => {
         const existingCities = this.cities();
         const newCities = cities.filter(
-          city => !existingCities.some(ec => ec.idCity === city.idCity)
+          city => !existingCities.some(ec => ec.cityId === city.cityId)
         );
         this.cities.set([...existingCities, ...newCities]);
         this.isLoadingCities.set(false);
@@ -145,72 +148,6 @@ export class FiltersSidebarComponent implements OnInit {
         this.isLoadingCities.set(false);
       }
     });
-  }
-
-  onCityChange(cityId: number, event: any): void {
-    const selected = [...this.selectedCities()];
-
-    if (event.checked) {
-      selected.push(cityId);
-    } else {
-      const index = selected.indexOf(cityId);
-      if (index > -1) {
-        selected.splice(index, 1);
-      }
-    }
-
-    this.selectedCities.set(selected);
-  }
-
-  selectAllCountries(): void {
-    const allCountryIds = this.countries().map(c => c.idCountry);
-    this.selectedCountries.set(allCountryIds);
-
-    // Load cities for all countries
-    allCountryIds.forEach(id => {
-      this.loadCitiesForCountry(id);
-    });
-  }
-
-  selectAllCities(): void {
-    const allCityIds = this.filteredCities().map(c => c.idCity);
-    this.selectedCities.set(allCityIds);
-  }
-
-  isCountrySelected(countryId: number): boolean {
-    return this.selectedCountries().includes(countryId);
-  }
-
-  isCitySelected(cityId: number): boolean {
-    return this.selectedCities().includes(cityId);
-  }
-
-  removeCountry(countryId: number): void {
-    const selected = this.selectedCountries().filter(id => id !== countryId);
-    this.selectedCountries.set(selected);
-
-    // Remove cities from this country
-    const citiesToRemove = this.cities()
-      .filter(city => city.idCountry === countryId)
-      .map(city => city.idCity);
-
-    const updatedCities = this.selectedCities().filter(
-      cityId => !citiesToRemove.includes(cityId)
-    );
-    this.selectedCities.set(updatedCities);
-  }
-
-  removeCity(cityId: number): void {
-    const selected = this.selectedCities().filter(id => id !== cityId);
-    this.selectedCities.set(selected);
-  }
-
-  getCountryName(countryId: number): string {
-    return this.countries().find(c => c.idCountry === countryId)?.countryName ?? '';
-  }
-
-  getCityName(cityId: number): string {
-    return this.cities().find(c => c.idCity === cityId)?.cityName ?? '';
   }
 
   applyFilters(): void {

@@ -1,0 +1,151 @@
+<div class="p-4">
+  <!-- Create Permission Form -->
+  <p-card class="mb-6">
+    <ng-template pTemplate="header">
+      <div class="p-4 pb-0">
+        <h3 class="text-xl font-semibold m-0">Crear Permiso Especial</h3>
+      </div>
+    </ng-template>
+
+    <form [formGroup]="permissionForm()" (ngSubmit)="onSubmit()" class="space-y-4">
+      <!-- City Selection -->
+      <div>
+        <label for="city" class="block text-sm font-medium mb-2">Ciudad</label>
+        <p-select
+          id="city"
+          formControlName="cityId"
+          [options]="cities()"
+          optionLabel="cityName"
+          optionValue="cityId"
+          placeholder="Seleccione una ciudad"
+          styleClass="w-full"
+          (onChange)="onCityChange()"
+        />
+        @if (permissionForm().get('cityId')?.invalid && permissionForm().get('cityId')?.touched) {
+          <small class="text-red-600">La ciudad es requerida</small>
+        }
+      </div>
+
+      <!-- Brand Selection -->
+      <div>
+        <label for="brand" class="block text-sm font-medium mb-2">Marca</label>
+        <p-select
+          id="brand"
+          formControlName="brandId"
+          [options]="brands()"
+          optionLabel="brandName"
+          optionValue="brandId"
+          placeholder="Seleccione una marca"
+          styleClass="w-full"
+          [disabled]="!permissionForm().get('cityId')?.value"
+          (onChange)="onBrandChange()"
+        />
+        @if (permissionForm().get('brandId')?.invalid && permissionForm().get('brandId')?.touched) {
+          <small class="text-red-600">La marca es requerida</small>
+        }
+      </div>
+
+      <!-- Store Selection -->
+      <div>
+        <label for="store" class="block text-sm font-medium mb-2">Tienda</label>
+        <p-select
+          id="store"
+          formControlName="storeId"
+          [options]="stores()"
+          optionLabel="storeName"
+          optionValue="storeId"
+          placeholder="Seleccione una tienda"
+          styleClass="w-full"
+          [disabled]="!permissionForm().get('brandId')?.value"
+        />
+        @if (permissionForm().get('storeId')?.invalid && permissionForm().get('storeId')?.touched) {
+          <small class="text-red-600">La tienda es requerida</small>
+        }
+      </div>
+
+      <!-- Error Message -->
+      @if (errorForm()) {
+        <p-message severity="error" [text]="errorForm()!" styleClass="w-full" />
+      }
+
+      <!-- Success Message -->
+      @if (successForm()) {
+        <p-message severity="success" [text]="successForm()!" styleClass="w-full" />
+      }
+
+      <!-- Actions -->
+      <div class="flex justify-end gap-2">
+        <p-button
+          type="button"
+          label="Cancelar"
+          severity="secondary"
+          [outlined]="true"
+          (onClick)="resetForm()"
+        />
+        <p-button
+          type="submit"
+          label="Crear Permiso"
+          [loading]="isSubmitting()"
+          [disabled]="permissionForm().invalid"
+        />
+      </div>
+    </form>
+  </p-card>
+
+  <!-- Existing Permissions List -->
+  <p-card>
+    <ng-template pTemplate="header">
+      <div class="p-4 pb-0">
+        <h3 class="text-xl font-semibold m-0">Permisos Existentes</h3>
+      </div>
+    </ng-template>
+
+    @if (isLoadingPermissions()) {
+      <div class="flex justify-center items-center py-8">
+        <p-progressSpinner />
+      </div>
+    }
+
+    @if (errorPermissions()) {
+      <p-message severity="error" [text]="errorPermissions()!" styleClass="w-full" />
+    }
+
+    @if (permissions() && permissions()!.length > 0) {
+      <p-table [value]="permissions()!" styleClass="p-datatable-sm">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Ciudad</th>
+            <th>Marca</th>
+            <th>Tienda</th>
+            <th>Fecha de Creación</th>
+            <th>Acciones</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-permission>
+          <tr>
+            <td>{{ permission.cityName }}</td>
+            <td>{{ permission.brandName }}</td>
+            <td>{{ permission.storeName }}</td>
+            <td>{{ permission.createdDate }}</td>
+            <td>
+              <p-button
+                icon="pi pi-trash"
+                severity="danger"
+                [text]="true"
+                [rounded]="true"
+                size="small"
+                (onClick)="deletePermission(permission.storeId)"
+              />
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    } @else if (!isLoadingPermissions() && !errorPermissions()) {
+      <p-message
+        severity="info"
+        text="No hay permisos especiales configurados"
+        styleClass="w-full"
+      />
+    }
+  </p-card>
+</div>

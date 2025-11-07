@@ -1,0 +1,60 @@
+<div class="p-4">
+  @if (isLoading()) {
+    <div class="flex justify-center items-center py-8">
+      <p-progressSpinner />
+    </div>
+  }
+
+  @if (error()) {
+    <p-message severity="error" [text]="error()!" styleClass="w-full mb-4" />
+  }
+
+  @if (orders()) {
+    <p-table
+      [value]="orders()!.records"
+      [lazy]="true"
+      [paginator]="true"
+      [rows]="pageSize()"
+      [totalRecords]="orders()!.metadata.totalCount"
+      [first]="(currentPage() - 1) * pageSize()"
+      (onLazyLoad)="onPageChange($event)"
+      [rowsPerPageOptions]="[10, 20, 50]"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} órdenes"
+      styleClass="p-datatable-sm"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Orden ID</th>
+          <th>Marca</th>
+          <th>Fecha</th>
+          <th>Total</th>
+          <th>Estado Desbloqueo</th>
+          <th>Aprobada</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-order>
+        <tr>
+          <td>{{ order.ordersId }}</td>
+          <td>{{ order.brandName }}</td>
+          <td>{{ order.orderDate }}</td>
+          <td>{{ order.totalOrder | currency: 'GTQ ' }}</td>
+          <td>{{ order.unlockOrder }}</td>
+          <td>
+            <p-tag
+              [value]="order.isApproved ? 'Aprobada' : 'No Aprobada'"
+              [severity]="order.isApproved ? 'success' : 'danger'"
+            />
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="6" class="text-center">
+            No se encontraron órdenes
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  }
+</div>

@@ -44,124 +44,52 @@
 
     <!-- Countries Filter -->
     <div>
-      <div class="flex items-center justify-between mb-3">
-        <h3 class="text-sm font-semibold">Países</h3>
-        @if (countries().length > 0) {
-          <button
-            type="button"
-            class="text-xs text-primary cursor-pointer hover:underline"
-            (click)="selectAllCountries()"
-          >
-            Seleccionar todos
-          </button>
-        }
-      </div>
+      <h3 class="text-sm font-semibold mb-3">Países</h3>
 
       @if (isLoadingCountries()) {
         <div class="flex items-center justify-center py-4">
           <i class="pi pi-spinner pi-spin text-2xl text-gray-400"></i>
         </div>
       } @else {
-        <div class="flex flex-col gap-2 max-h-60 overflow-y-auto">
-          @for (country of countries(); track country.idCountry) {
-            <div class="flex items-center gap-2">
-              <p-checkbox
-                [binary]="true"
-                [ngModel]="isCountrySelected(country.idCountry)"
-                (ngModelChange)="onCountryChange(country.idCountry, { checked: $event })"
-                [ngModelOptions]="{ standalone: true }"
-                [inputId]="'country-' + country.idCountry"
-              />
-              <label
-                [for]="'country-' + country.idCountry"
-                class="text-sm cursor-pointer"
-              >
-                {{ country.countryName }}
-              </label>
-            </div>
-          }
-        </div>
-
-        <!-- Selected Countries Tags -->
-        @if (selectedCountries().length > 0) {
-          <div class="flex flex-wrap gap-2 mt-3">
-            @for (countryId of selectedCountries(); track countryId) {
-              <p-tag
-                [value]="getCountryName(countryId)"
-                severity="info"
-                styleClass="cursor-pointer"
-                (click)="removeCountry(countryId)"
-              >
-                <span class="flex items-center gap-1">
-                  {{ getCountryName(countryId) }}
-                  <i class="pi pi-times text-xs"></i>
-                </span>
-              </p-tag>
-            }
-          </div>
-        }
+        <p-multiselect
+          [ngModel]="selectedCountries()"
+          (ngModelChange)="onCountryChange($event)"
+          [options]="countries()"
+          optionLabel="countryName"
+          optionValue="countryId"
+          placeholder="Seleccionar países"
+          [filter]="true"
+          filterPlaceHolder="Buscar país..."
+          [showClear]="true"
+          [ngModelOptions]="{ standalone: true }"
+          styleClass="w-full"
+        />
       }
     </div>
 
     <!-- Cities Filter -->
     @if (selectedCountries().length > 0) {
       <div>
-        <div class="flex items-center justify-between mb-3">
-          <h3 class="text-sm font-semibold">Ciudades</h3>
-          @if (filteredCities().length > 0) {
-            <button
-              type="button"
-              class="text-xs text-primary cursor-pointer hover:underline"
-              (click)="selectAllCities()"
-            >
-              Seleccionar todas
-            </button>
-          }
-        </div>
+        <h3 class="text-sm font-semibold mb-3">Ciudades</h3>
 
         @if (isLoadingCities()) {
           <div class="flex items-center justify-center py-4">
             <i class="pi pi-spinner pi-spin text-2xl text-gray-400"></i>
           </div>
         } @else {
-          <div class="flex flex-col gap-2 max-h-60 overflow-y-auto">
-            @for (city of filteredCities(); track city.idCity) {
-              <div class="flex items-center gap-2">
-                <p-checkbox
-                  [binary]="true"
-                  [ngModel]="isCitySelected(city.idCity)"
-                  (ngModelChange)="onCityChange(city.idCity, { checked: $event })"
-                  [ngModelOptions]="{ standalone: true }"
-                  [inputId]="'city-' + city.idCity"
-                />
-                <label
-                  [for]="'city-' + city.idCity"
-                  class="text-sm cursor-pointer"
-                >
-                  {{ city.cityName }}
-                </label>
-              </div>
-            }
-          </div>
-
-          <!-- Selected Cities Tags -->
-          @if (selectedCities().length > 0) {
-            <div class="flex flex-wrap gap-2 mt-3">
-              @for (cityId of selectedCities(); track cityId) {
-                <p-tag
-                  [value]="getCityName(cityId)"
-                  severity="success"
-                  styleClass="cursor-pointer"
-                  (click)="removeCity(cityId)"
-                >
-                  <span class="flex items-center gap-1">
-                    {{ getCityName(cityId) }}
-                    <i class="pi pi-times text-xs"></i>
-                  </span>
-                </p-tag>
-              }
-            </div>
-          }
+          <p-multiselect
+            [ngModel]="selectedCities()"
+            (ngModelChange)="selectedCities.set($event)"
+            [options]="filteredCities()"
+            optionLabel="cityName"
+            optionValue="cityId"
+            placeholder="Seleccionar ciudades"
+            [filter]="true"
+            filterPlaceHolder="Buscar ciudad..."
+            [showClear]="true"
+            [ngModelOptions]="{ standalone: true }"
+            styleClass="w-full"
+          />
         }
       </div>
     }

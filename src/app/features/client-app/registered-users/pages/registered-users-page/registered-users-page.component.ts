@@ -12,11 +12,14 @@ import { SkeletonModule } from 'primeng/skeleton';
 import { PaginatorModule } from 'primeng/paginator';
 import { MenuModule } from 'primeng/menu';
 import { TooltipModule } from 'primeng/tooltip';
+import { PopoverModule } from 'primeng/popover';
+import { TableModule } from 'primeng/table';
 import { MessageService, MenuItem } from 'primeng/api';
 
 import { RegisteredUsersService } from '../../services';
 import { RegisteredUserRecord, RegisteredUsersFilters } from '../../models';
 import { FiltersSidebarComponent } from '../../components/filters-sidebar/filters-sidebar.component';
+import { UserDetailsDrawerComponent } from '../../components/user-details-drawer/user-details-drawer.component';
 
 @Component({
   selector: 'app-registered-users-page',
@@ -35,7 +38,10 @@ import { FiltersSidebarComponent } from '../../components/filters-sidebar/filter
     PaginatorModule,
     MenuModule,
     TooltipModule,
-    FiltersSidebarComponent
+    PopoverModule,
+    TableModule,
+    FiltersSidebarComponent,
+    UserDetailsDrawerComponent
   ],
   providers: [MessageService],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -48,6 +54,8 @@ export class RegisteredUsersPageComponent implements OnInit {
   readonly searchTerm = signal('');
   readonly statusFilter = signal<'all' | 'active' | 'inactive' | 'blocked'>('all');
   readonly showFiltersDrawer = signal(false);
+  readonly showUserDetailsDrawer = signal(false);
+  readonly selectedUserId = signal<number | null>(null);
   readonly currentPage = signal(1);
   readonly pageSize = signal(10);
 
@@ -166,12 +174,8 @@ export class RegisteredUsersPageComponent implements OnInit {
   }
 
   viewUserDetails(user: RegisteredUserRecord): void {
-    // Placeholder - will be implemented in next phase
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Próximamente',
-      detail: `Vista de detalles de ${user.customerFullName} estará disponible pronto`
-    });
+    this.selectedUserId.set(user.customerId);
+    this.showUserDetailsDrawer.set(true);
   }
 
   togglePenalize(user: RegisteredUserRecord): void {

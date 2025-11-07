@@ -64,17 +64,31 @@ export interface RegisteredUsersFilters {
  * Country model for location filters
  */
 export interface Country {
-  idCountry: number;
+  countryId: number;
   countryName: string;
-  flagIcon?: string;
+  countryCode: string;
+  isActive: boolean;
+  countryPrefix: string;
+  countryUrlFlag: string;
+  countryMask: string;
 }
 
 /**
  * City model for location filters
  */
 export interface City {
-  idCity: number;
+  cityId: number;
+  codCountry: number;
+  countryUrlFlag: string | null;
+  countryName: string;
   cityName: string;
-  idCountry: number;
-  flagIcon?: string;
+  cityCode: string;
+  isActive: boolean;
+  couponMin: number;
+  publish: boolean;
+  codZone: number;
+  zoneName: string;
+  orderMin: number;
+  freeShipping: boolean;
+  faCpayment: boolean;
 }

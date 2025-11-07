@@ -109,152 +109,144 @@
   </div>
 
   <!-- Table -->
-  <div class="rounded-lg shadow-sm">
-    @if (isLoading()) {
-      <!-- Loading Skeleton -->
-      <div class="p-6">
-        @for (item of [1, 2, 3, 4, 5]; track item) {
-          <div class="mb-4">
-            <p-skeleton height="80px" />
+  <p-table
+    [value]="users()"
+    [loading]="isLoading()"
+    [tableStyle]="{ 'min-width': '60rem' }"
+    styleClass="p-datatable-sm"
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Nombre</th>
+        <th>Teléfono</th>
+        <th>Email</th>
+        <th>País y Ciudad</th>
+        <th>Fecha de R.</th>
+        <th style="width: 100px">Días de R.</th>
+        <th>Nivel y Pts</th>
+        <th style="width: 120px">Estado</th>
+        <th style="width: 80px; text-align: center">Acciones</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-user>
+      <tr>
+        <!-- Nombre -->
+        <td>
+          <div
+            class="font-semibold truncate max-w-[200px]"
+            [pTooltip]="user.customerFullName"
+            tooltipPosition="top"
+          >
+            {{ user.customerFullName }}
           </div>
-        }
-      </div>
-    } @else {
-      <div class="overflow-x-auto">
-        <table class="w-full">
-          <thead class="bg-surface-50 border-b border-surface-200">
-            <tr>
-              <th class="p-4 text-left text-sm font-semibold">Nombre</th>
-              <th class="p-4 text-left text-sm font-semibold">Teléfono</th>
-              <th class="p-4 text-left text-sm font-semibold">Email</th>
-              <th class="p-4 text-left text-sm font-semibold">País y Ciudad</th>
-              <th class="p-4 text-left text-sm font-semibold">Fecha de R.</th>
-              <th class="p-4 text-left text-sm font-semibold">Días de R.</th>
-              <th class="p-4 text-left text-sm font-semibold">Nivel y Pts</th>
-              <th class="p-4 text-left text-sm font-semibold">Estado</th>
-              <th class="p-4 text-left text-sm font-semibold" style="width: 100px;">Acciones</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-surface-200">
-            @if (users().length === 0) {
-              <tr>
-                <td colspan="9" class="text-center py-8">
-                  <div class="flex flex-col items-center gap-3">
-                    <i class="pi pi-inbox text-4xl "></i>
-                    <p class="">No se encontraron usuarios registrados</p>
-                    @if (statusFilter() !== 'all' || searchTerm() || hasActiveFilters()) {
-                      <p-button
-                        label="Limpiar filtros"
-                        [outlined]="true"
-                        size="small"
-                        (onClick)="statusFilter.set('all'); searchTerm.set(''); clearAllFilters()"
-                      />
-                    }
-                  </div>
-                </td>
-              </tr>
-            }
-            @for (user of users(); track user.customerId) {
-              <tr class="hover:bg-surface-50 transition-colors">
-                <!-- Nombre -->
-                <td class="p-4">
-                  <div
-                    class="font-semibold truncate max-w-[200px]"
-                    [pTooltip]="user.customerFullName"
-                    tooltipPosition="top"
-                  >
-                    {{ user.customerFullName }}
-                  </div>
-                </td>
+        </td>
 
-                <!-- Teléfono -->
-                <td class="p-4">
-                  <div class="text-sm">{{ user.customerPhone }}</div>
-                </td>
+        <!-- Teléfono -->
+        <td>
+          <div class="text-sm">{{ user.customerPhone }}</div>
+        </td>
 
-                <!-- Email -->
-                <td class="p-4">
-                  <div
-                    class="text-sm truncate max-w-[200px]"
-                    [pTooltip]="user.email"
-                    tooltipPosition="top"
-                  >
-                    {{ user.email }}
-                  </div>
-                </td>
+        <!-- Email -->
+        <td>
+          <div
+            class="text-sm truncate max-w-[200px]"
+            [pTooltip]="user.email"
+            tooltipPosition="top"
+          >
+            {{ user.email }}
+          </div>
+        </td>
 
-                <!-- País y Ciudad -->
-                <td class="p-4">
-                  <div class="flex flex-col gap-1">
-                    <span class="text-sm font-medium">{{ user.countryName }}</span>
-                    <span class="text-xs ">{{ user.cityName }}</span>
-                  </div>
-                </td>
+        <!-- País y Ciudad -->
+        <td>
+          <div class="font-medium">{{ user.countryName }}</div>
+          <div class="text-sm text-500">{{ user.cityName }}</div>
+        </td>
 
-                <!-- Fecha de Registro -->
-                <td class="p-4">
-                  <div class="text-sm">{{ formatDate(user.customerCreatedAt) }}</div>
-                </td>
+        <!-- Fecha de Registro -->
+        <td>{{ formatDate(user.customerCreatedAt) }}</td>
 
-                <!-- Días Registrados -->
-                <td class="p-4">
-                  <div class="text-sm text-center">
-                    <span class="font-semibold text-primary">{{ user.daysRegistered }}</span>
-                  </div>
-                </td>
+        <!-- Días Registrados -->
+        <td style="text-align: center">
+          <span class="font-semibold text-primary">{{ user.daysRegistered }}</span>
+        </td>
 
-                <!-- Nivel de Lealtad y Puntos -->
-                <td class="p-4">
-                  <div class="flex flex-col gap-1">
-                    <span class="text-sm font-medium">{{ user.nameLoyaltyLevel }}</span>
-                    <span class="text-xs text-gray-500">{{ user.pointsEarned }} pts</span>
-                  </div>
-                </td>
+        <!-- Nivel de Lealtad y Puntos -->
+        <td>
+          <div class="font-medium">{{ user.nameLoyaltyLevel }}</div>
+          <div class="text-sm text-500">{{ user.pointsEarned }} pts</div>
+        </td>
 
-                <!-- Estado -->
-                <td class="p-4">
-                  <p-tag
-                    [value]="getStatusLabel(user.customerStatus, user.isBlocked)"
-                    [severity]="getStatusSeverity(user.customerStatus, user.isBlocked)"
-                  />
-                </td>
-
-                <!-- Acciones -->
-                <td class="p-4">
-                  <p-button
-                    icon="pi pi-ellipsis-v"
-                    [text]="true"
-                    [rounded]="true"
-                    (onClick)="menu.toggle($event)"
-                  />
-                  <p-menu
-                    #menu
-                    [model]="getUserActions(user)"
-                    [popup]="true"
-                  />
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Pagination -->
-      @if (metadata().totalCount > 0) {
-        <div class="p-4 border-t border-surface-200">
-          <p-paginator
-            [first]="(currentPage() - 1) * pageSize()"
-            [rows]="pageSize()"
-            [totalRecords]="metadata().totalCount"
-            [rowsPerPageOptions]="[5, 10, 15, 20]"
-            [showCurrentPageReport]="true"
-            currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} usuarios"
-            (onPageChange)="onPageChange($event)"
+        <!-- Estado -->
+        <td>
+          <p-tag
+            [value]="getStatusLabel(user.customerStatus, user.isBlocked)"
+            [severity]="getStatusSeverity(user.customerStatus, user.isBlocked)"
           />
-        </div>
-      }
-    }
-  </div>
+        </td>
+
+        <!-- Acciones -->
+        <td style="text-align: center">
+          <p-button
+            icon="pi pi-ellipsis-v"
+            [text]="true"
+            [rounded]="true"
+            severity="secondary"
+            size="small"
+            (onClick)="popover.toggle($event)"
+          />
+          <p-popover #popover>
+            <div class="flex flex-col gap-2" style="min-width: 150px">
+              <p-button
+                label="Ver Detalles"
+                icon="pi pi-eye"
+                variant="outlined"
+                (click)="viewUserDetails(user); popover.hide()"
+              />
+              <p-button
+                [label]="user.isBlocked ? 'Despenalizar' : 'Penalizar'"
+                [icon]="user.isBlocked ? 'pi pi-unlock' : 'pi pi-ban'"
+                [severity]="user.isBlocked ? 'success' : 'warn'"
+                variant="outlined"
+                (click)="togglePenalize(user); popover.hide()"
+              />
+            </div>
+          </p-popover>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="9" class="text-center py-6">
+          @if (isLoading()) {
+            <div class="flex flex-column align-items-center gap-3">
+              <i class="pi pi-spin pi-spinner text-4xl text-primary"></i>
+              <p class="text-500">Cargando usuarios...</p>
+            </div>
+          } @else {
+            <div class="flex flex-column align-items-center gap-3">
+              <i class="pi pi-inbox text-4xl text-400"></i>
+              <p class="text-500">No se encontraron usuarios registrados</p>
+            </div>
+          }
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+
+  <!-- Paginator -->
+  @if (metadata().totalCount > 0) {
+    <p-paginator
+      [rows]="pageSize()"
+      [totalRecords]="metadata().totalCount"
+      [first]="(currentPage() - 1) * pageSize()"
+      [rowsPerPageOptions]="[5, 10, 20, 50]"
+      (onPageChange)="onPageChange($event)"
+      styleClass="mt-3"
+    />
+  }
 
   <!-- Toast for notifications -->
   <p-toast position="top-right" />
@@ -265,4 +257,11 @@
   [visible]="showFiltersDrawer()"
   (visibleChange)="showFiltersDrawer.set($event)"
   (onApplyFilters)="onFiltersApplied($event)"
+/>
+
+<!-- User Details Drawer -->
+<app-user-details-drawer
+  [visible]="showUserDetailsDrawer()"
+  [userId]="selectedUserId()"
+  (visibleChange)="showUserDetailsDrawer.set($event)"
 />
