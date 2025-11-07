@@ -1,0 +1,312 @@
+<div class="notification-form-page p-6">
+  <!-- Breadcrumb -->
+  <p-breadcrumb [model]="breadcrumbItems" [home]="home" styleClass="mb-4" />
+
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-3xl font-bold m-0">
+      {{ isEditMode() ? 'Editar' : 'Nueva' }} Notificación
+    </h1>
+  </div>
+
+  <form [formGroup]="notificationForm" (ngSubmit)="onSubmit()">
+    <div class="grid gap-4">
+      <!-- Basic Information Card -->
+      <p-card header="Información Básica">
+        <div class="grid gap-4">
+          <!-- Title -->
+          <div class="field">
+            <label for="title" class="block font-semibold mb-2">
+              Título <span class="text-red-500">*</span>
+            </label>
+            <input
+              pInputText
+              id="title"
+              formControlName="title"
+              placeholder="Ej: Promoción de verano"
+              class="w-full"
+              [class.ng-invalid]="isFieldInvalid('title')"
+              [class.ng-dirty]="isFieldInvalid('title')"
+            />
+            @if (isFieldInvalid('title')) {
+              <small class="text-red-500">{{ getFieldError('title') }}</small>
+            }
+          </div>
+
+          <!-- Message -->
+          <div class="field">
+            <label for="message" class="block font-semibold mb-2">
+              Mensaje <span class="text-red-500">*</span>
+            </label>
+            <textarea
+              pTextarea
+              id="message"
+              formControlName="message"
+              placeholder="Escribe el mensaje que verán los usuarios..."
+              rows="4"
+              class="w-full"
+              [class.ng-invalid]="isFieldInvalid('message')"
+              [class.ng-dirty]="isFieldInvalid('message')"
+            ></textarea>
+            @if (isFieldInvalid('message')) {
+              <small class="text-red-500">{{ getFieldError('message') }}</small>
+            }
+          </div>
+
+          <!-- Type -->
+          <div class="field">
+            <label for="type" class="block font-semibold mb-2">
+              Tipo de Notificación <span class="text-red-500">*</span>
+            </label>
+            <p-select
+              id="type"
+              formControlName="type"
+              [options]="PUSH_TYPE_OPTIONS"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Selecciona el tipo"
+              styleClass="w-full"
+            />
+          </div>
+
+          <!-- Target Audiences -->
+          <div class="field">
+            <label for="targets" class="block font-semibold mb-2">
+              Audiencias Objetivo <span class="text-red-500">*</span>
+            </label>
+            <p-multiselect
+              id="targets"
+              formControlName="targets"
+              [options]="targetAudiences"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Selecciona las audiencias"
+              display="chip"
+              styleClass="w-full"
+            />
+            @if (isFieldInvalid('targets')) {
+              <small class="text-red-500">{{ getFieldError('targets') }}</small>
+            }
+          </div>
+        </div>
+      </p-card>
+
+      <!-- Launch Configuration Card -->
+      <p-card header="Configuración de Lanzamiento">
+        <div class="grid gap-4">
+          <!-- Launch Type -->
+          <div class="field">
+            <label class="block font-semibold mb-3">
+              Tipo de Lanzamiento <span class="text-red-500">*</span>
+            </label>
+            <div class="flex flex-col gap-3">
+              <div class="flex items-center">
+                <p-radiobutton
+                  name="launchType"
+                  [value]="LaunchType.ONE_HOT"
+                  formControlName="launchType"
+                  inputId="oneHot"
+                />
+                <label for="oneHot" class="ml-2">
+                  <strong>Inmediato</strong> - Enviar ahora mismo (requiere autorización)
+                </label>
+              </div>
+              <div class="flex items-center">
+                <p-radiobutton
+                  name="launchType"
+                  [value]="LaunchType.SCHEDULE"
+                  formControlName="launchType"
+                  inputId="schedule"
+                />
+                <label for="schedule" class="ml-2">
+                  <strong>Programado</strong> - Enviar en una fecha y hora específica
+                </label>
+              </div>
+              <div class="flex items-center">
+                <p-radiobutton
+                  name="launchType"
+                  [value]="LaunchType.RECURRENT"
+                  formControlName="launchType"
+                  inputId="recurrent"
+                />
+                <label for="recurrent" class="ml-2">
+                  <strong>Recurrente</strong> - Enviar en días y hora específicos de cada semana
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Schedule Configuration (shown when SCHEDULE is selected) -->
+          @if (selectedLaunchType() === LaunchType.SCHEDULE) {
+            <div class="schedule-config p-4 bg-blue-50 rounded-lg">
+              <h4 class="text-lg font-semibold mb-3">Configuración de Programación</h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="field">
+                  <label for="scheduleDate" class="block font-semibold mb-2">
+                    Fecha <span class="text-red-500">*</span>
+                  </label>
+                  <p-datepicker
+                    id="scheduleDate"
+                    formControlName="scheduleDate"
+                    placeholder="Selecciona la fecha"
+                    dateFormat="dd/mm/yy"
+                    [showIcon]="true"
+                    [minDate]="minDate"
+                    styleClass="w-full"
+                  />
+                  @if (isFieldInvalid('scheduleDate')) {
+                    <small class="text-red-500">{{ getFieldError('scheduleDate') }}</small>
+                  }
+                </div>
+                <div class="field">
+                  <label for="scheduleTime" class="block font-semibold mb-2">
+                    Hora <span class="text-red-500">*</span>
+                  </label>
+                  <p-select
+                    id="scheduleTime"
+                    formControlName="scheduleTime"
+                    [options]="HOUR_OPTIONS"
+                    optionLabel="label"
+                    optionValue="value"
+                    placeholder="Selecciona la hora"
+                    styleClass="w-full"
+                  />
+                  @if (isFieldInvalid('scheduleTime')) {
+                    <small class="text-red-500">{{ getFieldError('scheduleTime') }}</small>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- Recurrent Configuration (shown when RECURRENT is selected) -->
+          @if (selectedLaunchType() === LaunchType.RECURRENT) {
+            <div class="recurrent-config p-4 bg-green-50 rounded-lg">
+              <h4 class="text-lg font-semibold mb-3">Configuración de Recurrencia</h4>
+              <div class="grid gap-4">
+                <div class="field">
+                  <label class="block font-semibold mb-2">
+                    Días de la Semana <span class="text-red-500">*</span>
+                  </label>
+                  <div class="flex flex-wrap gap-3">
+                    @for (day of DAYS_OF_WEEK; track day.value) {
+                      <div class="flex items-center">
+                        <p-checkbox
+                          [value]="day.value"
+                          formControlName="recurrentDays"
+                          [inputId]="'day-' + day.value"
+                        />
+                        <label [for]="'day-' + day.value" class="ml-2">{{ day.label }}</label>
+                      </div>
+                    }
+                  </div>
+                  @if (isFieldInvalid('recurrentDays')) {
+                    <small class="text-red-500">{{ getFieldError('recurrentDays') }}</small>
+                  }
+                </div>
+                <div class="field">
+                  <label for="recurrentHour" class="block font-semibold mb-2">
+                    Hora <span class="text-red-500">*</span>
+                  </label>
+                  <p-select
+                    id="recurrentHour"
+                    formControlName="recurrentHour"
+                    [options]="HOUR_OPTIONS"
+                    optionLabel="label"
+                    optionValue="value"
+                    placeholder="Selecciona la hora"
+                    styleClass="w-full"
+                  />
+                  @if (isFieldInvalid('recurrentHour')) {
+                    <small class="text-red-500">{{ getFieldError('recurrentHour') }}</small>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- One Hot Info (shown when ONE_HOT is selected) -->
+          @if (selectedLaunchType() === LaunchType.ONE_HOT) {
+            <div class="one-hot-info p-4 bg-orange-50 rounded-lg">
+              <div class="flex items-start gap-3">
+                <i class="pi pi-info-circle text-orange-500 text-xl"></i>
+                <div>
+                  <h4 class="text-lg font-semibold mb-2">Envío Inmediato</h4>
+                  <p class="text-gray-700 mb-2">
+                    Esta notificación se enviará inmediatamente después de la autorización por SMS.
+                  </p>
+                  <p class="text-sm text-gray-600">
+                    Se te pedirá un código de autorización que llegará a tu teléfono antes de enviar.
+                  </p>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </p-card>
+
+      <!-- Optional Fields Card -->
+      <p-card header="Campos Opcionales">
+        <div class="grid gap-4">
+          <!-- Image URL -->
+          <div class="field">
+            <label for="imageUrl" class="block font-semibold mb-2">
+              URL de Imagen
+            </label>
+            <input
+              pInputText
+              id="imageUrl"
+              formControlName="imageUrl"
+              placeholder="https://ejemplo.com/imagen.jpg"
+              class="w-full"
+            />
+            <small class="text-gray-500">URL de una imagen para mostrar en la notificación</small>
+          </div>
+
+          <!-- Action URL -->
+          <div class="field">
+            <label for="actionUrl" class="block font-semibold mb-2">
+              URL de Acción
+            </label>
+            <input
+              pInputText
+              id="actionUrl"
+              formControlName="actionUrl"
+              placeholder="https://ejemplo.com/promocion"
+              class="w-full"
+            />
+            <small class="text-gray-500">URL a la que se redirige al hacer clic en la notificación</small>
+          </div>
+        </div>
+      </p-card>
+
+      <!-- Actions -->
+      <div class="flex justify-end gap-3 mt-4">
+        <p-button
+          label="Cancelar"
+          severity="secondary"
+          [outlined]="true"
+          (onClick)="onCancel()"
+          [disabled]="isSaving()"
+        />
+        <p-button
+          type="submit"
+          [label]="isEditMode() ? 'Guardar Cambios' : 'Crear Notificación'"
+          icon="pi pi-check"
+          [loading]="isSaving()"
+        />
+      </div>
+    </div>
+  </form>
+
+  <!-- SMS Authorization Dialog -->
+  @if (createdNotificationId()) {
+    <app-sms-authorization-dialog
+      [visible]="showAuthDialog()"
+      [notificationId]="createdNotificationId()!"
+      (visibleChange)="showAuthDialog.set($event)"
+      (authorized)="onAuthorizationSuccess()"
+      (cancelled)="onAuthorizationCancel()"
+    />
+  }
+</div>

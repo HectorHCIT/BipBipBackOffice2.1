@@ -11,7 +11,7 @@ import { Routes } from '@angular/router';
  * - Tips (Propinas) ✅
  * - FAQs (Preguntas Frecuentes) ✅
  * - Registered Users (Usuarios Registrados) ✅
- * - SMS/Push Notifications (Notificaciones) 🔜
+ * - SMS/Push Notifications (Notificaciones) ✅
  */
 export const CLIENT_APP_ROUTES: Routes = [
   {
@@ -38,6 +38,10 @@ export const CLIENT_APP_ROUTES: Routes = [
     path: 'user-registry',
     loadChildren: () => import('./registered-users/registered-users.routes').then(m => m.REGISTERED_USERS_ROUTES),
     title: 'Usuarios Registrados'
+  },
+  {
+    path: 'sms-push-notifications',
+    loadChildren: () => import('./notifications/notifications.routes').then(m => m.NOTIFICATIONS_ROUTES),
+    title: 'Gestión de Notificaciones'
   }
-  // TODO: Agregar más submódulos aquí (Notifications)
 ];

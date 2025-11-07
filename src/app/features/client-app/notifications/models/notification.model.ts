@@ -27,15 +27,15 @@ export enum PushTypeEnum {
 export interface DataPush {
   codPN: number;
   titlePN: string;
-  scheduleDatePN: string | null;
+  scheduleDatePN: string;
   sendIt: boolean;
   isPushNotification: boolean;
   status: boolean;
-  isProcessed: boolean;
+  isProcessed: boolean | null;
+  targets: string[];
   namePN?: string;
   bodyPN?: string;
   typePN?: number;
-  targets?: string[];
   launchType?: LaunchType;
   recurrenceInfo?: {
     frequency: string;

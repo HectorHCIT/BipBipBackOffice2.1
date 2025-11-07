@@ -1,0 +1,55 @@
+.notification-history {
+  .filters-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .bulk-actions {
+    position: sticky;
+    bottom: 1rem;
+    z-index: 10;
+  }
+
+  // Table row hover effect
+  ::ng-deep {
+    .p-datatable-tbody > tr.cursor-pointer:hover {
+      background-color: #f9fafb;
+    }
+  }
+}
+
+// Line clamp utility for message preview
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .notification-history {
+    .filters-container {
+      > div {
+        flex-direction: column;
+        width: 100%;
+
+        > div {
+          width: 100% !important;
+          min-width: 100% !important;
+        }
+      }
+    }
+  }
+
+  ::ng-deep {
+    .p-datatable {
+      .p-datatable-thead > tr > th,
+      .p-datatable-tbody > tr > td {
+        padding: 0.5rem;
+        font-size: 0.875rem;
+      }
+    }
+  }
+}

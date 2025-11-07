@@ -1,0 +1,56 @@
+.authorization-content {
+  padding: 1rem 0;
+
+  .step-request,
+  .step-verify {
+    animation: fadeIn 0.3s ease-in;
+  }
+
+  .countdown-timer {
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  // Code input styling
+  input[type="text"] {
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+// Responsive
+@media (max-width: 640px) {
+  ::ng-deep {
+    .p-dialog {
+      width: 95% !important;
+      max-width: 95% !important;
+    }
+  }
+
+  .authorization-content {
+    input[type="text"] {
+      font-size: 2rem;
+    }
+  }
+}

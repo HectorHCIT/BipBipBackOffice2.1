@@ -1,0 +1,242 @@
+<div class="notification-history">
+  <!-- Filters card -->
+  <p-card class="mb-4">
+    <div class="filters-container">
+      <!-- Search and type filter row -->
+      <div class="flex gap-3 mb-3 flex-wrap">
+        <!-- Search -->
+        <div class="flex-1" style="min-width: 250px;">
+          <span class="p-input-icon-left w-full">
+            <i class="pi pi-search"></i>
+            <input
+              pInputText
+              type="text"
+              placeholder="Buscar por título..."
+              class="w-full"
+              [ngModel]="filters().search"
+              (ngModelChange)="onSearchChange($event)"
+            />
+          </span>
+        </div>
+
+        <!-- Type filter -->
+        <div style="min-width: 200px;">
+          <p-select
+            [options]="typeOptions"
+            [ngModel]="filters().type"
+            (ngModelChange)="onTypeChange($event)"
+            placeholder="Tipo de notificación"
+            optionLabel="label"
+            optionValue="value"
+            styleClass="w-full"
+          />
+        </div>
+
+        <!-- Status filter -->
+        <div style="min-width: 180px;">
+          <p-select
+            [options]="statusOptions"
+            [ngModel]="filters().status"
+            (ngModelChange)="onStatusChange($event)"
+            placeholder="Estado"
+            optionLabel="label"
+            optionValue="value"
+            styleClass="w-full"
+          />
+        </div>
+      </div>
+
+      <!-- Date range filter row -->
+      <div class="flex gap-3 items-center flex-wrap">
+        <!-- Date from -->
+        <div style="min-width: 200px;">
+          <p-datepicker
+            [ngModel]="filters().dateFrom"
+            (ngModelChange)="onDateFromChange($event)"
+            placeholder="Fecha desde"
+            dateFormat="dd/mm/yy"
+            [showIcon]="true"
+            styleClass="w-full"
+          />
+        </div>
+
+        <!-- Date to -->
+        <div style="min-width: 200px;">
+          <p-datepicker
+            [ngModel]="filters().dateTo"
+            (ngModelChange)="onDateToChange($event)"
+            placeholder="Fecha hasta"
+            dateFormat="dd/mm/yy"
+            [showIcon]="true"
+            styleClass="w-full"
+          />
+        </div>
+
+        <!-- Clear filters -->
+        @if (hasActiveFilters()) {
+          <p-button
+            label="Limpiar filtros"
+            icon="pi pi-filter-slash"
+            [outlined]="true"
+            severity="secondary"
+            size="small"
+            (onClick)="clearFilters()"
+          />
+        }
+      </div>
+    </div>
+  </p-card>
+
+  <!-- Table -->
+  <p-table
+    [value]="notifications()"
+    [lazy]="true"
+    [paginator]="true"
+    [rows]="pageSize()"
+    [totalRecords]="totalRecords()"
+    [loading]="isLoading()"
+    [rowsPerPageOptions]="[10, 25, 50]"
+    [showCurrentPageReport]="true"
+    currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} notificaciones"
+    (onPage)="onPageChange($event)"
+    [(selection)]="selectedNotifications"
+    dataKey="idPush"
+    [rowHover]="true"
+    styleClass="p-datatable-gridlines"
+  >
+    <!-- Empty state -->
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="7" class="text-center py-8">
+          <div class="flex flex-col items-center gap-3 text-gray-500">
+            <i class="pi pi-inbox text-4xl"></i>
+            <p class="m-0">No se encontraron notificaciones</p>
+            @if (hasActiveFilters()) {
+              <p class="m-0 text-sm">Intenta ajustar los filtros de búsqueda</p>
+            }
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <!-- Header -->
+    <ng-template pTemplate="header">
+      <tr>
+        <th style="width: 3rem">
+          <p-tableHeaderCheckbox />
+        </th>
+        <th pSortableColumn="title">
+          Título
+          <p-sortIcon field="title" />
+        </th>
+        <th pSortableColumn="type" style="width: 120px">
+          Tipo
+          <p-sortIcon field="type" />
+        </th>
+        <th pSortableColumn="status" style="width: 120px">
+          Estado
+          <p-sortIcon field="status" />
+        </th>
+        <th pSortableColumn="dateCreated" style="width: 180px">
+          Fecha
+          <p-sortIcon field="dateCreated" />
+        </th>
+        <th style="width: 200px">Audiencias</th>
+        <th style="width: 120px">Acciones</th>
+      </tr>
+    </ng-template>
+
+    <!-- Body -->
+    <ng-template pTemplate="body" let-notification>
+      <tr (click)="onRowSelect(notification)" class="cursor-pointer">
+        <td>
+          <p-tableCheckbox [value]="notification" />
+        </td>
+        <td>
+          <div class="flex flex-col gap-1">
+            <span class="font-semibold">{{ notification.titlePN }}</span>
+            @if (notification.bodyPN) {
+              <span class="text-sm text-gray-600 line-clamp-1">
+                {{ notification.bodyPN }}
+              </span>
+            }
+          </div>
+        </td>
+        <td>
+          @if (notification.typePN) {
+            <p-tag
+              [value]="getTypeLabel(notification.typePN)"
+              [severity]="getTypeSeverity(notification.typePN)"
+            />
+          } @else {
+            <span class="text-sm text-gray-500">-</span>
+          }
+        </td>
+        <td>
+          <p-tag
+            [value]="getStatusLabel(notification.isProcessed)"
+            [severity]="getStatusSeverity(notification.isProcessed)"
+          />
+        </td>
+        <td>
+          <span class="text-sm">{{ formatDate(notification.scheduleDatePN) }}</span>
+        </td>
+        <td>
+          <span class="text-sm">{{ formatTargets(notification.targets) }}</span>
+        </td>
+        <td>
+          <div class="flex gap-2">
+            <p-button
+              icon="pi pi-pencil"
+              [outlined]="true"
+              severity="secondary"
+              size="small"
+              (onClick)="onEdit(notification); $event.stopPropagation()"
+            />
+            <p-button
+              icon="pi pi-trash"
+              [outlined]="true"
+              severity="danger"
+              size="small"
+              (onClick)="onDelete(notification); $event.stopPropagation()"
+            />
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <!-- Loading template -->
+    <ng-template pTemplate="loadingbody">
+      <tr>
+        <td colspan="7">
+          <div class="flex items-center justify-center py-4 gap-3">
+            <i class="pi pi-spin pi-spinner text-2xl"></i>
+            <span>Cargando notificaciones...</span>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+
+  <!-- Bulk actions (when rows are selected) -->
+  @if (selectedNotifications().length > 0) {
+    <div class="bulk-actions mt-4">
+      <p-card>
+        <div class="flex items-center justify-between">
+          <span class="font-semibold">
+            {{ selectedNotifications().length }} notificación(es) seleccionada(s)
+          </span>
+          <div class="flex gap-2">
+            <p-button
+              label="Eliminar seleccionadas"
+              icon="pi pi-trash"
+              severity="danger"
+              [outlined]="true"
+              size="small"
+            />
+          </div>
+        </div>
+      </p-card>
+    </div>
+  }
+</div>

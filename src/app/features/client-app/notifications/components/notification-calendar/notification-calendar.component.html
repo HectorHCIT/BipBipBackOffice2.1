@@ -1,0 +1,209 @@
+<div class="notification-calendar">
+  <!-- Header with navigation and stats -->
+  <div class="calendar-header mb-4">
+    <div class="flex justify-between items-center mb-4">
+      <div class="flex items-center gap-4">
+        <h2 class="text-2xl font-semibold m-0">{{ monthName() }}</h2>
+
+        <!-- View toggles -->
+        <div class="flex gap-2">
+          <p-button
+            icon="pi pi-calendar"
+            [outlined]="currentView() !== 'month'"
+            [severity]="currentView() === 'month' ? 'primary' : 'secondary'"
+            size="small"
+            (onClick)="switchToMonthView()"
+            label="Mes"
+          />
+          <p-button
+            icon="pi pi-list"
+            [outlined]="currentView() !== 'day'"
+            [severity]="currentView() === 'day' ? 'primary' : 'secondary'"
+            size="small"
+            (onClick)="switchToDayView()"
+            label="Día"
+          />
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div class="flex items-center gap-2">
+        <p-button
+          icon="pi pi-chevron-left"
+          [outlined]="true"
+          size="small"
+          (onClick)="previousMonth()"
+        />
+        <p-button
+          label="Hoy"
+          [outlined]="true"
+          size="small"
+          (onClick)="goToToday()"
+        />
+        <p-button
+          icon="pi pi-chevron-right"
+          [outlined]="true"
+          size="small"
+          (onClick)="nextMonth()"
+        />
+      </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="flex gap-4 flex-wrap">
+      <div class="stat-badge">
+        <span class="stat-label">Total:</span>
+        <span class="stat-value">{{ stats().total }}</span>
+      </div>
+      <div class="stat-badge stat-push">
+        <span class="stat-label">Push:</span>
+        <span class="stat-value">{{ stats().pushCount }}</span>
+      </div>
+      <div class="stat-badge stat-sms">
+        <span class="stat-label">SMS:</span>
+        <span class="stat-value">{{ stats().smsCount }}</span>
+      </div>
+      <div class="stat-badge stat-processed">
+        <span class="stat-label">Procesadas:</span>
+        <span class="stat-value">{{ stats().processedCount }}</span>
+      </div>
+      <div class="stat-badge stat-pending">
+        <span class="stat-label">Pendientes:</span>
+        <span class="stat-value">{{ stats().pendingCount }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading overlay -->
+  @if (isLoading()) {
+    <div class="loading-overlay">
+      <p-progressSpinner />
+      <p class="mt-2">Cargando notificaciones...</p>
+    </div>
+  }
+
+  <!-- Month view -->
+  @if (currentView() === 'month') {
+    <div class="calendar-grid">
+      <!-- Week day headers -->
+      <div class="calendar-row header-row">
+        @for (day of weekDays; track day) {
+          <div class="calendar-header-cell">
+            {{ day }}
+          </div>
+        }
+      </div>
+
+      <!-- Calendar days -->
+      @for (day of calendarDays(); track day.date.getTime()) {
+        <div
+          class="calendar-day border-[0.5px] p-2 cursor-pointer"
+          [class.other-month]="!day.isCurrentMonth"
+          [class.today]="day.isToday"
+          [class.has-events]="day.hasEvents"
+          (click)="onDayClick(day)"
+        >
+          <div class="day-number">
+            {{ day.dayNumber }}
+          </div>
+
+          @if (day.hasEvents) {
+            <div class="day-events">
+              @for (event of getVisibleEvents(day); track event.id) {
+                <div
+                  class="event-badge"
+                  [style.background-color]="event.extendedProps.bulletcolor"
+                  [title]="event.title"
+                  (click)="onEventClick(event, $event)"
+                >
+                  <span class="event-time">{{ formatEventTime(event.date) }}</span>
+                  <span class="event-title">{{ event.title }}</span>
+                  <span class="event-type">{{ getEventTypeIcon(event) }}</span>
+                </div>
+              }
+
+              @if (shouldShowMoreButton(day)) {
+                <button
+                  class="show-more-button"
+                  (click)="toggleDayExpanded(getDateKey(day.date)); $event.stopPropagation()"
+                >
+                  @if (isDayExpanded(getDateKey(day.date))) {
+                    <i class="pi pi-chevron-up"></i>
+                  } @else {
+                    <span>+{{ getRemainingCount(day) }}</span>
+                  }
+                </button>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Day/Agenda view -->
+  @if (currentView() === 'day') {
+    <div class="day-view">
+      <h3 class="text-xl font-semibold mb-4">
+        {{ currentDate() | date: 'EEEE, d MMMM yyyy':'es-GT' }}
+      </h3>
+
+      @if (dayViewEvents().length === 0) {
+        <p-card>
+          <div class="text-center py-8 text-gray-500">
+            <i class="pi pi-calendar text-4xl mb-3"></i>
+            <p>No hay notificaciones programadas para este día</p>
+          </div>
+        </p-card>
+      } @else {
+        <div class="events-list">
+          @for (event of dayViewEvents(); track event.id) {
+            <p-card
+              class="event-card mb-3 cursor-pointer hover:shadow-lg transition-shadow"
+              (click)="onEventClick(event, $event)"
+            >
+              <div class="flex items-start gap-4">
+                <!-- Time -->
+                <div class="event-time-block">
+                  <div class="text-lg font-semibold">
+                    {{ formatEventTime(event.date) }}
+                  </div>
+                </div>
+
+                <!-- Event info -->
+                <div class="flex-1">
+                  <div class="flex items-start justify-between mb-2">
+                    <h4 class="text-lg font-semibold m-0">{{ event.title }}</h4>
+                    <div class="flex gap-2">
+                      <p-tag
+                        [value]="event.extendedProps.type === 'push' ? 'Push' : 'SMS'"
+                        [severity]="event.extendedProps.type === 'push' ? 'danger' : 'secondary'"
+                      />
+                      <p-tag
+                        [value]="event.extendedProps.processed"
+                        [severity]="event.extendedProps.originalPush.isProcessed ? 'success' : 'warn'"
+                      />
+                      <p-tag
+                        [value]="event.extendedProps.status"
+                        [severity]="event.extendedProps.originalPush.status ? 'success' : 'danger'"
+                      />
+                    </div>
+                  </div>
+
+                  <p class="text-gray-600 m-0">{{ event.extendedProps.description }}</p>
+
+                  @if (event.extendedProps.originalPush.targets && event.extendedProps.originalPush.targets.length > 0) {
+                    <div class="mt-2">
+                      <span class="text-sm text-gray-500">Audiencias: </span>
+                      <span class="text-sm">{{ event.extendedProps.originalPush.targets.join(', ') }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
+            </p-card>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

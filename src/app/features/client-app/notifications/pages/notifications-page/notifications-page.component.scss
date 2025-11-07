@@ -1,0 +1,15 @@
+.notifications-page {
+  min-height: calc(100vh - 100px);
+}
+
+.empty-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.history-placeholder {
+  padding: 2rem;
+  text-align: center;
+}
