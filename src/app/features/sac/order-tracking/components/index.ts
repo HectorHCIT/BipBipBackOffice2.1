@@ -7,3 +7,4 @@ export * from './assign-driver-dialog/assign-driver-dialog.component';
 export * from './release-driver-dialog/release-driver-dialog.component';
 export * from './penalize-driver-dialog/penalize-driver-dialog.component';
 export * from './driver-details-dialog/driver-details-dialog.component';
+export * from './incidents-table/incidents-table.component';

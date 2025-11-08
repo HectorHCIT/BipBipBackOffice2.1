@@ -4,6 +4,7 @@ import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { TagModule } from 'primeng/tag';
+import { ChipModule } from 'primeng/chip';
 
 import { NotificationEvent, CalendarStats } from '../../models';
 
@@ -26,7 +27,8 @@ type CalendarView = 'month' | 'day';
     ButtonModule,
     CardModule,
     ProgressSpinnerModule,
-    TagModule
+    TagModule,
+    ChipModule
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './notification-calendar.component.html',
@@ -237,14 +239,10 @@ export class NotificationCalendarComponent {
   }
 
   /**
-   * Get severity for event type tag
+   * Get severity for event type tag based on processed status
    */
-  getEventSeverity(event: NotificationEvent): 'success' | 'danger' | 'secondary' {
-    const color = event.extendedProps.bulletcolor;
-
-    if (color === '#01EB7B') return 'success'; // Green - Processed
-    if (color === '#fb0021') return 'danger';   // Red - Push pending
-    return 'secondary'; // Gray - SMS pending
+  getEventSeverity(event: NotificationEvent): 'success' | 'warn' {
+    return event.extendedProps.originalPush.isProcessed ? 'success' : 'warn';
   }
 
   /**
@@ -265,5 +263,14 @@ export class NotificationCalendarComponent {
       return '✓';
     }
     return event.extendedProps.type === 'push' ? 'P' : 'S';
+  }
+
+  /**
+   * Format event label for chip display
+   */
+  formatEventLabel(event: NotificationEvent): string {
+    const time = this.formatEventTime(event.date);
+    const title = event.title;
+    return `${time} - ${title}`;
   }
 }

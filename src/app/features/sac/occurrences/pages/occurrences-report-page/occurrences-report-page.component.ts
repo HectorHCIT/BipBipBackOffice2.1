@@ -44,7 +44,7 @@ export class OccurrencesReportPageComponent implements OnInit {
   // Breadcrumb
   readonly breadcrumbItems: MenuItem[] = [
     { label: 'SAC', routerLink: '/sac' },
-    { label: 'Ocurrencias', routerLink: '/sac/occurrences' },
+    { label: 'Ocurrencias', routerLink: '/sac/ocurrences' },
     { label: 'Reportes' }
   ];
   readonly home: MenuItem = { icon: 'pi pi-home', routerLink: '/' };

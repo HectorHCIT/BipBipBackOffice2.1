@@ -333,7 +333,7 @@ export interface TrackOrderDetails {
   status: OrderStatus[];
   ordersProductsDetails: OrdersProductsDetail[];
   cancelRequest: CancelRequest[];
-  incidents: Incident[];
+  incidents: OrderIncidentManual[];
 }
 
 /**
@@ -684,3 +684,212 @@ export interface ChangeStoreRequest {
   /** Comentarios del cambio */
   comments: string;
 }
+
+// ============================================
+// Tabs Adicionales - Interfaces
+// ============================================
+
+/**
+ * Solicitud de cancelación de orden
+ */
+export interface CancelRequest {
+  /** Código de la solicitud */
+  codCancelRequest: number;
+
+  /** ID de la orden */
+  orderId: number;
+
+  /** ID de orden en POSGC */
+  posgcOrderId: number;
+
+  /** Fecha de la solicitud */
+  dateRequest: string;
+
+  /** Usuario que solicitó */
+  userRequest: string;
+
+  /** Comentario de la solicitud */
+  comment: string;
+
+  /** Tienda */
+  store: string;
+
+  /** Si el producto fue preparado */
+  productWasPrepared: boolean;
+
+  /** Canal de venta */
+  channel: string;
+
+  /** Usuario que aprobó/rechazó */
+  userAproved: string;
+
+  /** Estado: 'Pendiente', 'Aprobada', 'Rechazada' */
+  status: string;
+}
+
+/**
+ * Datos para aprobar solicitud de cancelación
+ */
+export interface ApproveRequest {
+  /** Código de la solicitud */
+  codOrderCancelRequest: number;
+
+  /** Comentario */
+  comment: string;
+
+  /** Código de razón de cancelación */
+  codCancelReason: number;
+
+  /** Si el producto fue procesado */
+  productProcessed: boolean;
+}
+
+/**
+ * Datos para denegar solicitud de cancelación
+ */
+export interface DenyRequest {
+  /** Código de la solicitud */
+  codOrderCancelRequest: number;
+
+  /** Comentario */
+  comment: string;
+}
+
+/**
+ * Razón de cancelación del catálogo
+ */
+export interface ReasonCancelList {
+  /** ID de la razón */
+  id: number;
+
+  /** Descripción de la razón */
+  reason: string;
+}
+
+/**
+ * Incidencia/Ocurrencia registrada manualmente
+ */
+export interface OrderIncidentManual {
+  /** ID de la incidencia */
+  id: number;
+
+  /** Fecha de creación */
+  createdAt: string;
+
+  /** Usuario que creó */
+  createdBy: string;
+
+  /** Tipo de incidencia */
+  type: string;
+
+  /** Razón/motivo */
+  reason: string;
+
+  /** Comentarios */
+  comments: string;
+
+  /** Soluciones aplicadas */
+  solution: IncidentSolution[];
+}
+
+/**
+ * Solución aplicada a una incidencia
+ */
+export interface IncidentSolution {
+  /** Descripción de la solución */
+  solution: string;
+
+  /** Fecha de la solución */
+  createdAt: string;
+
+  /** Usuario que solucionó */
+  createdBy: string;
+
+  /** Encargado de la solución */
+  attendant: string;
+}
+
+/**
+ * Incidencia del sistema (auditoría automática)
+ */
+export interface OrderIncident {
+  /** ID de la orden */
+  orderId: number;
+
+  /** Fecha del incidente */
+  createDateIncident: string;
+
+  /** Usuario que generó el incidente */
+  userCreateIncident: string;
+
+  /** Tipo: 'A', 'D', 'E', 'CO' */
+  incidentType: string;
+
+  /** ID del driver anterior (solo para reasignaciones) */
+  previousDriverId?: number;
+}
+
+/**
+ * Estado completo de un driver para incidencias
+ */
+export interface DriverIncidentInfo {
+  /** ID del driver */
+  driverId: number;
+
+  /** Código del driver */
+  driverCode: string;
+
+  /** Nombre completo */
+  fullname: string;
+
+  /** ID de ciudad */
+  cityId: number;
+
+  /** Si está disponible para asignación */
+  isAvailableForAssignment: boolean;
+
+  /** Si está trabajando actualmente */
+  isCurrentlyWorking: boolean | null;
+
+  /** Estado activo/inactivo */
+  isActive: boolean;
+
+  /** Si tiene penalización activa */
+  hasActivePenalty: boolean;
+}
+
+/**
+ * Enum de tipos de incidentes del sistema
+ */
+export enum IncidentType {
+  ASSIGNMENT = 'A',      // Asignación inicial
+  REASSIGNMENT = 'D',    // Reasignación (Derivación)
+  CANCELLATION = 'E',    // Cancelación (Eliminación)
+  COMPLETION = 'CO'      // Completación
+}
+
+/**
+ * Obtener nombre legible del tipo de incidente
+ */
+export const getIncidentTypeName = (type: string): string => {
+  const typeMap: Record<string, string> = {
+    'A': 'Asignación',
+    'D': 'Reasignación',
+    'E': 'Cancelación',
+    'CO': 'Completación'
+  };
+  return typeMap[type] || type;
+};
+
+/**
+ * Obtener clases CSS para badge según tipo de incidente
+ */
+export const getIncidentTypeSeverity = (type: string): 'info' | 'warn' | 'danger' | 'success' | 'secondary' => {
+  const severityMap: Record<string, 'info' | 'warn' | 'danger' | 'success' | 'secondary'> = {
+    'A': 'info',      // Asignación - Azul
+    'D': 'warn',      // Reasignación - Naranja (warn en vez de warning)
+    'E': 'danger',    // Cancelación - Rojo
+    'CO': 'success'   // Completación - Verde
+  };
+  return severityMap[type] || 'secondary';
+};

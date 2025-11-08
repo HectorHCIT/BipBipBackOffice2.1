@@ -7,10 +7,12 @@
   <form [formGroup]="notificationForm" (ngSubmit)="onSubmit()">
     <!-- Detalles de la notificación (Full Width) -->
     <div class="form-section mb-6">
-      <h3 class="text-lg font-semibold mb-4 pb-3 border-b border-surface-border">
-        <i class="pi pi-info-circle mr-2"></i>
-        Detalles de la notificación
-      </h3>
+      <p-divider align="left" type="solid">
+        <div class="inline-flex items-center">
+          <i class="pi pi-info-circle mr-2"></i>
+          <span class="font-semibold">Detalles de la notificación</span>
+        </div>
+      </p-divider>
 
       <!-- Contenido de la notificación (subsection) -->
       <div class="mb-6">
@@ -77,10 +79,12 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
       <!-- Left: Contenido de la Notificación -->
       <div class="form-section">
-        <h3 class="text-lg font-semibold mb-4 pb-3 border-b border-surface-border">
-          <i class="pi pi-file-edit mr-2"></i>
-          Contenido de la Notificación
-        </h3>
+        <p-divider align="left" type="solid">
+          <div class="inline-flex items-center">
+            <i class="pi pi-file-edit mr-2"></i>
+            <span class="font-semibold">Contenido de la Notificación</span>
+          </div>
+        </p-divider>
         <div class="grid gap-4">
           <!-- Título de la notificación -->
           <div>
@@ -123,7 +127,12 @@
 
       <!-- Right: Vista Previa -->
       <div>
-        <h3 class="section-title mb-4">Vista Previa</h3>
+        <p-divider align="left" type="solid">
+          <div class="inline-flex items-center">
+            <i class="pi pi-eye mr-2"></i>
+            <span class="font-semibold">Vista Previa</span>
+          </div>
+        </p-divider>
         <app-notification-preview
           [title]="previewTitle()"
           [message]="previewMessage()"
@@ -136,10 +145,12 @@
 
     <!-- Configuración de Envío (Full Width) -->
     <div class="form-section mb-6">
-      <h3 class="text-lg font-semibold mb-4 pb-3 border-b border-surface-border">
-        <i class="pi pi-calendar-clock mr-2"></i>
-        Configuración de Envío
-      </h3>
+      <p-divider align="left" type="solid">
+        <div class="inline-flex items-center">
+          <i class="pi pi-calendar-clock mr-2"></i>
+          <span class="font-semibold">Configuración de Envío</span>
+        </div>
+      </p-divider>
 
       <!-- Checkbox: Programación por frecuencia -->
       <div class="flex items-center mb-4 p-3  rounded-lg border border-gray-200">

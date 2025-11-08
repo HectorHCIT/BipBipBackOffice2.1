@@ -309,4 +309,40 @@ export class OrderTrackingService {
       { comment: data.comments }
     );
   }
+
+  // ============================================
+  // Cancellation Requests Methods
+  // ============================================
+
+  /**
+   * Obtiene las razones de cancelación del catálogo
+   */
+  getReasonsCancels(): Observable<any[]> {
+    return this.dataService.get$('OrderTracking/cancel/reasons');
+  }
+
+  /**
+   * Aprueba una solicitud de cancelación
+   */
+  approveRequest(data: any): Observable<any> {
+    return this.dataService.post$('CancelRequest/ApproveRequest', data);
+  }
+
+  /**
+   * Rechaza una solicitud de cancelación
+   */
+  denyRequest(data: any): Observable<any> {
+    return this.dataService.post$('CancelRequest/DenyRequest', data);
+  }
+
+  // ============================================
+  // Incidents/Ocurrences Methods
+  // ============================================
+
+  /**
+   * Elimina una ocurrencia/incidencia
+   */
+  deleteOcurrency(id: number): Observable<any> {
+    return this.dataService.delete$(`OrderTracking/DeleteOcurrency/${id}`);
+  }
 }

@@ -1,0 +1,188 @@
+<div class="incidents-table-container p-4">
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-4">
+    <h3 class="text-lg font-semibold text-gray-900">
+      Incidencias del Sistema
+      @if (totalRecords() > 0) {
+        <span class="text-sm font-normal text-gray-600 ml-2">({{ totalRecords() }} registros)</span>
+      }
+    </h3>
+    <p-button
+      icon="pi pi-refresh"
+      [text]="true"
+      [rounded]="true"
+      (onClick)="loadIncidents()"
+      [loading]="isLoading()"
+      pTooltip="Recargar"
+    />
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="space-y-3">
+      @for (i of [1,2,3,4,5]; track i) {
+        <p-skeleton height="60px" />
+      }
+    </div>
+  }
+
+  <!-- Error State -->
+  @else if (hasError()) {
+    <div class="border border-red-200 bg-red-50 rounded-lg p-6 text-center">
+      <i class="pi pi-exclamation-triangle text-3xl text-red-600 mb-3"></i>
+      <h4 class="text-lg font-semibold text-red-800 mb-2">Error al cargar incidencias</h4>
+      <p class="text-sm text-red-700 mb-4">
+        No se pudieron cargar las incidencias del sistema. Por favor, intenta nuevamente.
+      </p>
+      <p-button
+        label="Reintentar"
+        icon="pi pi-refresh"
+        severity="danger"
+        [outlined]="true"
+        (onClick)="loadIncidents()"
+      />
+    </div>
+  }
+
+  <!-- Empty State -->
+  @else if (isEmpty()) {
+    <div class="border border-gray-200 bg-gray-50 rounded-lg p-8 text-center">
+      <i class="pi pi-info-circle text-4xl text-gray-400 mb-3"></i>
+      <h4 class="text-lg font-semibold text-gray-700 mb-2">No hay incidencias registradas</h4>
+      <p class="text-sm text-gray-600">
+        Esta orden no tiene incidencias del sistema registradas.
+      </p>
+    </div>
+  }
+
+  <!-- Table with Data -->
+  @else {
+    <div class="border border-gray-200 rounded-lg overflow-hidden">
+      <p-table
+        [value]="paginatedIncidents()"
+        [tableStyle]="{ 'min-width': '50rem' }"
+        styleClass="p-datatable-sm"
+      >
+        <ng-template #header>
+          <tr>
+            <th class="text-left">Fecha de Creación</th>
+            <th class="text-left">Usuario</th>
+            <th class="text-left">Tipo de Incidente</th>
+            <th class="text-left">Driver Anterior</th>
+          </tr>
+        </ng-template>
+        <ng-template #body let-incident>
+          <tr>
+            <!-- Fecha -->
+            <td>
+              <div class="flex flex-col gap-1">
+                <span class="text-sm font-medium text-gray-900">
+                  {{ formatDate(incident.createDateIncident) }}
+                </span>
+                <span class="text-xs text-gray-500">
+                  {{ incident.createDateIncident | date:'dd/MM/yyyy HH:mm:ss' }}
+                </span>
+              </div>
+            </td>
+
+            <!-- Usuario -->
+            <td>
+              <div class="flex items-center gap-2">
+                <i class="pi pi-user text-gray-500 text-sm"></i>
+                <span class="text-sm text-gray-900">{{ incident.userCreateIncident }}</span>
+              </div>
+            </td>
+
+            <!-- Tipo de Incidente -->
+            <td>
+              <p-badge
+                [value]="getIncidentTypeName(incident.incidentType)"
+                [severity]="getIncidentTypeSeverity(incident.incidentType)"
+                styleClass="text-xs"
+              />
+              <span class="text-xs text-gray-500 ml-2">({{ incident.incidentType }})</span>
+            </td>
+
+            <!-- Driver Anterior -->
+            <td>
+              @if (hasPreviousDriver(incident)) {
+                <div class="flex flex-col gap-1">
+                  @if (isDriverLoading(incident.previousDriverId!)) {
+                    <div class="flex items-center gap-2">
+                      <i class="pi pi-spin pi-spinner text-xs text-gray-400"></i>
+                      <span class="text-xs text-gray-500">Cargando... (ID: {{ incident.previousDriverId }})</span>
+                    </div>
+                  } @else if (getDriverInfo(incident.previousDriverId!); as driverInfo) {
+                    <div class="flex items-center gap-2">
+                      <i class="pi pi-car text-orange-600 text-sm"></i>
+                      <div class="flex flex-col">
+                        <span class="text-sm font-medium text-gray-900">{{ driverInfo.fullname }}</span>
+                        <span class="text-xs text-gray-500">{{ driverInfo.driverCode }}</span>
+                      </div>
+                    </div>
+                  } @else {
+                    <span class="text-xs text-gray-400">ID: {{ incident.previousDriverId }}</span>
+                  }
+                </div>
+              } @else {
+                <span class="text-xs text-gray-400">N/A</span>
+              }
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+
+      <!-- Pagination -->
+      @if (totalPages() > 1) {
+        <div class="border-t border-gray-200 bg-gray-50 px-4 py-3">
+          <div class="flex flex-col sm:flex-row justify-between items-center gap-3">
+            <!-- Info -->
+            <div class="text-sm text-gray-700">
+              Mostrando
+              <span class="font-medium">{{ (currentPage() * pageSize) + 1 }}</span>
+              -
+              <span class="font-medium">{{ Math.min((currentPage() + 1) * pageSize, totalRecords()) }}</span>
+              de
+              <span class="font-medium">{{ totalRecords() }}</span>
+              registros
+            </div>
+
+            <!-- Controls -->
+            <div class="flex items-center gap-2">
+              <p-button
+                icon="pi pi-angle-left"
+                [text]="true"
+                [rounded]="true"
+                [disabled]="currentPage() === 0"
+                (onClick)="previousPage()"
+                pTooltip="Anterior"
+              />
+
+              <div class="flex gap-1">
+                @for (page of getPageNumbers(); track page) {
+                  <p-button
+                    [label]="(page + 1).toString()"
+                    [text]="currentPage() !== page"
+                    [rounded]="true"
+                    size="small"
+                    (onClick)="goToPage(page)"
+                    [styleClass]="currentPage() === page ? 'w-10' : 'w-10'"
+                  />
+                }
+              </div>
+
+              <p-button
+                icon="pi pi-angle-right"
+                [text]="true"
+                [rounded]="true"
+                [disabled]="currentPage() === totalPages() - 1"
+                (onClick)="nextPage()"
+                pTooltip="Siguiente"
+              />
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

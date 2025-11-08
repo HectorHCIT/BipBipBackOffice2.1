@@ -10,6 +10,7 @@ import { RadioButtonModule } from 'primeng/radiobutton';
 import { CheckboxModule } from 'primeng/checkbox';
 import { DatePickerModule } from 'primeng/datepicker';
 import { MultiSelectModule } from 'primeng/multiselect';
+import { DividerModule } from 'primeng/divider';
 
 import { NotificationService } from '../../services';
 import { LaunchType, PushTypeEnum, DAYS_OF_WEEK, HOUR_OPTIONS, PUSH_TYPE_OPTIONS } from '../../models';
@@ -31,6 +32,7 @@ import { SmsAuthorizationDialogComponent } from '../sms-authorization-dialog/sms
     CheckboxModule,
     DatePickerModule,
     MultiSelectModule,
+    DividerModule,
     NotificationPreviewComponent,
     SmsAuthorizationDialogComponent
   ],

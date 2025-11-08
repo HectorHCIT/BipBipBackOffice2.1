@@ -12,6 +12,7 @@ import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { OrderTrackingService } from '../../services';
 import { TrackOrderDetails, CreateIncidentRequest } from '../../models';
 import { environment } from '../../../../../../environments/environment';
+import { AuthService } from '../../../../../core/services/auth.service';
 import {
   DriverAssignmentComponent,
   CompleteOrderDialogComponent,
@@ -50,6 +51,7 @@ export class OrderDetailPageComponent implements OnInit {
   private readonly orderTrackingService = inject(OrderTrackingService);
   private readonly messageService = inject(MessageService);
   private readonly dialogService = inject(DialogService);
+  private readonly authService = inject(AuthService);
   private dialogRef: DynamicDialogRef | null = null;
 
   // Order number from route
@@ -98,6 +100,55 @@ export class OrderDetailPageComponent implements OnInit {
   readonly statusSeverity = computed(() => {
     const status = this.orderDetail()?.orderStatus.toUpperCase();
     return status === 'CANCELADO' ? 'danger' : 'success';
+  });
+
+  // Button visibility computed properties
+  readonly userRole = computed(() => this.authService.userRole());
+
+  readonly canShowSendButton = computed(() => {
+    const order = this.orderDetail();
+    if (!order) return false;
+    // Visible si NO tiene número de factura POSGC
+    return !order.posgc;
+  });
+
+  readonly canShowCompleteButton = computed(() => {
+    const order = this.orderDetail();
+    const role = this.userRole();
+    if (!order) return false;
+
+    // No mostrar si está cancelada o entregada
+    const statusUpper = order.orderStatus?.toUpperCase() || '';
+    if (statusUpper === 'CANCELADO' || statusUpper === 'CANCELADA' || statusUpper === 'ENTREGADA') {
+      return false;
+    }
+
+    // Verificar permisos por rol (fallback simple)
+    const hasPermission = role === 'Administrador' || role === 'SSAC';
+    if (!hasPermission) return false;
+
+    // Si es delivery (channelId 1 o 3), debe tener driver asignado
+    if (order.channelId === 1 || order.channelId === 3) {
+      return order.idDriver !== null && order.idDriver !== undefined && order.idDriver > 0;
+    }
+
+    // Si es pick-up (channelId 2), siempre visible (con permisos)
+    return true;
+  });
+
+  readonly canShowCancelButton = computed(() => {
+    const order = this.orderDetail();
+    const role = this.userRole();
+    if (!order) return false;
+
+    // No mostrar si ya está cancelada
+    const statusUpper = order.orderStatus?.toUpperCase() || '';
+    if (statusUpper === 'CANCELADO' || statusUpper === 'CANCELADA') {
+      return false;
+    }
+
+    // Solo Administrador y SSAC pueden cancelar (SAC NO puede)
+    return role === 'Administrador' || role === 'SSAC';
   });
 
   ngOnInit(): void {
@@ -282,6 +333,18 @@ export class OrderDetailPageComponent implements OnInit {
 
   onCreateIncidentClick(): void {
     this.showIncidentDialog.set(true);
+  }
+
+  onChatClick(): void {
+    const order = this.orderDetail();
+    if (!order) return;
+
+    // TODO: Implementar diálogo de chat
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Chat',
+      detail: 'Funcionalidad de chat en desarrollo'
+    });
   }
 
   /**

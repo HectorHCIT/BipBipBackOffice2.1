@@ -61,5 +61,101 @@
       "timestamp": 1762623822642,
       "ttl": 86400000
     }
+  ],
+  [
+    "tag",
+    {
+      "data": {
+        "name": "tag",
+        "description": "Tag component is used to categorize content.",
+        "importStatement": "import { Tag } from 'primeng/tag';",
+        "moduleImport": "import { TagModule } from 'primeng/tag';",
+        "basicUsage": "import { TagModule } from 'primeng/tag';",
+        "examples": [
+          "import { TagModule } from 'primeng/tag';",
+          "<p-tag value=\"New\" />",
+          "<p-tag value=\"Primary\" />\n<p-tag severity=\"secondary\" value=\"Secondary\" />\n<p-tag severity=\"success\" value=\"Success\" />\n<p-tag severity=\"info\" value=\"Info\" />\n<p-tag severity=\"warn\" value=\"Warn\" />\n<p-tag severity=\"danger\" value=\"Danger\" />\n<p-tag severity=\"contrast\" value=\"Contrast\" />",
+          "<p-tag value=\"Primary\" [rounded]=\"true\" />\n<p-tag severity=\"secondary\" value=\"Secondary\" [rounded]=\"true\" />\n<p-tag severity=\"success\" value=\"Success\" [rounded]=\"true\" />\n<p-tag severity=\"info\" value=\"Info\" [rounded]=\"true\" />\n<p-tag severity=\"warn\" value=\"Warn\" [rounded]=\"true\" />\n<p-tag severity=\"danger\" value=\"Danger\" [rounded]=\"true\" />\n<p-tag severity=\"contrast\" value=\"Contrast\" [rounded]=\"true\" />",
+          "<p-tag icon=\"pi pi-user\" value=\"Primary\" />\n<p-tag icon=\"pi pi-search\" severity=\"secondary\" value=\"Secondary\" />\n<p-tag icon=\"pi pi-check\" severity=\"success\" value=\"Success\" />\n<p-tag icon=\"pi pi-info-circle\" severity=\"info\" value=\"Info\" />\n<p-tag icon=\"pi pi-exclamation-triangle\" severity=\"warn\" value=\"Warn\" />\n<p-tag icon=\"pi pi-times\" severity=\"danger\" value=\"Danger\" />\n<p-tag icon=\"pi pi-cog\" severity=\"contrast\" value=\"Contrast\" />",
+          "<p-tag [style]=\"{ border: '2px solid var(--border-color)', background: 'transparent', color: 'var(--text-color)'}\">\n    <div class=\"flex items-center gap-2 px-1\">\n        <img alt=\"Country\" src=\"https://primefaces.org/cdn/primeng/images/demo/flag/flag_placeholder.png\" class=\"flag flag-it\" style=\"width: 18px\" />\n        <span class=\"text-base\">\n            Italy\n        </span>\n    </div>\n</p-tag>"
+        ],
+        "properties": [],
+        "events": [],
+        "methods": []
+      },
+      "timestamp": 1762623832395,
+      "ttl": 86400000
+    }
+  ],
+  [
+    "chip",
+    {
+      "data": {
+        "name": "chip",
+        "description": "Chip represents entities using icons, labels and images.",
+        "importStatement": "import { Chip } from 'primeng/chip';",
+        "moduleImport": "import { ChipModule } from 'primeng/chip';",
+        "basicUsage": "import { ChipModule } from 'primeng/chip';",
+        "examples": [
+          "import { ChipModule } from 'primeng/chip';",
+          "<p-chip label=\"Action\" />\n<p-chip label=\"Comedy\" />\n<p-chip label=\"Mystery\" />\n<p-chip label=\"Thriller\" [removable]=\"true\" />",
+          "<p-chip label=\"Apple\" icon=\"pi pi-apple\" />",
+          "<p-chip label=\"Amy Elsner\" image=\"https://primefaces.org/cdn/primeng/images/demo/avatar/amyelsner.png\" alt=\"Avatar image\" />\n<p-chip label=\"Asiya Javayant\" image=\"https://primefaces.org/cdn/primeng/images/demo/avatar/asiyajavayant.png\" alt=\"Avatar image\" />\n<p-chip label=\"Onyama Limba\" image=\"https://primefaces.org/cdn/primeng/images/demo/avatar/onyamalimba.png\" alt=\"Avatar image\" />\n<p-chip label=\"Xuxue Feng\" image=\"https://primefaces.org/cdn/primeng/images/demo/avatar/xuxuefeng.png\" alt=\"Avatar image\" [removable]=\"true\" />",
+          "<p-chip class=\"!py-0 !pl-0 !pr-4\">\n    <span class=\"bg-primary text-primary-contrast rounded-full w-8 h-8 flex items-center justify-center\">\n        P\n    </span>\n    <span class=\"ml-2 font-medium\">\n        PRIME\n    </span>\n</p-chip>"
+        ],
+        "properties": [],
+        "events": [],
+        "methods": []
+      },
+      "timestamp": 1762623877221,
+      "ttl": 86400000
+    }
+  ],
+  [
+    "badge",
+    {
+      "data": {
+        "name": "badge",
+        "description": "Badge is a small status indicator for another element.",
+        "importStatement": "import { Badge } from 'primeng/badge';",
+        "moduleImport": "import { BadgeModule } from 'primeng/badge';",
+        "basicUsage": "import { BadgeModule } from 'primeng/badge';\nimport { OverlayBadgeModule } from 'primeng/overlaybadge';",
+        "examples": [
+          "import { BadgeModule } from 'primeng/badge';\nimport { OverlayBadgeModule } from 'primeng/overlaybadge';",
+          "<p-badge value=\"2\" />",
+          "<p-badge [value]=\"2\" severity=\"success\" />",
+          "<p-badge value=\"8\" badgeSize=\"xlarge\" severity=\"success\" />",
+          "<p-overlaybadge value=\"2\">\n    <i class=\"pi pi-bell\" style=\"font-size: 2rem\"></i>\n</p-overlaybadge>\n<p-overlaybadge value=\"4\" severity=\"danger\">\n    <i class=\"pi pi-calendar\" style=\"font-size: 2rem\"></i>\n</p-overlaybadge>\n<p-overlaybadge severity=\"danger\">\n    <i class=\"pi pi-envelope\" style=\"font-size: 2rem\"></i>\n</p-overlaybadge>",
+          "<p-button label=\"Emails\" icon=\"pi pi-bell\" label=\"Notifications\" badge=\"2\" />"
+        ],
+        "properties": [],
+        "events": [],
+        "methods": []
+      },
+      "timestamp": 1762623884800,
+      "ttl": 86400000
+    }
+  ],
+  [
+    "panel",
+    {
+      "data": {
+        "name": "panel",
+        "description": "Panel is a container component with an optional content toggle feature.",
+        "importStatement": "import { Panel } from 'primeng/panel';",
+        "moduleImport": "import { PanelModule } from 'primeng/panel';",
+        "basicUsage": "import { PanelModule } from 'primeng/panel';",
+        "examples": [
+          "import { PanelModule } from 'primeng/panel';",
+          "<p-panel header=\"Header\">\n    <p class=\"m-0\">\n        Lorem ipsum dolor sit amet...\n    </p>\n</p-panel>",
+          "<p-panel header=\"Header\" [toggleable]=\"true\">\n    <p class=\"m-0\">\n        Lorem ipsum dolor sit amet...\n    </p>\n</p-panel>"
+        ],
+        "properties": [],
+        "events": [],
+        "methods": []
+      },
+      "timestamp": 1762623886526,
+      "ttl": 86400000
+    }
   ]
 ]

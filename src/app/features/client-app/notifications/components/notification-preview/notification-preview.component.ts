@@ -1,11 +1,12 @@
 import { Component, ChangeDetectionStrategy, input, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { CardModule } from 'primeng/card';
 import { PushTypeEnum } from '../../models';
 
 @Component({
   selector: 'app-notification-preview',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, CardModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './notification-preview.component.html',
   styleUrl: './notification-preview.component.scss'

@@ -50,32 +50,12 @@
     </div>
 
     <!-- Statistics -->
-    <div class="flex gap-4 flex-wrap">
-      <div class="flex items-center gap-2 px-3 py-2 rounded-lg border border-surface-border bg-surface-50">
-        <i class="pi pi-bell"></i>
-        <span class="text-sm font-medium">Total:</span>
-        <span class="text-lg font-bold">{{ stats().total }}</span>
-      </div>
-      <div class="flex items-center gap-2 px-3 py-2 rounded-lg border border-surface-border bg-surface-50">
-        <i class="pi pi-mobile"></i>
-        <span class="text-sm font-medium">Push:</span>
-        <span class="text-lg font-bold">{{ stats().pushCount }}</span>
-      </div>
-      <div class="flex items-center gap-2 px-3 py-2 rounded-lg border border-surface-border bg-surface-50">
-        <i class="pi pi-comment"></i>
-        <span class="text-sm font-medium">SMS:</span>
-        <span class="text-lg font-bold">{{ stats().smsCount }}</span>
-      </div>
-      <div class="flex items-center gap-2 px-3 py-2 rounded-lg border border-surface-border bg-surface-50">
-        <i class="pi pi-check-circle"></i>
-        <span class="text-sm font-medium">Procesadas:</span>
-        <span class="text-lg font-bold">{{ stats().processedCount }}</span>
-      </div>
-      <div class="flex items-center gap-2 px-3 py-2 rounded-lg border border-surface-border bg-surface-50">
-        <i class="pi pi-clock"></i>
-        <span class="text-sm font-medium">Pendientes:</span>
-        <span class="text-lg font-bold">{{ stats().pendingCount }}</span>
-      </div>
+    <div class="flex gap-3 flex-wrap">
+      <p-chip label="Total: {{ stats().total }}" icon="pi pi-bell" />
+      <p-chip label="Push: {{ stats().pushCount }}" icon="pi pi-mobile" />
+      <p-chip label="SMS: {{ stats().smsCount }}" icon="pi pi-comment" />
+      <p-chip label="Procesadas: {{ stats().processedCount }}" icon="pi pi-check-circle" />
+      <p-chip label="Pendientes: {{ stats().pendingCount }}" icon="pi pi-clock" />
     </div>
   </div>
 
@@ -102,7 +82,7 @@
       <!-- Calendar days -->
       @for (day of calendarDays(); track day.date.getTime()) {
         <div
-          class="calendar-day border-[0.5px] p-2 cursor-pointer"
+          class="calendar-day border-[0.1px] p-2 cursor-pointer"
           [class.other-month]="!day.isCurrentMonth"
           [class.today]="day.isToday"
           [class.has-events]="day.hasEvents"
@@ -115,31 +95,24 @@
           @if (day.hasEvents) {
             <div class="day-events">
               @for (event of getVisibleEvents(day); track event.id) {
-                <div
-                  class="event-badge"
-                  [class.event-push-pending]="event.extendedProps.type === 'push' && !event.extendedProps.originalPush.isProcessed"
-                  [class.event-processed]="event.extendedProps.originalPush.isProcessed"
-                  [class.event-sms-pending]="event.extendedProps.type === 'sms' && !event.extendedProps.originalPush.isProcessed"
-                  [title]="event.title"
+                <p-tag
+                  [value]="formatEventLabel(event)"
+                  [severity]="getEventSeverity(event)"
                   (click)="onEventClick(event, $event)"
-                >
-                  <span class="event-time">{{ formatEventTime(event.date) }}</span>
-                  <span class="event-title">{{ event.title }}</span>
-                  <span class="event-type">{{ getEventTypeIcon(event) }}</span>
-                </div>
+                  [style]="{ width: '100%', fontSize: '0.6875rem', cursor: 'pointer' }"
+                />
               }
 
               @if (shouldShowMoreButton(day)) {
-                <button
-                  class="show-more-button"
-                  (click)="toggleDayExpanded(getDateKey(day.date)); $event.stopPropagation()"
-                >
-                  @if (isDayExpanded(getDateKey(day.date))) {
-                    <i class="pi pi-chevron-up"></i>
-                  } @else {
-                    <span>+{{ getRemainingCount(day) }}</span>
-                  }
-                </button>
+                <p-button
+                  [label]="isDayExpanded(getDateKey(day.date)) ? '' : '+' + getRemainingCount(day)"
+                  [icon]="isDayExpanded(getDateKey(day.date)) ? 'pi pi-chevron-up' : ''"
+                  (onClick)="toggleDayExpanded(getDateKey(day.date)); $event.stopPropagation()"
+                  severity="secondary"
+                  size="small"
+                  [text]="true"
+                  [style]="{ width: '100%', fontSize: '0.625rem', minHeight: '18px' }"
+                />
               }
             </div>
           }

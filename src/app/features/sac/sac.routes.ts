@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 
 export const SAC_ROUTES: Routes = [
   {
-    path: 'occurrences',
+    path: 'ocurrences',
     loadChildren: () =>
       import('./occurrences/occurrences.routes').then((m) => m.OCCURRENCES_ROUTES),
     title: 'SAC - Ocurrencias'
