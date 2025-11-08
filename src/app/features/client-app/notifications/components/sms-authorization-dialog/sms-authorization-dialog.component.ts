@@ -51,7 +51,7 @@ export class SmsAuthorizationDialogComponent {
   });
 
   readonly canVerify = computed(() => {
-    return this.authCode().length === 6 && !this.isVerifying();
+    return this.authCode().length === 4 && !this.isVerifying();
   });
 
   readonly isCodeExpired = computed(() => {
@@ -171,18 +171,15 @@ export class SmsAuthorizationDialogComponent {
 
   /**
    * Handle code input (only allow numbers, max 6 digits)
+   * Auto-verify when 6 digits are entered
    */
   onCodeInput(event: any): void {
     let value = event.target.value.replace(/\D/g, ''); // Remove non-digits
     value = value.slice(0, 6); // Max 6 digits
     this.authCode.set(value);
-  }
 
-  /**
-   * Auto-verify when 6 digits are entered
-   */
-  onCodeChange(): void {
-    if (this.authCode().length === 6) {
+    // Auto-verify when 6 digits are entered
+    if (value.length === 6) {
       setTimeout(() => {
         this.verifyCode();
       }, 500);

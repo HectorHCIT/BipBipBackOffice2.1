@@ -1,35 +1,64 @@
 [
   [
-    "accordion",
+    "autocomplete",
     {
       "data": {
-        "name": "accordion",
-        "description": "Accordion groups a collection of contents in tabs.",
-        "importStatement": "import { Accordion } from 'primeng/accordion';",
-        "moduleImport": "import { AccordionModule } from 'primeng/accordion';",
-        "basicUsage": "import { AccordionModule } from 'primeng/accordion';",
+        "name": "autocomplete",
+        "description": "AutoComplete is an input component that provides real-time suggestions when being typed.",
+        "importStatement": "import { Autocomplete } from 'primeng/autocomplete';",
+        "moduleImport": "import { AutocompleteModule } from 'primeng/autocomplete';",
+        "basicUsage": "import { AutoCompleteModule } from 'primeng/autocomplete';",
+        "examples": [
+          "import { AutoCompleteModule } from 'primeng/autocomplete';",
+          "<p-autocomplete [(ngModel)]=\"value\" [suggestions]=\"items\" (completeMethod)=\"search($event)\" />",
+          "<p-autocomplete [(ngModel)]=\"value\" [dropdown]=\"true\" [suggestions]=\"items\" (completeMethod)=\"search($event)\" />",
+          "<p-autocomplete [(ngModel)]=\"selectedCountry\" [suggestions]=\"filteredCountries\" (completeMethod)=\"filterCountry($event)\" optionLabel=\"name\" />",
+          "<p-autocomplete [(ngModel)]=\"selectedCountryAdvanced\" [suggestions]=\"filteredCountries\" (completeMethod)=\"filterCountry($event)\" optionLabel=\"name\">\n    <ng-template let-country #item>\n        <div class=\"flex items-center gap-2\">\n            <img src=\"https://primefaces.org/cdn/primeng/images/demo/flag/flag_placeholder.png\" [class]=\"'flag flag-' + country.code.toLowerCase()\" style=\"width: 18px\" />\n            <div>{{ country.name }}</div>\n        </div>\n    </ng-template>\n    <ng-template #header>\n        <div class=\"font-medium px-3 py-2\">Available Countries</div>\n    </ng-template>\n    <ng-template #footer>\n        <div class=\"px-3 py-3\">\n            <p-button label=\"Add New\" fluid severity=\"secondary\" text size=\"small\" icon=\"pi pi-plus\" />\n        </div>\n    </ng-template>\n</p-autocomplete>",
+          "<p-autocomplete [(ngModel)]=\"selectedCity\" [group]=\"true\" [suggestions]=\"filteredGroups\" (completeMethod)=\"filterGroupedCity($event)\" placeholder=\"Hint: type 'a'\">\n    <ng-template let-group #group>\n        <div class=\"flex items-center\">\n            <img src=\"https://primefaces.org/cdn/primeng/images/demo/flag/flag_placeholder.png\" [class]=\"'mr-2 flag flag-' + group.value\" style=\"width: 20px\" />\n            <span>{{ group.label }}</span>\n        </div>\n    </ng-template>\n</p-autocomplete>",
+          "<p-autocomplete [(ngModel)]=\"selectedCountry\" [forceSelection]=\"true\" [suggestions]=\"filteredCountries\" (completeMethod)=\"filterCountry($event)\" optionLabel=\"name\" />",
+          "<p-autocomplete [(ngModel)]=\"selectedItem\" [virtualScroll]=\"true\" [suggestions]=\"filteredItems\" [virtualScrollItemSize]=\"34\" (completeMethod)=\"filterItems($event)\" optionLabel=\"label\" [dropdown]=\"true\" />",
+          "<label for=\"multiple-ac-1\" class=\"font-bold mb-2 block\">With Typeahead</label>\n<p-autocomplete [(ngModel)]=\"value1\" inputId=\"multiple-ac-1\" multiple fluid [suggestions]=\"items\" (completeMethod)=\"search($event)\" />\n\n<label for=\"multiple-ac-2\" class=\"font-bold mt-8 mb-2 block\">Without Typeahead</label>\n<p-autocomplete [(ngModel)]=\"value2\" inputId=\"multiple-ac-2\" multiple fluid (completeMethod)=\"search($event)\" [typeahead]=\"false\" />",
+          "<!-- With Add On Blur -->\n<p-autocomplete\n    [(ngModel)]=\"valueBlur\"\n    multiple\n    [typeahead]=\"false\"\n    [addOnBlur]=\"true\"\n    placeholder=\"Type and click outside to add...\"\n/>\n\n<!-- With Add On Tab -->\n<p-autocomplete\n    [(ngModel)]=\"valueTab\"\n    multiple\n    [typeahead]=\"false\"\n    [addOnTab]=\"true\"\n    placeholder=\"Type and press Tab to add...\"\n/>\n\n<!-- With Separator -->\n<p-autocomplete\n    [(ngModel)]=\"valueSeparator\"\n    multiple\n    [typeahead]=\"false\"\n    separator=\",\"\n    placeholder=\"Type items separated by comma...\"\n/>\n\n<!-- Combined Features -->\n<p-autocomplete\n    [(ngModel)]=\"valueCombined\"\n    multiple\n    [typeahead]=\"false\"\n    [addOnBlur]=\"true\"\n    [addOnTab]=\"true\"\n    separator=\",\"\n    placeholder=\"Use Tab, Blur, or Comma to add items...\"\n/>",
+          "<p-floatlabel>\n    <p-autocomplete [(ngModel)]=\"value1\" [suggestions]=\"items\" (completeMethod)=\"search($event)\" inputId=\"over_label\" />\n    <label for=\"over_label\">Over Label</label>\n</p-floatlabel>\n\n<p-floatlabel variant=\"in\">\n    <p-autocomplete [(ngModel)]=\"value2\" [suggestions]=\"items\" (completeMethod)=\"search($event)\" inputId=\"in_label\" />\n    <label for=\"in_label\">In Label</label>\n</p-floatlabel>\n\n<p-floatlabel variant=\"on\">\n    <p-autocomplete [(ngModel)]=\"value3\" [suggestions]=\"items\" (completeMethod)=\"search($event)\" inputId=\"on_label\" />\n    <label for=\"on_label\">On Label</label>\n</p-floatlabel>",
+          "<p-iftalabel>\n    <p-autocomplete [(ngModel)]=\"value\" [suggestions]=\"items\" (completeMethod)=\"search($event)\" inputId=\"ac\" />\n    <label for=\"ac\">Identifier</label>\n</p-iftalabel>",
+          "<p-autocomplete [(ngModel)]=\"value\" [suggestions]=\"items\" (completeMethod)=\"search($event)\" [showClear]=\"true\" inputStyleClass=\"w-56\" />",
+          "<p-autocomplete [(ngModel)]=\"value1\" [suggestions]=\"items\" (completeMethod)=\"search()\" size=\"small\" placeholder=\"Small\" dropdown />\n<p-autocomplete [(ngModel)]=\"value2\" [suggestions]=\"items\" (completeMethod)=\"search()\" placeholder=\"Normal\" dropdown />\n<p-autocomplete [(ngModel)]=\"value3\" [suggestions]=\"items\" (completeMethod)=\"search()\" size=\"large\" placeholder=\"Large\" dropdown />",
+          "<p-autocomplete [(ngModel)]=\"value\" [suggestions]=\"items\" (completeMethod)=\"search($event)\" fluid />",
+          "<p-autocomplete [(ngModel)]=\"selectedItem\" [suggestions]=\"suggestions\" (completeMethod)=\"search($event)\" variant=\"filled\" />",
+          "<p-autocomplete [(ngModel)]=\"selectedItem\" [suggestions]=\"suggestions\" placeholder=\"Disabled\" (completeMethod)=\"search($event)\" [disabled]=\"true\" />",
+          "<p-autocomplete [(ngModel)]=\"value1\" [suggestions]=\"suggestions\" [invalid]=\"!value1\" (completeMethod)=\"search($event)\" placeholder=\"Code\" />\n<p-autocomplete [(ngModel)]=\"value2\" [suggestions]=\"suggestions\" [invalid]=\"!value2\" (completeMethod)=\"search($event)\" variant=\"filled\" placeholder=\"Code\" />",
+          "<form #exampleForm=\"ngForm\" (ngSubmit)=\"onSubmit(exampleForm)\" class=\"flex justify-center flex-col gap-4 md:w-56\">\n    <div class=\"flex flex-col gap-1\">\n        <p-autocomplete\n            #val=\"ngModel\"\n            [(ngModel)]=\"value\"\n            [suggestions]=\"items\"\n            [invalid]=\"val.invalid && (val.touched || exampleForm.submitted)\"\n            name=\"val\"\n            (completeMethod)=\"search($event)\"\n            required\n            fluid\n        />\n        @if (val.invalid && (val.touched || exampleForm.submitted)) {\n            <p-message severity=\"error\" size=\"small\" variant=\"simple\">Value is required.</p-message>\n        }\n    </div>\n    <button pButton severity=\"secondary\" type=\"submit\"><span pButtonLabel>Submit</span></button>\n</form>",
+          "<form [formGroup]=\"exampleForm\" (ngSubmit)=\"onSubmit()\" class=\"flex justify-center flex-col gap-4 md:w-56\">\n    <div class=\"flex flex-col gap-1\">\n        <p-autocomplete formControlName=\"value\" [suggestions]=\"items\" [invalid]=\"isInvalid('value')\" (completeMethod)=\"search($event)\" fluid />\n        @if (isInvalid('value')) {\n            <p-message severity=\"error\" size=\"small\" variant=\"simple\">Value is required.</p-message>\n        }\n    </div>\n    <button pButton severity=\"secondary\" type=\"submit\"><span pButtonLabel>Submit</span></button>\n</form>",
+          "<label for=\"ac1\">Username</label>\n<p-autocomplete inputId=\"ac1\"/>\n\n<span id=\"ac2\">Email</span>\n<p-autocomplete ariaLabelledBy=\"ac2\" />\n\n<p-autocomplete ariaLabel=\"City\" />"
+        ],
         "properties": [],
         "events": [],
         "methods": []
       },
-      "timestamp": 1762441224587,
+      "timestamp": 1762569495955,
       "ttl": 86400000
     }
   ],
   [
-    "drawer",
+    "card",
     {
       "data": {
-        "name": "drawer",
-        "description": "Drawer is a container component displayed as an overlay.",
-        "importStatement": "import { Drawer } from 'primeng/drawer';",
-        "moduleImport": "import { DrawerModule } from 'primeng/drawer';",
-        "basicUsage": "import { DrawerModule } from 'primeng/drawer';",
+        "name": "card",
+        "description": "Card is a flexible container component.",
+        "importStatement": "import { Card } from 'primeng/card';",
+        "moduleImport": "import { CardModule } from 'primeng/card';",
+        "basicUsage": "import { CardModule } from 'primeng/card';",
+        "examples": [
+          "import { CardModule } from 'primeng/card';",
+          "<p-card header=\"Simple Card\">\n    <p class=\"m-0\">\n        Lorem ipsum dolor sit amet...\n    </p>\n</p-card>",
+          "<p-card [style]=\"{ width: '25rem', overflow: 'hidden' }\">\n    <ng-template #header>\n        <img alt=\"Card\" class=\"w-full\" src=\"https://primefaces.org/cdn/primeng/images/card-ng.jpg\" />\n    </ng-template>\n    <ng-template #title> Advanced Card </ng-template>\n    <ng-template #subtitle> Card subtitle </ng-template>\n    <p>\n        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Inventore sed consequuntur error repudiandae numquam deserunt\n        quisquam repellat libero asperiores earum nam nobis, culpa ratione quam perferendis esse, cupiditate neque quas!\n    </p>\n    <ng-template #footer>\n        <div class=\"flex gap-4 mt-1\">\n            <p-button label=\"Cancel\" severity=\"secondary\" class=\"w-full\" [outlined]=\"true\" styleClass=\"w-full\" />\n            <p-button label=\"Save\" class=\"w-full\" styleClass=\"w-full\" />\n        </div>\n    </ng-template>\n</p-card>",
+          "<p-card role=\"region\">\n    Content\n</p-card>"
+        ],
         "properties": [],
         "events": [],
         "methods": []
       },
-      "timestamp": 1762456820722,
+      "timestamp": 1762623822642,
       "ttl": 86400000
     }
   ]

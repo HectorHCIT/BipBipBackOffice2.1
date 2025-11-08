@@ -3,7 +3,7 @@
   <div class="calendar-header mb-4">
     <div class="flex justify-between items-center mb-4">
       <div class="flex items-center gap-4">
-        <h2 class="text-2xl font-semibold m-0">{{ monthName() }}</h2>
+        <h2 class="text-2xl font-semibold  m-0">{{ monthName() }}</h2>
 
         <!-- View toggles -->
         <div class="flex gap-2">
@@ -51,25 +51,30 @@
 
     <!-- Statistics -->
     <div class="flex gap-4 flex-wrap">
-      <div class="stat-badge">
-        <span class="stat-label">Total:</span>
-        <span class="stat-value">{{ stats().total }}</span>
+      <div class="flex items-center gap-2 px-3 py-2 rounded-lg border border-surface-border bg-surface-50">
+        <i class="pi pi-bell"></i>
+        <span class="text-sm font-medium">Total:</span>
+        <span class="text-lg font-bold">{{ stats().total }}</span>
       </div>
-      <div class="stat-badge stat-push">
-        <span class="stat-label">Push:</span>
-        <span class="stat-value">{{ stats().pushCount }}</span>
+      <div class="flex items-center gap-2 px-3 py-2 rounded-lg border border-surface-border bg-surface-50">
+        <i class="pi pi-mobile"></i>
+        <span class="text-sm font-medium">Push:</span>
+        <span class="text-lg font-bold">{{ stats().pushCount }}</span>
       </div>
-      <div class="stat-badge stat-sms">
-        <span class="stat-label">SMS:</span>
-        <span class="stat-value">{{ stats().smsCount }}</span>
+      <div class="flex items-center gap-2 px-3 py-2 rounded-lg border border-surface-border bg-surface-50">
+        <i class="pi pi-comment"></i>
+        <span class="text-sm font-medium">SMS:</span>
+        <span class="text-lg font-bold">{{ stats().smsCount }}</span>
       </div>
-      <div class="stat-badge stat-processed">
-        <span class="stat-label">Procesadas:</span>
-        <span class="stat-value">{{ stats().processedCount }}</span>
+      <div class="flex items-center gap-2 px-3 py-2 rounded-lg border border-surface-border bg-surface-50">
+        <i class="pi pi-check-circle"></i>
+        <span class="text-sm font-medium">Procesadas:</span>
+        <span class="text-lg font-bold">{{ stats().processedCount }}</span>
       </div>
-      <div class="stat-badge stat-pending">
-        <span class="stat-label">Pendientes:</span>
-        <span class="stat-value">{{ stats().pendingCount }}</span>
+      <div class="flex items-center gap-2 px-3 py-2 rounded-lg border border-surface-border bg-surface-50">
+        <i class="pi pi-clock"></i>
+        <span class="text-sm font-medium">Pendientes:</span>
+        <span class="text-lg font-bold">{{ stats().pendingCount }}</span>
       </div>
     </div>
   </div>
@@ -112,7 +117,9 @@
               @for (event of getVisibleEvents(day); track event.id) {
                 <div
                   class="event-badge"
-                  [style.background-color]="event.extendedProps.bulletcolor"
+                  [class.event-push-pending]="event.extendedProps.type === 'push' && !event.extendedProps.originalPush.isProcessed"
+                  [class.event-processed]="event.extendedProps.originalPush.isProcessed"
+                  [class.event-sms-pending]="event.extendedProps.type === 'sms' && !event.extendedProps.originalPush.isProcessed"
                   [title]="event.title"
                   (click)="onEventClick(event, $event)"
                 >

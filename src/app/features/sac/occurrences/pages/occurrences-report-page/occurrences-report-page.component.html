@@ -1,0 +1,203 @@
+<!-- Toast notifications -->
+<p-toast />
+
+<!-- Breadcrumb -->
+<p-breadcrumb
+  [model]="breadcrumbItems"
+  [home]="home"
+  class="mb-4"
+/>
+
+<!-- Page header -->
+<div class="flex justify-between items-center mb-6">
+  <div>
+    <h1 class="text-3xl font-bold text-gray-800 mb-2">Reporte de Ocurrencias</h1>
+    <p class="text-gray-600">Genera reportes de incidencias con filtros personalizados</p>
+  </div>
+  <p-button
+    label="Volver"
+    icon="pi pi-arrow-left"
+    [outlined]="true"
+    routerLink="/sac/occurrences"
+  />
+</div>
+
+<!-- Filters form -->
+<div class="rounded-lg shadow-sm p-6 mb-6 border border-gray-200">
+  @if (isLoadingData()) {
+    <!-- Loading skeleton -->
+    <div class="flex flex-col gap-4">
+      @for (item of [1,2,3]; track item) {
+        <p-skeleton height="4rem" />
+      }
+    </div>
+  } @else {
+    <form [formGroup]="form">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Date range -->
+        <div class="flex flex-col gap-2">
+          <label for="dateRange" class="font-semibold text-sm">
+            Rango de Fechas <span class="text-red-500">*</span>
+          </label>
+          <p-datepicker
+            inputId="dateRange"
+            formControlName="dateRange"
+            selectionMode="range"
+            [showIcon]="true"
+            iconDisplay="input"
+            placeholder="Selecciona rango de fechas"
+            dateFormat="dd/mm/yy"
+            [readonlyInput]="true"
+            styleClass="w-full"
+            [class.ng-invalid]="form.get('dateRange')?.invalid && form.get('dateRange')?.touched"
+            [class.ng-dirty]="form.get('dateRange')?.touched"
+          />
+          @if (form.get('dateRange')?.invalid && form.get('dateRange')?.touched) {
+            <small class="text-red-600">
+              El rango de fechas es requerido
+            </small>
+          }
+        </div>
+
+        <!-- Brands -->
+        <div class="flex flex-col gap-2">
+          <div class="flex justify-between items-center">
+            <label for="brands" class="font-semibold text-sm">
+              Marcas <span class="text-red-500">*</span>
+            </label>
+            <button
+              type="button"
+              class="text-xs text-primary hover:underline"
+              (click)="toggleAllBrands()"
+            >
+              {{ allBrandsSelected() ? 'Deseleccionar todas' : 'Seleccionar todas' }}
+            </button>
+          </div>
+          <p-multiselect
+            inputId="brands"
+            formControlName="selectedBrands"
+            [options]="brands()"
+            optionLabel="name"
+            optionValue="id"
+            placeholder="Selecciona marcas"
+            [filter]="true"
+            filterPlaceholder="Buscar marca..."
+            [showClear]="true"
+            styleClass="w-full"
+            [class.ng-invalid]="form.get('selectedBrands')?.invalid && form.get('selectedBrands')?.touched"
+            [class.ng-dirty]="form.get('selectedBrands')?.touched"
+          >
+            <ng-template let-brand pTemplate="item">
+              <div class="flex items-center gap-2">
+                @if (brand.logo) {
+                  <img [src]="brand.logo" [alt]="brand.name" class="w-6 h-6 object-contain" />
+                }
+                <span>{{ brand.name }}</span>
+              </div>
+            </ng-template>
+          </p-multiselect>
+          @if (form.get('selectedBrands')?.invalid && form.get('selectedBrands')?.touched) {
+            <small class="text-red-600">
+              Debes seleccionar al menos una marca
+            </small>
+          }
+        </div>
+
+        <!-- Cities -->
+        <div class="flex flex-col gap-2 md:col-span-2">
+          <div class="flex justify-between items-center">
+            <label for="cities" class="font-semibold text-sm">
+              Ciudades <span class="text-red-500">*</span>
+            </label>
+            <button
+              type="button"
+              class="text-xs text-primary hover:underline"
+              (click)="toggleAllCities()"
+            >
+              {{ allCitiesSelected() ? 'Deseleccionar todas' : 'Seleccionar todas' }}
+            </button>
+          </div>
+          <p-multiselect
+            inputId="cities"
+            formControlName="selectedCities"
+            [options]="cities()"
+            optionLabel="name"
+            optionValue="id"
+            placeholder="Selecciona ciudades"
+            [filter]="true"
+            filterPlaceholder="Buscar ciudad..."
+            [showClear]="true"
+            styleClass="w-full"
+            [class.ng-invalid]="form.get('selectedCities')?.invalid && form.get('selectedCities')?.touched"
+            [class.ng-dirty]="form.get('selectedCities')?.touched"
+          />
+          @if (form.get('selectedCities')?.invalid && form.get('selectedCities')?.touched) {
+            <small class="text-red-600">
+              Debes seleccionar al menos una ciudad
+            </small>
+          }
+        </div>
+      </div>
+
+      <!-- Info box -->
+      <div class="mt-6 border border-blue-200 rounded-lg p-4">
+        <div class="flex gap-3">
+          <i class="pi pi-info-circle text-blue-600 text-xl"></i>
+          <div class="flex-1">
+            <p class="text-sm text-blue-800 font-semibold mb-1">Información del Reporte</p>
+            <ul class="text-sm text-blue-700 space-y-1">
+              <li>• El reporte se generará en formato Excel (.xlsx)</li>
+              <li>• Incluirá todas las ocurrencias que cumplan con los filtros seleccionados</li>
+              <li>• El rango de fechas se aplica sobre la fecha de creación de la ocurrencia</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex gap-3 mt-6 justify-end">
+        <p-button
+          label="Limpiar Filtros"
+          icon="pi pi-times"
+          [outlined]="true"
+          severity="secondary"
+          (onClick)="clearFilters()"
+          [disabled]="isGenerating()"
+        />
+        <p-button
+          label="Generar Reporte"
+          icon="pi pi-file-excel"
+          (onClick)="generateReport()"
+          [loading]="isGenerating()"
+          [disabled]="form.invalid"
+        />
+      </div>
+    </form>
+  }
+</div>
+
+<!-- Help section -->
+<div class="bg-gray-50 rounded-lg border border-gray-200 p-6">
+  <h3 class="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+    <i class="pi pi-question-circle text-primary"></i>
+    ¿Cómo usar este reporte?
+  </h3>
+  <div class="space-y-3 text-sm text-gray-700">
+    <div class="flex gap-3">
+      <span class="font-semibold text-primary">1.</span>
+      <p>Selecciona el rango de fechas que deseas consultar</p>
+    </div>
+    <div class="flex gap-3">
+      <span class="font-semibold text-primary">2.</span>
+      <p>Elige las marcas de las cuales quieres ver las ocurrencias (puedes seleccionar todas con un clic)</p>
+    </div>
+    <div class="flex gap-3">
+      <span class="font-semibold text-primary">3.</span>
+      <p>Selecciona las ciudades a incluir en el reporte</p>
+    </div>
+    <div class="flex gap-3">
+      <span class="font-semibold text-primary">4.</span>
+      <p>Haz clic en "Generar Reporte" y el archivo Excel se descargará automáticamente</p>
+    </div>
+  </div>
+</div>

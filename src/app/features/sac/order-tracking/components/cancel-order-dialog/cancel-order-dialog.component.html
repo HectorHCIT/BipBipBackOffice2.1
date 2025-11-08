@@ -1,0 +1,102 @@
+<div class="flex flex-col gap-4 p-2">
+  <!-- Header -->
+  <div class="mb-2">
+    <h2 class="text-xl font-bold text-gray-800">Cancelar pedido</h2>
+    <p class="text-sm text-gray-600 mt-1">Orden #{{ order.numOrder }}</p>
+  </div>
+
+  <!-- Motivo de cancelación -->
+  <div>
+    <p class="text-base font-bold text-gray-800 mb-3">Motivo de cancelación</p>
+
+    <div class="flex flex-col gap-2">
+      <label for="reason" class="text-sm font-semibold text-gray-700">
+        Selecciona un motivo <span class="text-red-500">*</span>
+      </label>
+
+      @if (isLoadingReasons()) {
+        <div class="flex items-center gap-2 p-2">
+          <i class="pi pi-spin pi-spinner"></i>
+          <span class="text-sm text-gray-600">Cargando motivos...</span>
+        </div>
+      } @else {
+        <p-select
+          id="reason"
+          [options]="reasons()"
+          [(ngModel)]="selectedReasonId"
+          optionLabel="reason"
+          optionValue="id"
+          placeholder="Seleccionar motivo"
+          appendTo="body"
+          styleClass="w-full"
+        />
+      }
+    </div>
+  </div>
+
+  <!-- Comentario -->
+  <div class="flex flex-col gap-2">
+    <label for="comment" class="text-sm font-semibold text-gray-700">
+      Deja un comentario
+    </label>
+    <textarea
+      id="comment"
+      [(ngModel)]="comment"
+      [maxLength]="200"
+      placeholder="Dejar comentario"
+      class="w-full h-36 border border-gray-300 rounded-md p-2 resize-none focus:outline-none focus:ring-2 focus:ring-primary"
+      [class.border-red-500]="isOverLimit()"
+    ></textarea>
+    <div class="flex justify-between items-center text-xs">
+      <span class="text-gray-500">Máximo 200 caracteres</span>
+      <span
+        [class.text-red-500]="isOverLimit()"
+        [class.text-gray-600]="!isOverLimit()"
+        class="font-medium"
+      >
+        {{ characterCount() }}/200
+      </span>
+    </div>
+  </div>
+
+  <!-- Checkbox -->
+  <div class="flex items-center gap-2">
+    <p-checkbox
+      [(ngModel)]="productProcessed"
+      [binary]="true"
+      inputId="processed"
+    />
+    <label for="processed" class="text-sm text-gray-700 cursor-pointer">
+      Se procesó la orden
+    </label>
+  </div>
+
+  <!-- Warning message -->
+  <div class="border border-orange-200 rounded-lg p-3 text-sm text-orange-800">
+    <div class="flex gap-2">
+      <i class="pi pi-exclamation-triangle mt-0.5"></i>
+      <span>Esta acción cancelará permanentemente la orden. Asegúrate de ingresar la información correcta.</span>
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div class="flex flex-col sm:flex-row sm:justify-end gap-2 mt-2">
+    <p-button
+      label="Cancelar"
+      [outlined]="true"
+      severity="secondary"
+      (onClick)="close()"
+      [disabled]="isLoading()"
+      styleClass="w-full sm:w-auto"
+    />
+    <p-button
+      label="Cancelar Pedido"
+      icon="pi pi-ban"
+      severity="danger"
+      [disabled]="!canSubmit()"
+      [loading]="isLoading()"
+      (onClick)="cancelOrder()"
+      styleClass="w-full sm:w-auto"
+    />
+  </div>
+</div>

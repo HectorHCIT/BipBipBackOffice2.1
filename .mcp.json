@@ -22,7 +22,7 @@
     "primeng": {
       "comment": "OPCIÓN 1: Modo Producción (Requiere npm run build primero)",
       "command": "node",
-      "args": ["C:\\Users\\henri\\CIT\\primeng-mcp-server\\dist\\index.js"]
+      "args": ["C:\\Users\\henri\\CIT\\PrimeNG_MCP\\dist\\index.js"]
     }
   }
 }

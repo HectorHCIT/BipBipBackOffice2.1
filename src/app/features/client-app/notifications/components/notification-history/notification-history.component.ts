@@ -93,7 +93,7 @@ export class NotificationHistoryComponent {
   constructor() {
     effect(() => {
       this.loadNotifications();
-    }, { allowSignalWrites: true });
+    });
   }
 
   /**

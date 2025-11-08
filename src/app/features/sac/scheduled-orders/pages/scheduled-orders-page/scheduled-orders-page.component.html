@@ -1,0 +1,234 @@
+<!-- Toast notifications -->
+<p-toast />
+
+<!-- Breadcrumb -->
+<p-breadcrumb
+  [model]="breadcrumbItems"
+  [home]="home"
+  class="mb-4"
+/>
+
+<!-- Page header -->
+<div class="mb-6">
+  <h1 class="text-3xl font-bold text-gray-800 mb-2">Órdenes Programadas</h1>
+  <p class="text-gray-600">Órdenes que han sido enviadas a clientes de forma anticipada</p>
+</div>
+
+<!-- Info banner -->
+<div class="border border-blue-200 rounded-lg p-4 mb-6">
+  <div class="flex gap-3">
+    <i class="pi pi-info-circle text-blue-600 text-xl"></i>
+    <div class="flex-1">
+      <p class="text-sm text-blue-800 font-semibold mb-1">Información</p>
+      <p class="text-sm text-blue-700">
+        Las órdenes programadas son aquellas que se envían anticipadamente a los clientes antes de su fecha de entrega.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Desktop Table View -->
+<div class="hidden sm:block rounded-lg shadow-sm border border-gray-200">
+  @if (isLoading()) {
+    <!-- Loading skeleton -->
+    <div class="p-4">
+      @for (item of [1,2,3,4,5]; track item) {
+        <div class="flex gap-4 mb-4">
+          <p-skeleton width="100%" height="3rem" />
+        </div>
+      }
+    </div>
+  } @else {
+    <p-table
+      [value]="scheduledOrders()"
+      [paginator]="true"
+      [rows]="10"
+      [rowsPerPageOptions]="[5, 10, 15, 20]"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} órdenes"
+      [tableStyle]="{ 'min-width': '70rem' }"
+      styleClass="p-datatable-sm"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="orderId">
+            # ORDEN
+            <p-sortIcon field="orderId" />
+          </th>
+          <th pSortableColumn="brand">
+            MARCA
+            <p-sortIcon field="brand" />
+          </th>
+          <th pSortableColumn="store">
+            UNIDAD
+            <p-sortIcon field="store" />
+          </th>
+          <th pSortableColumn="paymentMethod">
+            FORMA PAGO
+            <p-sortIcon field="paymentMethod" />
+          </th>
+          <th pSortableColumn="customer">
+            NOMBRE CLIENTE
+            <p-sortIcon field="customer" />
+          </th>
+          <th pSortableColumn="datePush">
+            FECHA ENVÍO
+            <p-sortIcon field="datePush" />
+          </th>
+          <th pSortableColumn="total">
+            TOTAL ORDEN
+            <p-sortIcon field="total" />
+          </th>
+          <th pSortableColumn="comments">
+            COMENTARIO
+            <p-sortIcon field="comments" />
+          </th>
+          <th>ACCIONES</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-order>
+        <tr>
+          <!-- Order ID -->
+          <td>
+            <span class="font-mono font-semibold text-primary">{{ order.orderId }}</span>
+          </td>
+
+          <!-- Brand with logo -->
+          <td>
+            <div class="flex items-center gap-2">
+              @if (order.brandLogo) {
+                <img [src]="order.brandLogo" [alt]="order.brand" class="w-8 h-8 object-contain" />
+              }
+              <span>{{ order.brand }}</span>
+            </div>
+          </td>
+
+          <!-- Store -->
+          <td>{{ order.store }}</td>
+
+          <!-- Payment Method -->
+          <td>{{ order.paymentMethod }}</td>
+
+          <!-- Customer -->
+          <td>{{ order.customer }}</td>
+
+          <!-- Date Push -->
+          <td>
+            <span class="text-sm">{{ order.datePush | date: 'dd/MM/yyyy HH:mm':'es-HN' }}</span>
+          </td>
+
+          <!-- Total -->
+          <td>
+            <span class="font-semibold">{{ order.total | currency: 'HNL':'symbol-narrow':'1.2-2':'es-HN' }}</span>
+          </td>
+
+          <!-- Comments -->
+          <td>
+            <span class="text-sm text-gray-600">{{ order.comments || '-' }}</span>
+          </td>
+
+          <!-- Actions -->
+          <td>
+            <p-button
+              label="Ver detalles"
+              icon="pi pi-eye"
+              [text]="true"
+              size="small"
+              (onClick)="viewOrderDetails(order.orderId)"
+            />
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="9" class="text-center py-8">
+            <div class="flex flex-col items-center gap-3">
+              <i class="pi pi-inbox text-4xl text-gray-400"></i>
+              <p class="text-gray-600">No hay órdenes programadas</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  }
+</div>
+
+<!-- Mobile Card View -->
+<div class="sm:hidden">
+  @if (isLoading()) {
+    <!-- Loading skeleton -->
+    <div class="flex flex-col gap-4">
+      @for (item of [1,2,3,4,5]; track item) {
+        <p-skeleton width="100%" height="12rem" />
+      }
+    </div>
+  } @else {
+    @if (scheduledOrders().length === 0) {
+      <!-- Empty state -->
+      <div class="border border-gray-200 rounded-lg p-8 text-center">
+        <i class="pi pi-inbox text-5xl text-gray-400 mb-4 block"></i>
+        <p class="text-gray-600">No hay órdenes programadas</p>
+      </div>
+    } @else {
+      <!-- Orders cards -->
+      <div class="flex flex-col gap-4">
+        @for (order of scheduledOrders(); track order.orderId) {
+          <div class="border border-gray-200 rounded-lg p-4 shadow-sm">
+            <!-- Header with brand -->
+            <div class="flex items-center justify-between mb-4 pb-3 border-b border-gray-200">
+              <div class="flex items-center gap-2">
+                @if (order.brandLogo) {
+                  <img [src]="order.brandLogo" [alt]="order.brand" class="w-10 h-10 object-contain" />
+                }
+                <div>
+                  <p class="font-semibold">{{ order.brand }}</p>
+                  <p class="text-xs text-gray-500">Orden # {{ order.orderId }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Order details -->
+            <div class="space-y-3 mb-4">
+              <div class="flex justify-between">
+                <span class="text-sm text-gray-600">Unidad:</span>
+                <span class="text-sm font-medium">{{ order.store }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-sm text-gray-600">Cliente:</span>
+                <span class="text-sm font-medium">{{ order.customer }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-sm text-gray-600">Forma de Pago:</span>
+                <span class="text-sm font-medium">{{ order.paymentMethod }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-sm text-gray-600">Fecha Envío:</span>
+                <span class="text-sm font-medium">{{ order.datePush | date: 'dd/MM/yyyy HH:mm':'es-HN' }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-sm text-gray-600">Total:</span>
+                <span class="text-sm font-bold text-primary">{{ order.total | currency: 'HNL':'symbol-narrow':'1.2-2':'es-HN' }}</span>
+              </div>
+              @if (order.comments) {
+                <div class="pt-2 border-t border-gray-100">
+                  <span class="text-xs text-gray-600">Comentario:</span>
+                  <p class="text-sm text-gray-800 mt-1">{{ order.comments }}</p>
+                </div>
+              }
+            </div>
+
+            <!-- Actions -->
+            <p-button
+              label="Ver detalles"
+              icon="pi pi-eye"
+              styleClass="w-full"
+              (onClick)="viewOrderDetails(order.orderId)"
+            />
+          </div>
+        }
+      </div>
+    }
+  }
+</div>

@@ -1,0 +1,132 @@
+<div class="flex flex-col gap-4 p-2">
+  <!-- Header -->
+  <div class="mb-2">
+    <h2 class="text-xl font-bold text-gray-800">Penalizar Driver</h2>
+    <p class="text-sm text-gray-600 mt-1">{{ driverName }}</p>
+  </div>
+
+  <!-- Form -->
+  <form [formGroup]="penaltyForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
+    <!-- Motivo de penalización -->
+    <div class="flex flex-col gap-2">
+      <label for="reasonId" class="text-sm font-semibold text-gray-700">
+        Motivo de penalización <span class="text-red-500">*</span>
+      </label>
+      <p-select
+        id="reasonId"
+        formControlName="reasonId"
+        [options]="penaltyReasons()"
+        optionLabel="reason"
+        optionValue="codDriverPenalty"
+        placeholder="Seleccionar motivo"
+        [loading]="loadingReasons()"
+        styleClass="w-full"
+        [class.ng-invalid]="isFieldInvalid('reasonId')"
+        [class.ng-dirty]="isFieldInvalid('reasonId')"
+      />
+      @if (isFieldInvalid('reasonId')) {
+        <small class="text-red-500">{{ getFieldError('reasonId') }}</small>
+      }
+    </div>
+
+    <!-- Descripción -->
+    <div class="flex flex-col gap-2">
+      <label for="descripcion" class="text-sm font-semibold text-gray-700">
+        Descripción <span class="text-red-500">*</span>
+      </label>
+      <textarea
+        pTextarea
+        id="descripcion"
+        formControlName="descripcion"
+        rows="4"
+        placeholder="Describe el motivo de la penalización..."
+        class="w-full"
+        [class.ng-invalid]="isFieldInvalid('descripcion')"
+        [class.ng-dirty]="isFieldInvalid('descripcion')"
+      ></textarea>
+      @if (isFieldInvalid('descripcion')) {
+        <small class="text-red-500">{{ getFieldError('descripcion') }}</small>
+      }
+    </div>
+
+    <!-- Fechas -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Fecha inicial -->
+      <div class="flex flex-col gap-2">
+        <label for="startDate" class="text-sm font-semibold text-gray-700">
+          Fecha inicial <span class="text-red-500">*</span>
+        </label>
+        <p-datepicker
+          id="startDate"
+          formControlName="startDate"
+          [minDate]="minDate"
+          dateFormat="dd/mm/yy"
+          [showIcon]="true"
+          iconDisplay="input"
+          placeholder="dd/mm/aaaa"
+          styleClass="w-full"
+          [class.ng-invalid]="isFieldInvalid('startDate')"
+          [class.ng-dirty]="isFieldInvalid('startDate')"
+        />
+        @if (isFieldInvalid('startDate')) {
+          <small class="text-red-500">{{ getFieldError('startDate') }}</small>
+        }
+      </div>
+
+      <!-- Fecha final -->
+      <div class="flex flex-col gap-2">
+        <label for="endDate" class="text-sm font-semibold text-gray-700">
+          Fecha final <span class="text-red-500">*</span>
+        </label>
+        <p-datepicker
+          id="endDate"
+          formControlName="endDate"
+          [minDate]="minDate"
+          dateFormat="dd/mm/yy"
+          [showIcon]="true"
+          iconDisplay="input"
+          placeholder="dd/mm/aaaa"
+          styleClass="w-full"
+          [class.ng-invalid]="isFieldInvalid('endDate')"
+          [class.ng-dirty]="isFieldInvalid('endDate')"
+        />
+        @if (isFieldInvalid('endDate')) {
+          <small class="text-red-500">{{ getFieldError('endDate') }}</small>
+        }
+      </div>
+    </div>
+
+    <!-- Warning message -->
+    <div class="border border-orange-200 bg-orange-50 rounded-lg p-3 text-sm text-orange-800">
+      <div class="flex gap-2">
+        <i class="pi pi-exclamation-triangle mt-0.5"></i>
+        <div>
+          <p class="font-semibold mb-1">Importante</p>
+          <p>El driver será penalizado durante el período seleccionado y no podrá recibir nuevas asignaciones.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex flex-col sm:flex-row sm:justify-end gap-2 mt-2">
+      <p-button
+        label="Cancelar"
+        [outlined]="true"
+        severity="secondary"
+        (onClick)="close()"
+        [disabled]="isSubmitting()"
+        styleClass="w-full sm:w-auto"
+        type="button"
+      />
+      <p-button
+        label="Penalizar Driver"
+        icon="pi pi-ban"
+        severity="danger"
+        [loading]="isSubmitting()"
+        [disabled]="penaltyForm.invalid"
+        styleClass="w-full sm:w-auto"
+        type="submit"
+      />
+    </div>
+  </form>
+</div>

@@ -14,6 +14,26 @@
       <!-- Basic Information Card -->
       <p-card header="Información Básica">
         <div class="grid gap-4">
+          <!-- Name -->
+          <div class="field">
+            <label for="name" class="block font-semibold mb-2">
+              Nombre de Campaña <span class="text-red-500">*</span>
+            </label>
+            <input
+              pInputText
+              id="name"
+              formControlName="name"
+              placeholder="Ej: Campaña Verano 2025"
+              class="w-full"
+              [class.ng-invalid]="isFieldInvalid('name')"
+              [class.ng-dirty]="isFieldInvalid('name')"
+            />
+            @if (isFieldInvalid('name')) {
+              <small class="text-red-500">{{ getFieldError('name') }}</small>
+            }
+            <small class="text-gray-500">Nombre interno para identificar esta campaña</small>
+          </div>
+
           <!-- Title -->
           <div class="field">
             <label for="title" class="block font-semibold mb-2">
@@ -23,7 +43,7 @@
               pInputText
               id="title"
               formControlName="title"
-              placeholder="Ej: Promoción de verano"
+              placeholder="Ej: ¡50% OFF en tu comida favorita!"
               class="w-full"
               [class.ng-invalid]="isFieldInvalid('title')"
               [class.ng-dirty]="isFieldInvalid('title')"
@@ -62,8 +82,8 @@
               id="type"
               formControlName="type"
               [options]="PUSH_TYPE_OPTIONS"
-              optionLabel="label"
-              optionValue="value"
+              optionLabel="name"
+              optionValue="id"
               placeholder="Selecciona el tipo"
               styleClass="w-full"
             />
@@ -77,7 +97,7 @@
             <p-multiselect
               id="targets"
               formControlName="targets"
-              [options]="targetAudiences"
+              [options]="targetAudiences()"
               optionLabel="label"
               optionValue="value"
               placeholder="Selecciona las audiencias"

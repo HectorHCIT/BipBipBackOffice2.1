@@ -1,0 +1,146 @@
+<p-drawer
+  [visible]="visible()"
+  position="right"
+  [style]="{ width: '28rem' }"
+  header="Filtros Avanzados"
+  (onHide)="close()"
+>
+  <form [formGroup]="form" class="flex flex-col gap-6">
+    <!-- Country filter -->
+    <div class="flex flex-col gap-2">
+      <div class="flex justify-between items-center">
+        <label class="font-semibold text-sm">País</label>
+        <button
+          type="button"
+          class="text-xs text-primary hover:underline"
+          (click)="toggleAllCountries()"
+        >
+          {{ allCountriesSelected() ? 'Deseleccionar todos' : 'Seleccionar todos' }}
+        </button>
+      </div>
+      <p-multiselect
+        formControlName="selectedCountries"
+        [options]="countries()"
+        optionLabel="name"
+        optionValue="id"
+        placeholder="Selecciona países"
+        [filter]="true"
+        filterPlaceholder="Buscar..."
+        [showClear]="true"
+        styleClass="w-full"
+        [loading]="isLoadingData()"
+      >
+        <ng-template let-country pTemplate="item">
+          <div class="flex items-center gap-2">
+            @if (country.urlFlag) {
+              <img [src]="country.urlFlag" [alt]="country.name" class="w-6 h-4 object-cover" />
+            }
+            <span>{{ country.name }}</span>
+          </div>
+        </ng-template>
+      </p-multiselect>
+    </div>
+
+    <!-- City filter -->
+    <div class="flex flex-col gap-2">
+      <div class="flex justify-between items-center">
+        <label class="font-semibold text-sm">Ciudad</label>
+        <button
+          type="button"
+          class="text-xs text-primary hover:underline"
+          (click)="toggleAllCities()"
+        >
+          {{ allCitiesSelected() ? 'Deseleccionar todas' : 'Seleccionar todas' }}
+        </button>
+      </div>
+      <p-multiselect
+        formControlName="selectedCities"
+        [options]="cities()"
+        optionLabel="name"
+        optionValue="id"
+        placeholder="Selecciona ciudades"
+        [filter]="true"
+        filterPlaceholder="Buscar..."
+        [showClear]="true"
+        styleClass="w-full"
+        [loading]="isLoadingData()"
+      />
+    </div>
+
+    <!-- Date range filter -->
+    <div class="flex flex-col gap-2">
+      <label class="font-semibold text-sm">Rango de Fechas</label>
+      <p-datepicker
+        formControlName="dateRange"
+        selectionMode="range"
+        [showIcon]="true"
+        iconDisplay="input"
+        placeholder="Selecciona rango"
+        dateFormat="dd/mm/yy"
+        [readonlyInput]="true"
+        styleClass="w-full"
+      />
+      <small class="text-xs text-gray-500">
+        Selecciona fecha de inicio y fin
+      </small>
+    </div>
+
+    <!-- Brands filter -->
+    <div class="flex flex-col gap-2">
+      <div class="flex justify-between items-center">
+        <label class="font-semibold text-sm">Marcas</label>
+        <button
+          type="button"
+          class="text-xs text-primary hover:underline"
+          (click)="toggleAllBrands()"
+        >
+          {{ allBrandsSelected() ? 'Deseleccionar todas' : 'Seleccionar todas' }}
+        </button>
+      </div>
+      <p-multiselect
+        formControlName="selectedBrands"
+        [options]="brands()"
+        optionLabel="name"
+        optionValue="id"
+        placeholder="Selecciona marcas"
+        [filter]="true"
+        filterPlaceholder="Buscar..."
+        [showClear]="true"
+        styleClass="w-full"
+        [loading]="isLoadingData()"
+      >
+        <ng-template let-brand pTemplate="item">
+          <div class="flex items-center gap-2">
+            @if (brand.logo) {
+              <img [src]="brand.logo" [alt]="brand.name" class="w-6 h-6 object-contain" />
+            }
+            <span>{{ brand.name }}</span>
+          </div>
+        </ng-template>
+      </p-multiselect>
+    </div>
+
+    <!-- Help text -->
+    <div class="border border-blue-200 rounded-lg p-3 text-sm text-blue-800">
+      <i class="pi pi-info-circle mr-2"></i>
+      <span>Selecciona los filtros que desees aplicar y haz clic en "Aplicar Filtros"</span>
+    </div>
+  </form>
+
+  <ng-template pTemplate="footer">
+    <div class="flex gap-2 justify-end">
+      <p-button
+        label="Limpiar"
+        icon="pi pi-times"
+        [outlined]="true"
+        severity="secondary"
+        (onClick)="clearFilters()"
+      />
+      <p-button
+        label="Aplicar Filtros"
+        icon="pi pi-check"
+        (onClick)="applyFilters()"
+      />
+    </div>
+  </ng-template>
+</p-drawer>

@@ -1,0 +1,346 @@
+<p-drawer
+  [(visible)]="visibleModel"
+  [header]="header()"
+  position="full"
+  [blockScroll]="true"
+>
+  <form [formGroup]="notificationForm" (ngSubmit)="onSubmit()">
+    <!-- Detalles de la notificación (Full Width) -->
+    <div class="form-section mb-6">
+      <h3 class="text-lg font-semibold mb-4 pb-3 border-b border-surface-border">
+        <i class="pi pi-info-circle mr-2"></i>
+        Detalles de la notificación
+      </h3>
+
+      <!-- Contenido de la notificación (subsection) -->
+      <div class="mb-6">
+        <div class="grid grid-cols-3 gap-4">
+          <!-- Nombre de la notificación -->
+          <div>
+            <label for="name" class="block text-sm font-medium mb-2">
+              Nombre de la notificación <span class="text-red-500">*</span>
+            </label>
+            <input
+              pInputText
+              id="name"
+              formControlName="name"
+              placeholder="Ej: Promo Verano 2025"
+              class="w-full"
+              [class.p-invalid]="isFieldInvalid('name')"
+            />
+            @if (isFieldInvalid('name')) {
+              <small class="text-red-500 mt-1 block">{{ getFieldError('name') }}</small>
+            }
+          </div>
+
+          <!-- Seleccionar públicos objetivo -->
+          <div>
+            <label for="targets" class="block text-sm font-medium mb-2">
+              Seleccionar públicos objetivo <span class="text-red-500">*</span>
+            </label>
+            <p-multiselect
+              id="targets"
+              formControlName="targets"
+              [options]="targetAudiences()"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Selecciona las audiencias"
+              display="chip"
+              class="w-full"
+              [class.p-invalid]="isFieldInvalid('targets')"
+            />
+            @if (isFieldInvalid('targets')) {
+              <small class="text-red-500 mt-1 block">{{ getFieldError('targets') }}</small>
+            }
+          </div>
+
+          <!-- Tipo de Promoción -->
+          <div>
+            <label for="type" class="block text-sm font-medium mb-2">
+              Tipo de Promoción <span class="text-red-500">*</span>
+            </label>
+            <p-select
+              id="type"
+              formControlName="type"
+              [options]="PUSH_TYPE_OPTIONS"
+              optionLabel="name"
+              optionValue="id"
+              placeholder="Selecciona el tipo"
+              class="w-full"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contenido de la Notificación (Left) + Vista Previa (Right) -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+      <!-- Left: Contenido de la Notificación -->
+      <div class="form-section">
+        <h3 class="text-lg font-semibold mb-4 pb-3 border-b border-surface-border">
+          <i class="pi pi-file-edit mr-2"></i>
+          Contenido de la Notificación
+        </h3>
+        <div class="grid gap-4">
+          <!-- Título de la notificación -->
+          <div>
+            <label for="title" class="block text-sm font-medium mb-2">
+              Título de la notificación <span class="text-red-500">*</span>
+            </label>
+            <input
+              pInputText
+              id="title"
+              formControlName="title"
+              placeholder="Ej: ¡50% OFF en tu comida favorita!"
+              class="w-full"
+              [class.p-invalid]="isFieldInvalid('title')"
+            />
+            @if (isFieldInvalid('title')) {
+              <small class="text-red-500 mt-1 block">{{ getFieldError('title') }}</small>
+            }
+          </div>
+
+          <!-- Descripción de la notificación -->
+          <div>
+            <label for="message" class="block text-sm font-medium mb-2">
+              Descripción de la notificación <span class="text-red-500">*</span>
+            </label>
+            <textarea
+              pTextarea
+              id="message"
+              formControlName="message"
+              placeholder="Escribe el mensaje que verán los usuarios..."
+              rows="4"
+              class="w-full"
+              [class.p-invalid]="isFieldInvalid('message')"
+            ></textarea>
+            @if (isFieldInvalid('message')) {
+              <small class="text-red-500 mt-1 block">{{ getFieldError('message') }}</small>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Vista Previa -->
+      <div>
+        <h3 class="section-title mb-4">Vista Previa</h3>
+        <app-notification-preview
+          [title]="previewTitle()"
+          [message]="previewMessage()"
+          [imageUrl]="previewImageUrl()"
+          [type]="previewType()"
+          [actionUrl]="previewActionUrl()"
+        />
+      </div>
+    </div>
+
+    <!-- Configuración de Envío (Full Width) -->
+    <div class="form-section mb-6">
+      <h3 class="text-lg font-semibold mb-4 pb-3 border-b border-surface-border">
+        <i class="pi pi-calendar-clock mr-2"></i>
+        Configuración de Envío
+      </h3>
+
+      <!-- Checkbox: Programación por frecuencia -->
+      <div class="flex items-center mb-4 p-3  rounded-lg border border-gray-200">
+        <p-checkbox
+          formControlName="scheduleSend"
+          inputId="scheduleSend"
+          [binary]="true"
+        />
+        <label for="scheduleSend" class="ml-2 font-semibold">
+          Programación por frecuencia
+        </label>
+      </div>
+
+      <!-- Immediate Send Info (when NOT scheduled) -->
+      @if (!scheduleSend()) {
+        <div class="one-hot-info p-4  rounded-lg border border-orange-200">
+          <div class="flex items-start gap-3">
+            <i class="pi pi-bolt text-orange-500 text-xl"></i>
+            <div>
+              <h4 class="text-base font-semibold mb-2">Envío Inmediato</h4>
+              <p class="text-sm text-gray-700 mb-2">
+                Esta notificación se enviará inmediatamente después de la autorización por SMS.
+              </p>
+              <p class="text-xs text-gray-600">
+                Se te pedirá un código de autorización antes de enviar.
+              </p>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Scheduled Send Configuration -->
+      @if (scheduleSend()) {
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Notificación Programada -->
+          <div class="p-4  rounded-lg border border-blue-200">
+            <h4 class="font-semibold mb-3 flex items-center gap-2">
+              <i class="pi pi-calendar text-blue-600"></i>
+              Notificación Programada
+            </h4>
+            <div>
+              <label for="scheduleDateTime" class="block text-sm font-medium mb-2">
+                Fecha y hora de lanzamiento <span class="text-red-500">*</span>
+              </label>
+              <p-datepicker
+                id="scheduleDateTime"
+                formControlName="scheduleDateTime"
+                placeholder="Selecciona fecha y hora"
+                dateFormat="dd/mm/yy"
+                [showTime]="true"
+                [showIcon]="true"
+                [minDate]="minDate"
+                hourFormat="24"
+                class="w-full"
+                [class.p-invalid]="isFieldInvalid('scheduleDateTime') && !isRecurrent()"
+              />
+              @if (isFieldInvalid('scheduleDateTime') && !isRecurrent()) {
+                <small class="text-red-500 mt-1 block">{{ getFieldError('scheduleDateTime') }}</small>
+              }
+              <small class="text-gray-600 text-xs mt-1 block">
+                Selecciona una fecha y hora específica para el envío
+              </small>
+            </div>
+          </div>
+
+          <!-- Notificación Recurrente -->
+          <div class="p-4  rounded-lg border border-green-200">
+            <h4 class="font-semibold mb-3 flex items-center gap-2">
+              <i class="pi pi-sync text-green-600"></i>
+              Notificación Recurrente
+            </h4>
+
+            <!-- Checkbox: Aplicar notificación recurrente -->
+            <div class="flex items-center mb-4">
+              <p-checkbox
+                formControlName="isRecurrent"
+                inputId="isRecurrent"
+                [binary]="true"
+              />
+              <label for="isRecurrent" class="ml-2 font-medium">
+                Aplicar notificación recurrente
+              </label>
+            </div>
+
+            <!-- Recurrent Configuration -->
+            @if (isRecurrent()) {
+              <div class="grid gap-4">
+                <!-- Criterio (días de la semana) -->
+                <div>
+                  <label for="recurrentDays" class="block text-sm font-medium mb-2">
+                    Días de la semana <span class="text-red-500">*</span>
+                  </label>
+                  <p-multiselect
+                    id="recurrentDays"
+                    formControlName="recurrentDays"
+                    [options]="DAYS_OF_WEEK"
+                    optionLabel="label"
+                    optionValue="value"
+                    placeholder="Seleccionar días"
+                    display="chip"
+                    class="w-full"
+                    [class.p-invalid]="isFieldInvalid('recurrentDays')"
+                  />
+                  @if (isFieldInvalid('recurrentDays')) {
+                    <small class="text-red-500 mt-1 block">{{ getFieldError('recurrentDays') }}</small>
+                  }
+                </div>
+
+                <!-- Hora de lanzamiento -->
+                <div>
+                  <label for="recurrentHour" class="block text-sm font-medium mb-2">
+                    Hora de lanzamiento <span class="text-red-500">*</span>
+                  </label>
+                  <p-select
+                    id="recurrentHour"
+                    formControlName="recurrentHour"
+                    [options]="HOUR_OPTIONS"
+                    optionLabel="label"
+                    optionValue="value"
+                    placeholder="Selecciona la hora"
+                    class="w-full"
+                    [class.p-invalid]="isFieldInvalid('recurrentHour')"
+                  />
+                  @if (isFieldInvalid('recurrentHour')) {
+                    <small class="text-red-500 mt-1 block">{{ getFieldError('recurrentHour') }}</small>
+                  }
+                </div>
+
+                <!-- Checkbox: Aplicar fecha límite de envío -->
+                <div>
+                  <div class="flex items-center mb-2">
+                    <p-checkbox
+                      formControlName="hasEndDate"
+                      inputId="hasEndDate"
+                      [binary]="true"
+                    />
+                    <label for="hasEndDate" class="ml-2 font-medium">
+                      Establecer fecha límite
+                    </label>
+                  </div>
+
+                  <!-- Fecha límite -->
+                  @if (hasEndDate()) {
+                    <div>
+                      <label for="recurrentEndDate" class="block text-sm font-medium mb-2">
+                        Fecha límite <span class="text-red-500">*</span>
+                      </label>
+                      <p-datepicker
+                        id="recurrentEndDate"
+                        formControlName="recurrentEndDate"
+                        placeholder="Fecha límite"
+                        dateFormat="dd/mm/yy"
+                        [showIcon]="true"
+                        [minDate]="minDate"
+                        class="w-full"
+                        [class.p-invalid]="isFieldInvalid('recurrentEndDate')"
+                      />
+                      @if (isFieldInvalid('recurrentEndDate')) {
+                        <small class="text-red-500 mt-1 block">{{ getFieldError('recurrentEndDate') }}</small>
+                      }
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+
+  </form>
+
+  <!-- Footer Actions -->
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end gap-3 p-4 border-t border-surface-200">
+      <p-button
+        label="Cancelar"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="closeDrawer()"
+        [disabled]="isSaving()"
+      />
+      <p-button
+        [label]="isEditMode() ? 'Guardar Cambios' : 'Crear Notificación'"
+        icon="pi pi-check"
+        (onClick)="onSubmit()"
+        [loading]="isSaving()"
+        [disabled]="notificationForm.invalid"
+      />
+    </div>
+  </ng-template>
+</p-drawer>
+
+<!-- SMS Authorization Dialog (separate from drawer) -->
+@if (createdNotificationId()) {
+  <app-sms-authorization-dialog
+    [visible]="showAuthDialog()"
+    [notificationId]="createdNotificationId()!"
+    (visibleChange)="showAuthDialog.set($event)"
+    (authorized)="onAuthorizationSuccess()"
+    (cancelled)="onAuthorizationCancel()"
+  />
+}

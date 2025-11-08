@@ -74,14 +74,13 @@ export class NotificationFormPageComponent implements OnInit {
   readonly PUSH_TYPE_OPTIONS = PUSH_TYPE_OPTIONS;
   readonly minDate = new Date();
 
-  // Mock target audiences (TODO: Load from API)
-  readonly targetAudiences = [
-    { label: 'Todos los usuarios', value: 'all_users' },
-    { label: 'Usuarios Android', value: 'android_users' },
-    { label: 'Usuarios iOS', value: 'ios_users' },
-    { label: 'Usuarios Premium', value: 'premium_users' },
-    { label: 'Usuarios Nuevos', value: 'new_users' }
-  ];
+  // Target audiences from API
+  readonly targetAudiences = computed(() =>
+    this.notificationService.targetAudiences().map(ta => ({
+      label: ta.name,
+      value: ta.id
+    }))
+  );
 
   // Computed
   readonly selectedLaunchType = computed(() => {
@@ -91,11 +90,13 @@ export class NotificationFormPageComponent implements OnInit {
   ngOnInit(): void {
     this.initializeForm();
     this.checkEditMode();
+    this.loadTargetAudiences();
   }
 
   initializeForm(): void {
     this.notificationForm = this.fb.group({
       // Basic info
+      name: ['', [Validators.required, Validators.maxLength(100)]],
       title: ['', [Validators.required, Validators.maxLength(100)]],
       message: ['', [Validators.required, Validators.maxLength(500)]],
       type: [PushTypeEnum.ALERT, Validators.required],
@@ -162,6 +163,10 @@ export class NotificationFormPageComponent implements OnInit {
     }
   }
 
+  loadTargetAudiences(): void {
+    this.notificationService.getTargetAudiences().subscribe();
+  }
+
   onSubmit(): void {
     if (this.notificationForm.invalid) {
       this.notificationForm.markAllAsTouched();
@@ -199,42 +204,58 @@ export class NotificationFormPageComponent implements OnInit {
   }
 
   buildPushData(formValue: any): any {
-    const baseData = {
-      title: formValue.title,
-      message: formValue.message,
+    const pushData: any = {
+      name: formValue.name,
+      criteria: formValue.targets, // Array de IDs numéricos
       type: formValue.type,
-      targets: formValue.targets,
-      imageUrl: formValue.imageUrl || undefined,
-      actionUrl: formValue.actionUrl || undefined
+      pushMetadata: {
+        title: formValue.title,
+        body: formValue.message
+      },
+      launchType: formValue.launchType,
+      oneHot: { send: formValue.launchType === LaunchType.ONE_HOT },
+      schedule: null,
+      recurrent: null
     };
 
     // Add launch configuration based on type
-    if (formValue.launchType === LaunchType.ONE_HOT) {
-      return {
-        ...baseData,
-        launchType: LaunchType.ONE_HOT
-      };
-    } else if (formValue.launchType === LaunchType.SCHEDULE) {
-      return {
-        ...baseData,
-        launchType: LaunchType.SCHEDULE,
-        scheduleConfig: {
-          date: formValue.scheduleDate,
-          time: formValue.scheduleTime
-        }
+    if (formValue.launchType === LaunchType.SCHEDULE) {
+      pushData.schedule = {
+        dateSchedule: this.formatScheduleDateTime(
+          formValue.scheduleDate,
+          formValue.scheduleTime
+        )
       };
     } else if (formValue.launchType === LaunchType.RECURRENT) {
-      return {
-        ...baseData,
-        launchType: LaunchType.RECURRENT,
-        recurrentConfig: {
-          daysOfWeek: formValue.recurrentDays,
-          hour: formValue.recurrentHour
-        }
+      pushData.recurrent = {
+        frequency: formValue.recurrentDays.join(','), // "0,1,2"
+        frequencyHour: formValue.recurrentHour,
+        dateFrom: this.formatDate(new Date()),
+        dateTo: null
       };
     }
 
-    return baseData;
+    return pushData;
+  }
+
+  /**
+   * Format schedule date and time to "YYYY-MM-DD HH:MM:SS"
+   */
+  private formatScheduleDateTime(date: Date, time: string): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day} ${time}:00`;
+  }
+
+  /**
+   * Format date to "YYYY-MM-DD"
+   */
+  private formatDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   onCancel(): void {

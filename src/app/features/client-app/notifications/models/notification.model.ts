@@ -125,8 +125,8 @@ export interface HistoryPushResponse {
  * Target audience/public
  */
 export interface TargetAudience {
-  idTargetPublic: number;
-  nameTargetPublic: string;
+  id: number;
+  name: string;
   description?: string;
   totalCustomers?: number;
 }
@@ -252,8 +252,24 @@ export const DAYS_OF_WEEK: DayOfWeek[] = [
 /**
  * Hour options for recurrence (8 AM - 9 PM)
  */
-export const HOUR_OPTIONS: string[] = [
-  '08:00', '09:00', '10:00', '11:00', '12:00',
-  '13:00', '14:00', '15:00', '16:00', '17:00',
-  '18:00', '19:00', '20:00', '21:00'
+export interface HourOption {
+  label: string;
+  value: string;
+}
+
+export const HOUR_OPTIONS: HourOption[] = [
+  { label: '08:00 AM', value: '08:00' },
+  { label: '09:00 AM', value: '09:00' },
+  { label: '10:00 AM', value: '10:00' },
+  { label: '11:00 AM', value: '11:00' },
+  { label: '12:00 PM', value: '12:00' },
+  { label: '01:00 PM', value: '13:00' },
+  { label: '02:00 PM', value: '14:00' },
+  { label: '03:00 PM', value: '15:00' },
+  { label: '04:00 PM', value: '16:00' },
+  { label: '05:00 PM', value: '17:00' },
+  { label: '06:00 PM', value: '18:00' },
+  { label: '07:00 PM', value: '19:00' },
+  { label: '08:00 PM', value: '20:00' },
+  { label: '09:00 PM', value: '21:00' }
 ];

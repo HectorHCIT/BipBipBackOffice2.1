@@ -1,0 +1,553 @@
+<p-toast />
+
+<div class="p-4 max-w-7xl mx-auto">
+  <!-- Breadcrumb -->
+  <p-breadcrumb [model]="breadcrumbItems()" [home]="home" styleClass="mb-4" />
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="flex items-center justify-center py-12">
+      <i class="pi pi-spin pi-spinner text-4xl text-primary"></i>
+      <span class="ml-3 text-lg ">Cargando detalle...</span>
+    </div>
+  }
+
+  <!-- Order Not Found -->
+  @else if (notFound()) {
+    <div class="border border-yellow-200 bg-yellow-50 rounded-lg p-6 text-center">
+      <i class="pi pi-exclamation-triangle text-4xl text-yellow-600 mb-3"></i>
+      <h2 class="text-xl font-bold  mb-2">Orden no encontrada</h2>
+      <p class=" mb-4">
+        No se pudo encontrar la orden solicitada. Es posible que no exista o no tengas permisos para verla.
+      </p>
+      <p-button
+        label="Volver a la lista"
+        icon="pi pi-arrow-left"
+        (onClick)="goBack()"
+      />
+    </div>
+  }
+
+  <!-- Order Detail Content -->
+  @else if (orderDetail(); as order) {
+    <div class="space-y-4">
+      <!-- Page Header with Back Button -->
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <p-button
+            icon="pi pi-arrow-left"
+            [text]="true"
+            [rounded]="true"
+            size="large"
+            (onClick)="goBack()"
+            severity="secondary"
+          />
+          <div>
+            <h1 class="text-2xl font-bold ">
+              Orden #{{ order.numOrder }}
+            </h1>
+            <div class="flex items-center gap-2 mt-1">
+              <p-badge
+                [value]="order.orderStatus"
+                [severity]="statusSeverity()"
+              />
+              @if (isExpressOrder()) {
+                <div class="express-tag">
+                  <i class="pi pi-bolt"></i>
+                  <span>EXPRESS</span>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Reload Button -->
+        <p-button
+          icon="pi pi-refresh"
+          label="Actualizar"
+          [outlined]="true"
+          (onClick)="reload()"
+          [loading]="isLoading()"
+        />
+      </div>
+
+      <!-- Tabs -->
+      <p-tabs [value]="activeTabIndex()" (valueChange)="activeTabIndex.set(typeof $event === 'number' ? $event : 0)">
+        <!-- TAB 1: DETALLE -->
+        <p-tabpanel [value]="0" header="Detalle">
+          <div class="py-4 space-y-4">
+
+            <!-- Section 1: Header with POSGC and Actions -->
+            <div class="border border-gray-200 rounded-lg p-4">
+              <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <!-- POSGC Info -->
+                <div class="flex items-center gap-3">
+                  @if (order.posgc) {
+                    <div class="flex items-center gap-2">
+                      <span class="text-sm font-semibold ">POSGC:</span>
+                      <span class="text-base font-bold ">{{ order.posgc }}</span>
+                      <button
+                        type="button"
+                        class="text-primary hover:text-primary-dark"
+                        (click)="downloadInvoice()"
+                        title="Descargar factura"
+                      >
+                        <i class="pi pi-download text-sm"></i>
+                      </button>
+                    </div>
+                  } @else {
+                    <span class="text-sm ">Sin POSGC</span>
+                  }
+                </div>
+
+                <!-- Action Buttons - Desktop -->
+                <div class="hidden sm:flex items-center gap-2">
+                  @if (!order.isOrderSend && order.isSchedule) {
+                    <p-button
+                      label="Enviar pedido"
+                      icon="pi pi-send"
+                      size="small"
+                      [outlined]="true"
+                      (onClick)="onSendOrderClick()"
+                    />
+                  }
+                  @if (!isCancelled()) {
+                    <p-button
+                      label="Completar"
+                      icon="pi pi-check"
+                      severity="success"
+                      size="small"
+                      [outlined]="true"
+                      (onClick)="onCompleteOrderClick()"
+                    />
+                    <p-button
+                      label="Cancelar"
+                      icon="pi pi-ban"
+                      severity="danger"
+                      size="small"
+                      [outlined]="true"
+                      (onClick)="onCancelOrderClick()"
+                    />
+                  }
+                  <p-button
+                    label="Crear incidencia"
+                    icon="pi pi-exclamation-circle"
+                    severity="secondary"
+                    size="small"
+                    [outlined]="true"
+                    (onClick)="onCreateIncidentClick()"
+                  />
+                </div>
+
+                <!-- Action Buttons - Mobile (Menu) -->
+                <div class="flex sm:hidden">
+                  <p-button
+                    icon="pi pi-ellipsis-v"
+                    [text]="true"
+                    [rounded]="true"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Section 2: General Data (2 columns) -->
+            <div class="border border-gray-200 rounded-lg p-4">
+              <h2 class="text-lg font-semibold  mb-4">Datos generales</h2>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 divide-y md:divide-y-0 md:divide-x divide-gray-200">
+                <!-- Left Column -->
+                <div class="space-y-4 md:pr-6">
+                  <!-- Customer -->
+                  <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-full  text-white flex items-center justify-center font-semibold text-lg">
+                      {{ order.customerName.charAt(0).toUpperCase() }}
+                    </div>
+                    <div class="flex-1">
+                      <label class="text-xs font-semibold  uppercase">Cliente</label>
+                      <p class="text-base font-medium ">{{ order.customerName }}</p>
+                      <p class="text-sm ">{{ order.phoneCustomer }}</p>
+                      @if (order.customerSecondaryPhone) {
+                        <p class="text-sm ">{{ order.customerSecondaryPhone }}</p>
+                      }
+                    </div>
+                  </div>
+
+                  <!-- Driver -->
+                  <div>
+                    <label class="text-xs font-semibold  uppercase block mb-1">Repartidor</label>
+                    @if (order.nameDriver) {
+                      <div class="flex items-center gap-2">
+                        <p class="text-base font-medium ">{{ order.nameDriver }}</p>
+                        <button class="text-primary hover:text-primary-dark">
+                          <i class="pi pi-info-circle text-sm"></i>
+                        </button>
+                      </div>
+                      <!-- TODO: Add driver assignment component -->
+                    } @else {
+                      <p class=" italic">No asignado</p>
+                    }
+                  </div>
+
+                  <!-- Distance -->
+                  <div>
+                    <label class="text-xs font-semibold  uppercase block mb-1">Distancia</label>
+                    <p class="text-base ">{{ order.distanceOrder }} km</p>
+                  </div>
+
+                  <!-- Date & Time -->
+                  <div>
+                    <label class="text-xs font-semibold  uppercase block mb-1">Fecha y hora</label>
+                    <p class="text-base ">{{ order.orderDate | date:'medium' }}</p>
+                  </div>
+                </div>
+
+                <!-- Right Column -->
+                <div class="space-y-4 pt-4 md:pt-0 md:pl-6">
+                  <!-- Store/Brand -->
+                  <div>
+                    <label class="text-xs font-semibold  uppercase block mb-1">Tienda / Marca</label>
+                    <div class="flex items-center gap-3">
+                      @if (order.brandLogo) {
+                        <img [src]="order.brandLogo" [alt]="order.storeShortName" class="w-12 h-12 rounded object-contain border border-gray-200" />
+                      }
+                      <p class="text-base font-medium ">{{ order.storeShortName }}</p>
+                    </div>
+                  </div>
+
+                  <!-- Payment Method -->
+                  <div>
+                    <label class="text-xs font-semibold  uppercase block mb-1">Método de pago</label>
+                    <p class="text-base ">{{ order.namePaymentMethod }}</p>
+                  </div>
+
+                  <!-- Channel -->
+                  <div>
+                    <label class="text-xs font-semibold  uppercase block mb-1">Canal de pedido</label>
+                    <p class="text-base ">
+                      {{ order.channelId === 3 ? 'CALL CENTER' : (order.channelId === 1 ? 'DELIVERY' : 'PICKUP') }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Comments / Instructions -->
+              @if (order.comments || order.instructionsForDelivery) {
+                <div class="mt-4 space-y-3">
+                  @if (order.comments) {
+                    <div class="border-l-4 border-yellow-400  p-3 rounded">
+                      <p class="text-xs font-semibold text-yellow-800 uppercase mb-1">Comentarios del restaurante</p>
+                      <p class="text-sm text-yellow-900">{{ order.comments }}</p>
+                    </div>
+                  }
+                  @if (order.instructionsForDelivery) {
+                    <div class="border-l-4 border-blue-400  p-3 rounded">
+                      <p class="text-xs font-semibold text-blue-800 uppercase mb-1">Instrucciones de entrega</p>
+                      <p class="text-sm text-blue-900">{{ order.instructionsForDelivery }}</p>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+
+            <!-- Section 3: Delivery Time (Conditional - only for delivery) -->
+            @if (order.channelId === 1) {
+              <div class="border border-gray-200 rounded-lg p-4">
+                <h2 class="text-lg font-semibold  mb-4">Tiempos de entrega</h2>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  <div>
+                    <label class="text-xs font-semibold  uppercase block mb-1">Tiempo estimado</label>
+                    <p class="text-base font-medium ">
+                      {{ order.estimatedTime || 'N/A' }}
+                    </p>
+                  </div>
+                  <div>
+                    <label class="text-xs font-semibold  uppercase block mb-1">Hora inicio</label>
+                    <p class="text-base font-medium ">
+                      @if (order.status && order.status.length > 0 && order.status[0].time) {
+                        {{ order.status[0].time }}
+                      } @else {
+                        N/A
+                      }
+                    </p>
+                  </div>
+                  <div>
+                    <label class="text-xs font-semibold  uppercase block mb-1">Tiempo real</label>
+                    <p class="text-base font-medium ">
+                      {{ order.realTime || 'N/A' }}
+                    </p>
+                  </div>
+                  <div>
+                    <label class="text-xs font-semibold  uppercase block mb-1">Hora fin</label>
+                    <p class="text-base font-medium ">
+                      @if (order.deliveryDate) {
+                        {{ order.deliveryDate | date:'shortTime' }}
+                      } @else {
+                        Pendiente
+                      }
+                    </p>
+                  </div>
+                </div>
+              </div>
+            }
+
+            <!-- Driver Assignment Component -->
+            <app-driver-assignment
+              [orderDetail]="order"
+              [isLoading]="false"
+              (assignDriver)="onAssignDriver()"
+              (reassignDriver)="onReassignDriver()"
+              (releaseDriver)="onReleaseDriver()"
+              (viewDriverDetails)="onViewDriverDetails($event)"
+              (penalizeDriver)="onPenalizeDriver($event)"
+            />
+
+            <!-- Section 4: Products & Invoice -->
+            <div class="border border-gray-200 rounded-lg p-4">
+              <div class="mb-4 pb-4 border-b border-gray-200">
+                <h2 class="text-lg font-semibold ">Factura de venta</h2>
+              </div>
+
+              <!-- Company & Customer Info -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6 pb-6 border-b border-gray-200">
+                <!-- Company Info -->
+                <div>
+                  @if (order.rtn) {
+                    <p class="text-sm font-semibold ">{{ order.rtn.businessName }}</p>
+                    <p class="text-sm ">RTN: {{ order.rtn.rtnNumber }}</p>
+                  }
+                </div>
+
+                <!-- Customer Info -->
+                <div>
+                  <p class="text-sm font-semibold ">{{ order.customerName }}</p>
+                  <p class="text-sm ">{{ order.phoneCustomer }}</p>
+                  @if (order.channelId === 1 || order.channelId === 3) {
+                    <p class="text-sm ">{{ order.addressCustomer }}</p>
+                    @if (order.referencePoints) {
+                      <p class="text-sm  italic">Ref: {{ order.referencePoints }}</p>
+                    }
+                  }
+                </div>
+              </div>
+
+              <!-- Products Table - Desktop -->
+              <div class="hidden sm:block overflow-x-auto">
+                <table class="w-full text-sm">
+                  <thead class=" border-y border-gray-200">
+                    <tr>
+                      <th class="text-left p-3 font-semibold ">CONCEPTO</th>
+                      <th class="text-right p-3 font-semibold ">PRECIO</th>
+                      <th class="text-center p-3 font-semibold ">CANT</th>
+                      <th class="text-right p-3 font-semibold ">SUBTOTAL</th>
+                      <th class="text-center p-3 font-semibold ">ISV</th>
+                      <th class="text-right p-3 font-semibold ">TOTAL</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (product of order.ordersProductsDetails; track product.idProduct) {
+                      <tr class="border-b border-gray-100">
+                        <td class="p-3">
+                          <p class="font-medium ">{{ product.productName }}</p>
+                          @if (product.modifiers) {
+                            <p class="text-xs ">{{ product.modifiers }}</p>
+                          }
+                          @if (product.comments) {
+                            <p class="text-xs  italic">{{ product.comments }}</p>
+                          }
+                        </td>
+                        <td class="p-3 text-right">L. {{ (product.unitPrice || 0).toFixed(2) }}</td>
+                        <td class="p-3 text-center">{{ product.quantity }}</td>
+                        <td class="p-3 text-right">L. {{ (product.subtotal || 0).toFixed(2) }}</td>
+                        <td class="p-3 text-center">{{ product.taxPercentage || 0 }}%</td>
+                        <td class="p-3 text-right font-semibold">L. {{ (product.total || 0).toFixed(2) }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Products Cards - Mobile -->
+              <div class="flex sm:hidden flex-col gap-3 mb-4">
+                @for (product of order.ordersProductsDetails; track product.idProduct) {
+                  <div class="border border-gray-200 rounded-lg p-3">
+                    <div class="flex justify-between items-start mb-2">
+                      <div class="flex-1">
+                        <p class="font-medium ">{{ product.productName }}</p>
+                        @if (product.modifiers) {
+                          <p class="text-xs  mt-1">{{ product.modifiers }}</p>
+                        }
+                      </div>
+                      <p class="font-semibold  ml-2">L. {{ (product.total || 0).toFixed(2) }}</p>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 text-xs ">
+                      <div>
+                        <span class="font-medium">Cant:</span> {{ product.quantity }}
+                      </div>
+                      <div>
+                        <span class="font-medium">Precio:</span> L. {{ (product.unitPrice || 0).toFixed(2) }}
+                      </div>
+                      <div>
+                        <span class="font-medium">ISV:</span> {{ product.taxPercentage }}%
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <!-- Payment Details -->
+              @if (order.paidDetails && order.paidDetails.length > 0) {
+                <div class="mt-6 pt-6 border-t border-gray-200">
+                  <div class="space-y-2 max-w-md ml-auto">
+                    @for (detail of order.paidDetails; track detail.name) {
+                      <div class="flex justify-between text-sm">
+                        <span class="">{{ detail.name }}</span>
+                        <span class="font-medium ">L. {{ (detail.amount || 0).toFixed(2) }}</span>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+
+              <!-- Payment Gateway Info -->
+              @if (order.responseCard || order.authorizationCode) {
+                <div class="mt-4 pt-4 border-t border-gray-200 text-sm ">
+                  @if (order.responseCard) {
+                    <p><span class="font-medium">Respuesta:</span> {{ order.responseCard }}</p>
+                  }
+                  @if (order.authorizationCode) {
+                    <p><span class="font-medium">Autorización:</span> {{ order.authorizationCode }}</p>
+                  }
+                  @if (order.cardUsed) {
+                    <p><span class="font-medium">Tarjeta:</span> {{ order.cardUsed }}</p>
+                  }
+                </div>
+              }
+            </div>
+
+            <!-- Section 5: Order History Timeline -->
+            <div class="border border-gray-200 rounded-lg p-4">
+              <h2 class="text-lg font-semibold  mb-4">Historial de la orden</h2>
+              <div class="space-y-3">
+                @for (status of order.status; track status.name) {
+                  <div class="flex items-start gap-3">
+                    <div class="w-2 h-2  rounded-full mt-2 flex-shrink-0"></div>
+                    <div class="flex-1 min-w-0">
+                      <p class="text-sm ">
+                        <span class="font-medium">{{ status.time }}</span>
+                        @if (status.driver) {
+                          <span class=""> | Driver: {{ status.driver }}</span>
+                        }
+                        <span class=""> | Estado: </span>
+                        <span class="font-medium">{{ status.name }}</span>
+                      </p>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Section 6: Location & Map (Placeholder) -->
+            <div class="border border-gray-200 rounded-lg p-4">
+              <h2 class="text-lg font-semibold  mb-4">Ubicación</h2>
+              <div class="bg-gray-100 rounded-lg p-8 text-center">
+                <i class="pi pi-map-marker text-4xl mb-2"></i>
+                <p class="">Mapa de ubicación (próximamente)</p>
+                <p class="text-sm  mt-1">{{ order.addressCompany }}</p>
+              </div>
+            </div>
+
+          </div>
+        </p-tabpanel>
+
+        <!-- TAB 2: SOLICITUDES DE CANCELACIÓN -->
+        <p-tabpanel [value]="1" header="Solicitudes de cancelación">
+          <div class="py-4">
+            @if (order.cancelRequest && order.cancelRequest.length > 0) {
+              <div class="space-y-3">
+                @for (request of order.cancelRequest; track request.idRequest) {
+                  <div class="border border-gray-200 rounded-lg p-4">
+                    <div class="flex justify-between items-start mb-2">
+                      <p class="font-medium ">{{ request.reason }}</p>
+                      <p-badge [value]="request.status" />
+                    </div>
+                    <p class="text-sm  mb-2">{{ request.comments }}</p>
+                    <div class="text-xs ">
+                      <p>Solicitado por: {{ request.requestedBy }}</p>
+                      <p>Fecha: {{ request.requestDate | date:'medium' }}</p>
+                    </div>
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="text-center py-8 ">
+                <i class="pi pi-inbox text-4xl mb-2"></i>
+                <p>No hay solicitudes de cancelación</p>
+              </div>
+            }
+          </div>
+        </p-tabpanel>
+
+        <!-- TAB 3: INCIDENCIAS -->
+        <p-tabpanel [value]="2" header="Incidencias">
+          <div class="py-4">
+            @if (order.incidents && order.incidents.length > 0) {
+              <div class="space-y-3">
+                @for (incident of order.incidents; track incident.idIncident) {
+                  <div class="border border-gray-200 rounded-lg p-4">
+                    <div class="flex justify-between items-start mb-2">
+                      <p class="font-medium ">{{ incident.incidentType }}</p>
+                      <p-badge [value]="incident.status" />
+                    </div>
+                    <p class="text-sm  mb-2">{{ incident.description }}</p>
+                    <div class="text-xs ">
+                      <p>Creado por: {{ incident.createdBy }}</p>
+                      <p>Fecha: {{ incident.createdAt | date:'medium' }}</p>
+                    </div>
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="text-center py-8 ">
+                <i class="pi pi-inbox text-4xl mb-2"></i>
+                <p>No hay incidencias registradas</p>
+              </div>
+            }
+          </div>
+        </p-tabpanel>
+      </p-tabs>
+    </div>
+  }
+</div>
+
+<!-- Dialogs -->
+@if (orderDetail(); as order) {
+  <!-- Complete Order Dialog -->
+  <app-complete-order-dialog
+    [visible]="showCompleteDialog()"
+    [orderNumber]="order.numOrder"
+    [customerName]="order.customerName"
+    [loading]="completeLoading()"
+    (visibleChange)="showCompleteDialog.set($event)"
+    (confirm)="onConfirmComplete()"
+  />
+
+  <!-- Send Order Dialog -->
+  <app-send-order-dialog
+    [visible]="showSendDialog()"
+    [orderNumber]="order.numOrder"
+    [customerName]="order.customerName"
+    [scheduledTime]="order.orderDate | date:'medium'"
+    [loading]="sendLoading()"
+    (visibleChange)="showSendDialog.set($event)"
+    (confirm)="onConfirmSend()"
+  />
+
+  <!-- Create Incident Dialog -->
+  <app-create-incident-dialog
+    [visible]="showIncidentDialog()"
+    [orderNumber]="order.numOrder"
+    [loading]="incidentLoading()"
+    (visibleChange)="showIncidentDialog.set($event)"
+    (confirm)="onConfirmIncident($event)"
+  />
+}

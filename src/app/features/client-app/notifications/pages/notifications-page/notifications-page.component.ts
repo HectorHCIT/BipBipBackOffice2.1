@@ -1,6 +1,5 @@
 import { Component, ChangeDetectionStrategy, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
 import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { ButtonModule } from 'primeng/button';
 import { TabsModule } from 'primeng/tabs';
@@ -9,6 +8,8 @@ import { MenuItem } from 'primeng/api';
 
 import { NotificationCalendarComponent } from '../../components/notification-calendar/notification-calendar.component';
 import { NotificationHistoryComponent } from '../../components/notification-history/notification-history.component';
+import { NotificationFormDrawerComponent } from '../../components/notification-form-drawer/notification-form-drawer.component';
+import { NotificationEventDetailsDialogComponent } from '../../components/notification-event-details-dialog/notification-event-details-dialog.component';
 import { NotificationService } from '../../services';
 import { NotificationEvent } from '../../models';
 
@@ -22,14 +23,15 @@ import { NotificationEvent } from '../../models';
     TabsModule,
     MessageModule,
     NotificationCalendarComponent,
-    NotificationHistoryComponent
+    NotificationHistoryComponent,
+    NotificationFormDrawerComponent,
+    NotificationEventDetailsDialogComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './notifications-page.component.html',
   styleUrl: './notifications-page.component.scss'
 })
 export class NotificationsPageComponent implements OnInit {
-  private readonly router = inject(Router);
   private readonly notificationService = inject(NotificationService);
 
   // Breadcrumb
@@ -41,6 +43,14 @@ export class NotificationsPageComponent implements OnInit {
 
   // Active tab
   readonly activeTab = signal('calendar');
+
+  // Form drawer state
+  readonly showFormDrawer = signal(false);
+  readonly selectedNotificationId = signal<number | null>(null);
+
+  // Event details dialog state
+  readonly showEventDetailsDialog = signal(false);
+  readonly selectedEvent = signal<NotificationEvent | null>(null);
 
   // State from service
   readonly events = this.notificationService.notificationEvents;
@@ -60,16 +70,26 @@ export class NotificationsPageComponent implements OnInit {
   }
 
   onEventClick(event: NotificationEvent): void {
-    console.log('Event clicked:', event);
-    // TODO: Open details dialog
+    this.selectedEvent.set(event);
+    this.showEventDetailsDialog.set(true);
   }
 
   onDateClick(date: Date): void {
     console.log('Date clicked:', date);
   }
 
-  goToCreateNotification(): void {
-    this.router.navigate(['/client-app/notifications/create']);
+  openFormDrawer(notificationId: number | null = null): void {
+    this.selectedNotificationId.set(notificationId);
+    this.showFormDrawer.set(true);
+  }
+
+  handleFormSave(): void {
+    // Refresh data after save
+    this.loadNotifications();
+  }
+
+  handleFormCancel(): void {
+    // Optional: Any cleanup when form is cancelled
   }
 
   refreshData(): void {

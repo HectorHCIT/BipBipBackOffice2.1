@@ -1,0 +1,391 @@
+<!-- Toast notifications -->
+<p-toast />
+
+<!-- Breadcrumb -->
+<p-breadcrumb
+  [model]="breadcrumbItems"
+  [home]="home"
+  class="mb-4"
+/>
+
+<!-- Page header -->
+<div class="mb-6">
+  <h1 class="text-3xl font-bold text-gray-800 mb-2">Seguimiento de Pedidos</h1>
+  <p class="text-gray-600">Gestiona y monitorea todas las órdenes en tiempo real</p>
+</div>
+
+<!-- Volume Charts Section -->
+<div class="border border-gray-200 rounded-lg shadow-sm p-4 mb-6">
+  <div class="flex justify-between items-center cursor-pointer" (click)="toggleCharts()">
+    <h2 class="text-lg font-semibold text-gray-800">Volúmenes de órdenes</h2>
+    <p-button
+      [icon]="showCharts() ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
+      [text]="true"
+      [rounded]="true"
+      size="small"
+    />
+  </div>
+
+  @if (showCharts()) {
+    <div class="mt-4 flex flex-col sm:flex-row sm:justify-around sm:flex-wrap gap-4">
+      <app-volume-chart
+        [data]="volumePendingData()"
+        [type]="'pending'"
+        [loading]="chartsLoading()"
+      />
+      <app-volume-chart
+        [data]="volumeCompletedData()"
+        [type]="'completed'"
+        [loading]="chartsLoading()"
+      />
+      <app-volume-chart
+        [data]="volumeCancelledData()"
+        [type]="'cancelled'"
+        [loading]="chartsLoading()"
+      />
+    </div>
+  }
+</div>
+
+<!-- Search and filters bar -->
+<div class="border border-gray-200 rounded-lg shadow-sm p-4 mb-4">
+  <div class="flex flex-col md:flex-row gap-4">
+    <!-- Search input -->
+    <div class="flex-1">
+      <p-iconfield iconPosition="left">
+        <p-inputicon styleClass="pi pi-search" />
+        <input
+          pInputText
+          type="text"
+          placeholder="Buscar por # de orden, teléfono o cliente..."
+          [formControl]="searchControl"
+          (input)="onSearchChange($event)"
+          (keydown)="onSearchKeydown($event)"
+          class="w-full"
+        />
+      </p-iconfield>
+    </div>
+
+    <!-- Time filter -->
+    <div class="w-full md:w-64">
+      <p-select
+        [options]="timeFilterOptions"
+        [formControl]="timeFilterControl"
+        placeholder="Filtrar por tiempo"
+        (onChange)="onTimeFilterChange()"
+        [showClear]="true"
+        styleClass="w-full"
+      />
+    </div>
+
+    <!-- Advanced filters button -->
+    <p-button
+      label="Filtros Avanzados"
+      icon="pi pi-filter"
+      [outlined]="true"
+      (onClick)="openFilterSidebar()"
+    />
+  </div>
+</div>
+
+<!-- Active filters chips -->
+@if (hasActiveFilters()) {
+  <div class="flex flex-wrap gap-2 mb-4 items-center">
+    <span class="text-sm font-semibold text-gray-700">Filtros activos:</span>
+    @for (filter of activeFilters(); track filter.label) {
+      <p-chip
+        [label]="filter.label"
+        [removable]="true"
+        (onRemove)="removeFilter(filter)"
+      />
+    }
+    <p-button
+      label="Limpiar todos"
+      [text]="true"
+      size="small"
+      severity="secondary"
+      (onClick)="clearAllFilters()"
+    />
+  </div>
+}
+
+<!-- Desktop Table View -->
+<div class="hidden md:block rounded-lg shadow-sm border border-gray-200">
+  @if (isLoading()) {
+    <!-- Loading skeleton -->
+    <div class="p-4">
+      @for (item of [1,2,3,4,5]; track item) {
+        <div class="flex gap-4 mb-4">
+          <p-skeleton width="100%" height="3rem" />
+        </div>
+      }
+    </div>
+  } @else {
+    <p-table
+      [value]="orders()"
+      [paginator]="true"
+      [rows]="pageSize()"
+      [totalRecords]="totalRecords()"
+      [rowsPerPageOptions]="[5, 10, 15, 20]"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} órdenes"
+      (onPage)="onPageChange($event)"
+      [tableStyle]="{ 'min-width': '80rem' }"
+      styleClass="p-datatable-sm"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="numOrder">
+            N° DE ORDEN
+            <p-sortIcon field="numOrder" />
+          </th>
+          <th pSortableColumn="posgcId">
+            # POSGC
+            <p-sortIcon field="posgcId" />
+          </th>
+          <th>
+            DETALLES DEL P.
+          </th>
+          <th>
+            ESTADO/MÉT. DEL PAGO
+          </th>
+          <th pSortableColumn="orderAmount">
+            MONTO DEL PEDIDO
+            <p-sortIcon field="orderAmount" />
+          </th>
+          <th pSortableColumn="orderDate">
+            FECHA
+            <p-sortIcon field="orderDate" />
+          </th>
+          <th>
+            RECEPCIÓN
+          </th>
+          <th>
+            ENTREGA
+          </th>
+          <th pSortableColumn="orderStatus">
+            ESTADO DE ORDEN
+            <p-sortIcon field="orderStatus" />
+          </th>
+          <th>
+            ACCIONES
+          </th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-order>
+        <tr>
+          <!-- N° de Orden -->
+          <td>
+            <span class="font-mono font-semibold text-primary">{{ order.numOrder }}</span>
+          </td>
+
+          <!-- POSGC -->
+          <td>
+            <span class="font-mono text-sm">{{ order.posgcId }}</span>
+          </td>
+
+          <!-- Detalles -->
+          <td>
+            <span
+              class="text-sm"
+              [pTooltip]="order.orderDetails"
+              tooltipPosition="top"
+            >
+              {{ truncateOrderDetails(order.orderDetails) }}
+            </span>
+          </td>
+
+          <!-- Estado/Método Pago -->
+          <td>
+            <div class="flex flex-col gap-1">
+              <span class="text-xs font-semibold text-gray-700">{{ order.generalStatus }}</span>
+              <span class="text-xs text-gray-600">{{ order.paymentMethod }}</span>
+            </div>
+          </td>
+
+          <!-- Monto -->
+          <td>
+            <span class="font-semibold">{{ order.orderAmount | currency: 'HNL':'symbol-narrow':'1.2-2':'es-HN' }}</span>
+          </td>
+
+          <!-- Fecha -->
+          <td>
+            <span class="text-sm">{{ order.orderDate | date: 'dd/MM/yyyy HH:mm':'es-HN' }}</span>
+          </td>
+
+          <!-- Recepción -->
+          <td>
+            <span class="text-sm">{{ order.reception }}</span>
+          </td>
+
+          <!-- Entrega -->
+          <td>
+            <span class="text-sm">{{ order.shipping }}</span>
+          </td>
+
+          <!-- Estado de Orden -->
+          <td>
+            <p-tag
+              [value]="order.orderStatus"
+              [severity]="getOrderStatusSeverity(order.orderStatus)"
+            />
+          </td>
+
+          <!-- Acciones -->
+          <td>
+            <p-button
+              icon="pi pi-ellipsis-v"
+              [text]="true"
+              [rounded]="true"
+              size="small"
+              (click)="actionsPopover.toggle($event)"
+            />
+            <p-popover #actionsPopover>
+              <div class="flex flex-col gap-1 p-2">
+                @for (item of getOrderMenuItems(order); track item.label) {
+                  <button
+                    class="flex items-center gap-3 px-3 py-2 text-left hover:bg-gray-100 rounded-md transition-colors w-full text-sm"
+                    (click)="item.command?.({}); actionsPopover.hide()"
+                  >
+                    <i [class]="item.icon" class="text-gray-600"></i>
+                    <span>{{ item.label }}</span>
+                  </button>
+                }
+              </div>
+            </p-popover>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="10" class="text-center py-8">
+            <div class="flex flex-col items-center gap-3">
+              <i class="pi pi-inbox text-4xl text-gray-400"></i>
+              <p class="text-gray-600">
+                @if (hasActiveFilters()) {
+                  No se encontraron órdenes con los filtros aplicados
+                } @else {
+                  No hay órdenes para mostrar
+                }
+              </p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  }
+</div>
+
+<!-- Mobile Card View -->
+<div class="md:hidden">
+  @if (isLoading()) {
+    <!-- Loading skeleton -->
+    <div class="flex flex-col gap-4">
+      @for (item of [1,2,3,4,5]; track item) {
+        <p-skeleton width="100%" height="14rem" />
+      }
+    </div>
+  } @else {
+    @if (orders().length === 0) {
+      <!-- Empty state -->
+      <div class="border border-gray-200 rounded-lg p-8 text-center">
+        <i class="pi pi-inbox text-5xl text-gray-400 mb-4 block"></i>
+        <p class="text-gray-600">
+          @if (hasActiveFilters()) {
+            No se encontraron órdenes con los filtros aplicados
+          } @else {
+            No hay órdenes para mostrar
+          }
+        </p>
+      </div>
+    } @else {
+      <!-- Orders cards -->
+      <div class="flex flex-col gap-4">
+        @for (order of orders(); track order.numOrder) {
+          <div class="border border-gray-200 rounded-lg p-4 shadow-sm">
+            <!-- Header -->
+            <div class="flex justify-between items-start mb-3 pb-3 border-b border-gray-200">
+              <div class="flex-1">
+                <p class="text-xs text-gray-500 mb-1">Orden #</p>
+                <p class="font-mono font-bold text-lg text-primary">{{ order.numOrder }}</p>
+              </div>
+              <div class="flex items-start gap-2">
+                <p-tag
+                  [value]="order.orderStatus"
+                  [severity]="getOrderStatusSeverity(order.orderStatus)"
+                />
+                <p-button
+                  icon="pi pi-ellipsis-v"
+                  [text]="true"
+                  [rounded]="true"
+                  size="small"
+                  (click)="mobilePopover.toggle($event)"
+                />
+                <p-popover #mobilePopover>
+                  <div class="flex flex-col gap-1 p-2">
+                    @for (item of getOrderMenuItems(order); track item.label) {
+                      <button
+                        class="flex items-center gap-3 px-3 py-2 text-left hover:bg-gray-100 rounded-md transition-colors w-full text-sm"
+                        (click)="item.command?.({}); mobilePopover.hide()"
+                      >
+                        <i [class]="item.icon" class="text-gray-600"></i>
+                        <span>{{ item.label }}</span>
+                      </button>
+                    }
+                  </div>
+                </p-popover>
+              </div>
+            </div>
+
+            <!-- Order details -->
+            <div class="space-y-2 mb-4 text-sm">
+              <div class="flex justify-between">
+                <span class="text-gray-600">POSGC:</span>
+                <span class="font-medium">{{ order.posgcId }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-600">Monto:</span>
+                <span class="font-semibold text-primary">{{ order.orderAmount | currency: 'HNL':'symbol-narrow':'1.2-2':'es-HN' }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-600">Fecha:</span>
+                <span>{{ order.orderDate | date: 'dd/MM/yyyy HH:mm':'es-HN' }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-600">Pago:</span>
+                <span>{{ order.paymentMethod }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-600">Recepción:</span>
+                <span>{{ order.reception }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-600">Entrega:</span>
+                <span>{{ order.shipping }}</span>
+              </div>
+              <div class="pt-2 border-t border-gray-100">
+                <span class="text-xs text-gray-600">Detalles:</span>
+                <p class="text-xs text-gray-800 mt-1">{{ truncateOrderDetails(order.orderDetails, 80) }}</p>
+              </div>
+            </div>
+
+          </div>
+        }
+      </div>
+
+      <!-- Mobile pagination info -->
+      <div class="mt-4 text-center text-sm text-gray-600">
+        Mostrando {{ orders().length }} de {{ totalRecords() }} órdenes
+      </div>
+    }
+  }
+</div>
+
+<!-- Filter Sidebar -->
+<app-filter-sidebar
+  [visible]="showFilterSidebar()"
+  (onClose)="showFilterSidebar.set(false)"
+  (onApply)="onFiltersApplied($event)"
+/>

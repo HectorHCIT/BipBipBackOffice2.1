@@ -5,9 +5,14 @@
   [closable]="!isVerifying()"
   [closeOnEscape]="!isVerifying()"
   [dismissableMask]="false"
-  header="Autorización SMS"
   [style]="{ width: '500px' }"
 >
+  <ng-template pTemplate="header">
+    <div class="flex flex-col">
+      <h2 class="text-xl font-semibold m-0">Autorización por Correo</h2>
+      <p class="text-sm text-color-secondary m-0 mt-1">Código de verificación requerido</p>
+    </div>
+  </ng-template>
   <div class="authorization-content">
     <!-- Error message -->
     @if (error()) {
@@ -22,19 +27,19 @@
     @if (!codeRequested()) {
       <div class="step-request">
         <div class="text-center mb-4">
-          <i class="pi pi-mobile text-6xl text-blue-500 mb-3"></i>
+          <i class="pi pi-envelope text-6xl text-blue-500 mb-3"></i>
           <h3 class="text-xl font-semibold mb-2">Solicitar Código de Autorización</h3>
           <p class="text-gray-600 mb-4">
-            Para enviar esta notificación, necesitas autorizar la acción mediante un código SMS.
+            Para enviar esta notificación, necesitas autorizar la acción mediante un código enviado a tu correo.
           </p>
           <p class="text-sm text-gray-500">
-            Recibirás un código de 6 dígitos en tu teléfono registrado.
+            Recibirás un código de 4 dígitos en tu correo electrónico registrado.
           </p>
         </div>
 
         <div class="flex justify-center">
           <p-button
-            label="Solicitar Código SMS"
+            label="Solicitar Código"
             icon="pi pi-send"
             (onClick)="requestCode()"
             [loading]="isRequestingCode()"
@@ -52,7 +57,7 @@
           <i class="pi pi-shield text-6xl text-green-500 mb-3"></i>
           <h3 class="text-xl font-semibold mb-2">Ingresa el Código</h3>
           <p class="text-gray-600 mb-2">
-            Hemos enviado un código de 6 dígitos a tu teléfono.
+            Hemos enviado un código de 4 dígitos a tu correo electrónico.
           </p>
 
           <!-- Countdown timer -->
@@ -86,17 +91,16 @@
             id="authCode"
             type="text"
             inputmode="numeric"
-            maxlength="6"
-            placeholder="000000"
+            maxlength="4"
+            placeholder="0000"
             [value]="authCode()"
             (input)="onCodeInput($event)"
-            (ngModelChange)="onCodeChange()"
             [disabled]="isVerifying() || isCodeExpired()"
             class="w-full text-center text-3xl font-mono tracking-widest"
             autocomplete="off"
           />
           <small class="block text-center text-gray-500 mt-2">
-            Ingresa los 6 dígitos del código
+            Ingresa los 4 dígitos del código
           </small>
         </div>
 
@@ -129,7 +133,7 @@
         <div class="mt-4 p-3 bg-gray-50 rounded-lg">
           <p class="text-sm text-gray-600 m-0">
             <i class="pi pi-info-circle mr-2"></i>
-            ¿No recibiste el código? Verifica que tu número esté actualizado o contacta a soporte.
+            ¿No recibiste el código? Verifica tu bandeja de entrada y carpeta de spam, o contacta a soporte.
           </p>
         </div>
       </div>

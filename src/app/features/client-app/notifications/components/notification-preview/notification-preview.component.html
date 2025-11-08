@@ -1,0 +1,88 @@
+<div class="flex flex-col gap-14 p-4 border border-surface-border bg-surface-50 rounded-lg items-center">
+  <!-- iOS Preview -->
+  <div class="flex flex-col items-center gap-2">
+    <div class=" text-xs font-normal" style="font-family: 'Poppins', sans-serif;">iOS</div>
+    <div class="w-[370px] p-3.5 border-[0.1px] border-surface-200 rounded-[23px]" style="backdrop-filter: blur(40px);">
+      <div class="flex items-start gap-2.5">
+        <!-- App Icon -->
+        <div class="w-[38px] h-[38px] rounded-[10px] overflow-hidden flex-shrink-0">
+          <img src="/logoPush.png" alt="BipBip" class="w-full h-full object-cover" />
+        </div>
+
+        <!-- Content -->
+        <div class="flex-1 overflow-hidden">
+          <!-- Header row -->
+          <div class="flex justify-between gap-1.5 relative">
+            <div class="flex-1 flex flex-col gap-0.5 pr-10">
+              <!-- Type badge -->
+              <div class=" text-[13px] font-semibold leading-[18px] mix-blend-overlay" style="font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, sans-serif;">
+                {{ typeLabel().toUpperCase() }}
+              </div>
+              <!-- Title -->
+              <div class=" text-base font-semibold leading-5 overflow-hidden text-ellipsis line-clamp-2" style="font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, sans-serif;">
+                {{ title() || '¡Oferta de última hora!' }}
+              </div>
+              <!-- Message -->
+              <div class=" text-[13px] font-normal leading-[18px] overflow-hidden text-ellipsis line-clamp-2" style="font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, sans-serif;">
+                {{ message() || 'Aprovecha esta increíble promoción...' }}
+              </div>
+            </div>
+
+            <!-- Time and image -->
+            <div class="absolute right-0 top-0 flex flex-col items-end gap-0.5 pr-1">
+              <div class=" text-[13px] font-normal leading-[18px] text-right mix-blend-overlay" style="font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, sans-serif;">
+                34m ago
+              </div>
+              @if (imageUrl()) {
+                <div class="w-8 h-8 mt-1 rounded overflow-hidden">
+                  <img [src]="imageUrl()" alt="Preview" class="w-full h-full object-cover" />
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Android Preview -->
+  <div class="flex flex-col items-center gap-2">
+    <div class=" text-xs font-normal" style="font-family: 'Poppins', sans-serif;">Android</div>
+    <div class="w-[380px] h-[88px] p-4 border-[0.1px] border-surface-200 rounded overflow-hidden">
+      <div class="flex items-center gap-4 h-full">
+        <!-- App Icon -->
+        <div class="w-6 h-6 rounded-[5px] overflow-hidden flex-shrink-0">
+          <img src="/logoPush.png" alt="BipBip" class="w-full h-full object-cover" />
+        </div>
+
+        <!-- Content -->
+        <div class="flex-1 flex flex-col justify-center gap-1 overflow-hidden">
+          <div class="flex items-center gap-1">
+            <div class=" text-sm font-medium leading-5 tracking-[0.1px] overflow-hidden text-ellipsis whitespace-nowrap" style="font-family: 'Roboto', sans-serif;">
+              {{ title() || '¡Oferta de última hora!' }}
+            </div>
+            <div class="flex items-center gap-1 flex-shrink-0">
+              <span class=" text-xs font-normal leading-4 tracking-[0.4px]" style="font-family: 'Roboto', sans-serif;">•</span>
+              <span class=" text-xs font-normal leading-4 tracking-[0.4px]" style="font-family: 'Roboto', sans-serif;">5m</span>
+            </div>
+          </div>
+          <div class=" text-sm font-normal leading-5 tracking-[0.25px] overflow-hidden text-ellipsis whitespace-nowrap max-w-[268px]" style="font-family: 'Roboto', sans-serif;">
+            {{ message() || 'Aprovecha esta increíble promoción...' }}
+          </div>
+        </div>
+
+        <!-- Image thumbnail -->
+        @if (imageUrl()) {
+          <div class="w-12 h-12 rounded overflow-hidden flex-shrink-0">
+            <img [src]="imageUrl()" alt="Preview" class="w-full h-full object-cover" />
+          </div>
+        }
+
+        <!-- Expand button -->
+        <div class="w-6 h-6 p-1 bg-[#e0e3e1] rounded-2xl flex items-center justify-center flex-shrink-0">
+          <i class="pi pi-chevron-down text-xs text-[#1c1b1f]"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,99 @@
+<div class="flex flex-col gap-4 p-2">
+  <!-- Header -->
+  <div class="mb-2">
+    <h2 class="text-xl font-bold text-gray-800">{{ dialogTitle() }}</h2>
+    <p class="text-sm text-gray-600 mt-1">Orden #{{ orderId }}</p>
+  </div>
+
+  <!-- AutoComplete Input -->
+  <div class="flex flex-col gap-2">
+    <label for="driverSearch" class="text-sm font-semibold text-gray-700">
+      Buscar driver <span class="text-red-500">*</span>
+    </label>
+
+    @if (isLoadingDrivers()) {
+      <div class="flex items-center gap-2 p-3 border border-gray-300 rounded-md">
+        <i class="pi pi-spin pi-spinner"></i>
+        <span class="text-sm text-gray-600">Cargando drivers...</span>
+      </div>
+    } @else {
+      <p-autocomplete
+        [(ngModel)]="selectedDriver"
+        [suggestions]="filteredDrivers()"
+        (completeMethod)="filterDrivers($event)"
+        [dropdown]="true"
+        size="small"
+        placeholder="Buscar por nombre o código"
+        [forceSelection]="true"
+        [showClear]="true"
+        optionLabel="fullNameDriver"
+        appendTo="body"
+      >
+        <ng-template let-driver pTemplate="item">
+          <div class="flex items-center gap-2 p-2">
+            <span class="text-xs font-medium text-primary">{{ driver.codeDriver }}</span>
+            <span class="text-xs text-gray-400">|</span>
+            <span class="text-xs text-gray-700">{{ driver.fullNameDriver }}</span>
+          </div>
+        </ng-template>
+        <ng-template let-driver pTemplate="selectedItem">
+          <span>{{ driver.codeDriver }} | {{ driver.fullNameDriver }}</span>
+        </ng-template>
+      </p-autocomplete>
+
+      <!-- Help Text -->
+      <p class="text-xs text-gray-500">
+        Escribe el nombre o código del driver para filtrar la lista
+      </p>
+    }
+  </div>
+
+  <!-- Selected Driver Info -->
+  @if (selectedDriver) {
+    <div class="border border-green-200  rounded-lg p-3">
+      <div class="flex items-start gap-2">
+        <i class="pi pi-check-circle text-green-600 mt-0.5"></i>
+        <div>
+          <p class="text-sm font-semibold text-green-800">Driver seleccionado:</p>
+          <p class="text-sm text-green-700">{{ selectedDriver.fullNameDriver }}</p>
+          <p class="text-xs text-green-600">Código: {{ selectedDriver.codeDriver }}</p>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Warning message -->
+  <div class="border border-blue-200 rounded-lg p-3 text-sm text-blue-800">
+    <div class="flex gap-2">
+      <i class="pi pi-info-circle mt-0.5"></i>
+      <span>
+        @if (type === 'assign') {
+          El driver seleccionado será asignado a esta orden y recibirá una notificación.
+        } @else {
+          El driver actual será reemplazado por el driver seleccionado.
+        }
+      </span>
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div class="flex flex-col sm:flex-row sm:justify-end gap-2 mt-2">
+    <p-button
+      label="Cancelar"
+      [outlined]="true"
+      severity="secondary"
+      (onClick)="close()"
+      [disabled]="isSubmitting()"
+      styleClass="w-full sm:w-auto"
+    />
+    <p-button
+      [label]="type === 'assign' ? 'Asignar' : 'Reasignar'"
+      icon="pi pi-user-plus"
+      severity="primary"
+      [disabled]="!canSubmit()"
+      [loading]="isSubmitting()"
+      (onClick)="submit()"
+      styleClass="w-full sm:w-auto"
+    />
+  </div>
+</div>

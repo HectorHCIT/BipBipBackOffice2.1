@@ -15,7 +15,7 @@
       <p-button
         icon="pi pi-plus"
         label="Nueva Notificación"
-        (onClick)="goToCreateNotification()"
+        (onClick)="openFormDrawer()"
       />
     </div>
   </div>
@@ -50,7 +50,7 @@
                   <p-button
                     icon="pi pi-plus"
                     label="Crear Primera Notificación"
-                    (onClick)="goToCreateNotification()"
+                    (onClick)="openFormDrawer()"
                   />
                 </div>
               </ng-template>
@@ -73,4 +73,19 @@
       </p-tabpanel>
     </p-tabpanels>
   </p-tabs>
+
+  <!-- Notification Form Drawer -->
+  <app-notification-form-drawer
+    [(visibleModel)]="showFormDrawer"
+    [notificationId]="selectedNotificationId()"
+    (onSave)="handleFormSave()"
+    (onCancel)="handleFormCancel()"
+  />
+
+  <!-- Notification Event Details Dialog -->
+  <app-notification-event-details-dialog
+    [(visible)]="showEventDetailsDialog"
+    [event]="selectedEvent()"
+    (notificationActivated)="refreshData()"
+  />
 </div>

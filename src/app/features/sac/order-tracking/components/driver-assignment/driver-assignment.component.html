@@ -1,0 +1,184 @@
+<p-card class="driver-assignment-card">
+  <ng-template #header>
+    <div class="p-4 border-b border-gray-200">
+      <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+        <i class="pi pi-user text-primary"></i>
+        Información del Driver
+      </h3>
+    </div>
+  </ng-template>
+
+  @if (isLoading()) {
+    <div class="flex items-center justify-center py-8">
+      <i class="pi pi-spin pi-spinner text-2xl text-primary"></i>
+      <span class="ml-2 text-gray-600">Cargando información...</span>
+    </div>
+  } @else {
+    <!-- Driver Assigned -->
+    @if (hasDriver()) {
+      <div class="space-y-4">
+        <!-- Driver Info Header -->
+        <div class="flex items-start gap-4">
+          <p-avatar
+            [label]="driverInitials()"
+            size="xlarge"
+            styleClass="bg-primary text-white"
+          />
+
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-1">
+              <h4 class="text-lg font-semibold text-gray-900">
+                {{ orderDetail().nameDriver || orderDetail().driverName || 'Sin nombre' }}
+              </h4>
+              @if (orderDetail().driverStatus) {
+                <p-badge
+                  [value]="orderDetail().driverStatus"
+                  [severity]="driverStatusSeverity()"
+                />
+              }
+            </div>
+
+            <!-- Rating -->
+            @if (driverRating() > 0) {
+              <div class="flex items-center gap-1 mb-2">
+                <i class="pi pi-star-fill text-yellow-500 text-sm"></i>
+                <span class="text-sm font-medium text-gray-700">
+                  {{ driverRating() | number:'1.1-1' }}
+                </span>
+              </div>
+            }
+
+            <!-- Contact Info -->
+            <div class="space-y-1 text-sm text-gray-600">
+              @if (orderDetail().driverPhone) {
+                <div class="flex items-center gap-2">
+                  <i class="pi pi-phone text-gray-400"></i>
+                  <span>{{ orderDetail().driverPhone }}</span>
+                </div>
+              }
+              @if (orderDetail().driverEmail) {
+                <div class="flex items-center gap-2">
+                  <i class="pi pi-envelope text-gray-400"></i>
+                  <span class="truncate">{{ orderDetail().driverEmail }}</span>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <p-divider />
+
+        <!-- Driver Details -->
+        <div class="grid grid-cols-2 gap-4">
+          @if (orderDetail().driverVehicle) {
+            <div>
+              <label class="text-xs font-semibold text-gray-500 uppercase block mb-1">
+                Vehículo
+              </label>
+              <p class="text-sm font-medium text-gray-900">
+                {{ orderDetail().driverVehicle }}
+              </p>
+            </div>
+          }
+
+          @if (orderDetail().driverPlate) {
+            <div>
+              <label class="text-xs font-semibold text-gray-500 uppercase block mb-1">
+                Placa
+              </label>
+              <p class="text-sm font-medium text-gray-900">
+                {{ orderDetail().driverPlate }}
+              </p>
+            </div>
+          }
+
+          @if (orderDetail().driverDocument) {
+            <div>
+              <label class="text-xs font-semibold text-gray-500 uppercase block mb-1">
+                Documento
+              </label>
+              <p class="text-sm font-medium text-gray-900">
+                {{ orderDetail().driverDocument }}
+              </p>
+            </div>
+          }
+
+          @if (orderDetail().driverCity) {
+            <div>
+              <label class="text-xs font-semibold text-gray-500 uppercase block mb-1">
+                Ciudad
+              </label>
+              <p class="text-sm font-medium text-gray-900">
+                {{ orderDetail().driverCity }}
+              </p>
+            </div>
+          }
+        </div>
+
+        <p-divider />
+
+        <!-- Action Buttons -->
+        <div class="flex flex-wrap gap-2">
+          <p-button
+            label="Ver detalles"
+            icon="pi pi-info-circle"
+            severity="info"
+            size="small"
+            [outlined]="true"
+            (onClick)="onViewDriverDetails()"
+            pTooltip="Ver información completa del driver"
+          />
+
+          <p-button
+            label="Reasignar"
+            icon="pi pi-refresh"
+            severity="secondary"
+            size="small"
+            [outlined]="true"
+            (onClick)="onReassignDriver()"
+            pTooltip="Asignar otro driver a esta orden"
+          />
+
+          <p-button
+            label="Liberar"
+            icon="pi pi-times"
+            severity="secondary"
+            size="small"
+            [outlined]="true"
+            (onClick)="onReleaseDriver()"
+            pTooltip="Liberar driver de esta orden"
+          />
+
+          <p-button
+            label="Penalizar"
+            icon="pi pi-exclamation-triangle"
+            severity="danger"
+            size="small"
+            [outlined]="true"
+            (onClick)="onPenalizeDriver()"
+            pTooltip="Penalizar driver"
+          />
+        </div>
+      </div>
+    } @else {
+      <!-- No Driver Assigned -->
+      <div class="text-center py-8">
+        <div class="mb-4">
+          <i class="pi pi-user-minus text-5xl text-gray-300"></i>
+        </div>
+        <h4 class="text-lg font-semibold text-gray-700 mb-2">
+          Sin driver asignado
+        </h4>
+        <p class="text-sm text-gray-500 mb-4">
+          Esta orden no tiene un driver asignado todavía
+        </p>
+        <p-button
+          label="Asignar driver"
+          icon="pi pi-user-plus"
+          severity="primary"
+          (onClick)="onAssignDriver()"
+        />
+      </div>
+    }
+  }
+</p-card>

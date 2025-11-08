@@ -57,8 +57,13 @@ export const routes: Routes = [
       {
         path: 'client-app',
         loadChildren: () => import('./features/client-app/client-app.routes').then(m => m.CLIENT_APP_ROUTES)
+      },
+      // SAC (Servicio de Atención al Cliente)
+      {
+        path: 'sac',
+        loadChildren: () => import('./features/sac/sac.routes').then(m => m.SAC_ROUTES)
       }
-      // TODO: Agregar más módulos padre aquí (SAC, Drivers, etc.)
+      // TODO: Agregar más módulos padre aquí (Drivers, etc.)
     ]
   },
 

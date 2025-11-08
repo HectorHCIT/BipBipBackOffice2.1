@@ -270,3 +270,14 @@ html.dark {
 .p-datepicker-input{
   width: 100%;
 }
+
+/* ============================================
+   BREADCRUMB CUSTOMIZATION
+   Quitar fondo del breadcrumb
+   ============================================ */
+.p-breadcrumb {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 10px !important;
+}

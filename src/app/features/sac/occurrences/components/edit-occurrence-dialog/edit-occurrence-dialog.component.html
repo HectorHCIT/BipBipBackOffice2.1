@@ -1,0 +1,112 @@
+<p-toast />
+
+<p-dialog
+  [visible]="visible()"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '35rem' }"
+  header="Agregar / Editar Solución"
+  (onHide)="close()"
+  [closable]="!isSaving()"
+>
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <div class="flex flex-col gap-4">
+      <!-- Solution -->
+      <div class="flex flex-col gap-2">
+        <label for="solution" class="font-semibold text-sm">
+          Solución <span class="text-red-500">*</span>
+        </label>
+        <textarea
+          id="solution"
+          pInputTextarea
+          formControlName="solution"
+          rows="5"
+          placeholder="Describe la solución aplicada a esta incidencia..."
+          class="w-full"
+          [class.ng-invalid]="form.get('solution')?.invalid && form.get('solution')?.touched"
+          [class.ng-dirty]="form.get('solution')?.touched"
+        ></textarea>
+
+        <!-- Character counter -->
+        <div class="flex justify-between items-center text-xs">
+          <span [class]="getCounterClass()">
+            {{ characterCount() }} / {{ MAX_CHARS }} caracteres
+          </span>
+          @if (isOverLimit()) {
+            <span class="text-red-600 font-semibold">
+              Excede por {{ characterCount() - MAX_CHARS }} caracteres
+            </span>
+          } @else {
+            <span class="text-gray-500">
+              {{ remainingChars() }} restantes
+            </span>
+          }
+        </div>
+
+        @if (form.get('solution')?.invalid && form.get('solution')?.touched) {
+          <small class="text-red-600">
+            @if (form.get('solution')?.errors?.['required']) {
+              La solución es requerida
+            }
+            @if (form.get('solution')?.errors?.['maxlength']) {
+              La solución no puede exceder {{ MAX_CHARS }} caracteres
+            }
+          </small>
+        }
+      </div>
+
+      <!-- Attendance -->
+      <div class="flex flex-col gap-2">
+        <label for="attendance" class="font-semibold text-sm">
+          Persona Encargada <span class="text-red-500">*</span>
+        </label>
+        <input
+          id="attendance"
+          type="text"
+          pInputText
+          formControlName="attendance"
+          placeholder="Nombre de la persona que atendió"
+          class="w-full"
+          [class.ng-invalid]="form.get('attendance')?.invalid && form.get('attendance')?.touched"
+          [class.ng-dirty]="form.get('attendance')?.touched"
+        />
+        @if (form.get('attendance')?.invalid && form.get('attendance')?.touched) {
+          <small class="text-red-600">
+            @if (form.get('attendance')?.errors?.['required']) {
+              El nombre del encargado es requerido
+            }
+            @if (form.get('attendance')?.errors?.['maxlength']) {
+              El nombre no puede exceder 100 caracteres
+            }
+          </small>
+        }
+      </div>
+
+      <!-- Help text -->
+      <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-800">
+        <i class="pi pi-info-circle mr-2"></i>
+        <span>Ingresa una descripción clara de la solución aplicada y el nombre de la persona responsable.</span>
+      </div>
+    </div>
+  </form>
+
+  <ng-template pTemplate="footer">
+    <div class="flex gap-2 justify-end">
+      <p-button
+        label="Cancelar"
+        icon="pi pi-times"
+        [outlined]="true"
+        (onClick)="close()"
+        [disabled]="isSaving()"
+      />
+      <p-button
+        label="Guardar"
+        icon="pi pi-check"
+        (onClick)="save()"
+        [loading]="isSaving()"
+        [disabled]="form.invalid || isOverLimit()"
+      />
+    </div>
+  </ng-template>
+</p-dialog>

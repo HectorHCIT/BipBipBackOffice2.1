@@ -1,0 +1,36 @@
+.form-section {
+  .section-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--surface-border);
+  }
+}
+
+// Preview container with sticky positioning
+.preview-container {
+  @media (min-width: 1024px) {
+    position: sticky;
+    top: 1rem;
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+  }
+}
+
+// Schedule and Recurrent config boxes
+.schedule-config,
+.recurrent-config,
+.one-hot-info {
+  h4 {
+    margin: 0 0 0.75rem 0;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 1024px) {
+  .preview-container {
+    margin-top: 2rem;
+  }
+}

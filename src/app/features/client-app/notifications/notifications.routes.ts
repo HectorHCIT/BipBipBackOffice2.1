@@ -8,21 +8,5 @@ export const NOTIFICATIONS_ROUTES: Routes = [
         (m) => m.NotificationsPageComponent
       ),
     title: 'Gestión de Notificaciones'
-  },
-  {
-    path: 'create',
-    loadComponent: () =>
-      import('./pages/notification-form-page/notification-form-page.component').then(
-        (m) => m.NotificationFormPageComponent
-      ),
-    title: 'Nueva Notificación'
-  },
-  {
-    path: 'edit/:id',
-    loadComponent: () =>
-      import('./pages/notification-form-page/notification-form-page.component').then(
-        (m) => m.NotificationFormPageComponent
-      ),
-    title: 'Editar Notificación'
   }
 ];

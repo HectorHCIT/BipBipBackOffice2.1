@@ -1,0 +1,63 @@
+<p-dialog
+  [visible]="visible()"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '40rem' }"
+  header="Soluciones de la Ocurrencia"
+  (onHide)="close()"
+>
+  <div class="flex flex-col gap-4">
+    @if (solutions().length === 0) {
+      <div class="text-center py-6">
+        <i class="pi pi-info-circle text-4xl text-gray-400 mb-3"></i>
+        <p class="text-gray-600">No hay soluciones registradas para esta ocurrencia</p>
+      </div>
+    } @else {
+      @for (solution of solutions(); track $index) {
+        <div class="border border-gray-200 rounded-lg p-4 bg-gray-50">
+          <!-- Solution text -->
+          <div class="mb-3">
+            <label class="text-sm font-semibold text-gray-700 block mb-2">
+              Solución:
+            </label>
+            <p class="text-gray-800 whitespace-pre-wrap">{{ solution.solution }}</p>
+          </div>
+
+          <!-- Metadata -->
+          <div class="flex gap-4 text-sm text-gray-600 border-t pt-3">
+            <div class="flex items-center gap-2">
+              <i class="pi pi-calendar text-xs"></i>
+              <span>{{ formatDate(solution.createdAt) }}</span>
+            </div>
+            @if (solution.attendant) {
+              <div class="flex items-center gap-2">
+                <i class="pi pi-user text-xs"></i>
+                <span>{{ solution.attendant }}</span>
+              </div>
+            }
+            @if (solution.createdBy) {
+              <div class="flex items-center gap-2">
+                <i class="pi pi-id-card text-xs"></i>
+                <span>{{ solution.createdBy }}</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        @if (!$last) {
+          <div class="border-t border-gray-300"></div>
+        }
+      }
+    }
+  </div>
+
+  <ng-template pTemplate="footer">
+    <p-button
+      label="Cerrar"
+      icon="pi pi-times"
+      (onClick)="close()"
+      [outlined]="true"
+    />
+  </ng-template>
+</p-dialog>
