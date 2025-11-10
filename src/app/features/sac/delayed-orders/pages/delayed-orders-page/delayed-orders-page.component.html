@@ -1,0 +1,389 @@
+<div class="flex flex-col gap-4 p-4">
+  <!-- Header -->
+  <div class="flex flex-col gap-4">
+    <!-- Breadcrumb -->
+    <p-breadcrumb [model]="breadcrumbItems" [home]="home" />
+
+    <!-- Título y Controles -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div>
+        <h1 class="text-2xl font-bold ">Órdenes con Demora</h1>
+        <p class="text-sm  mt-1">
+          Gestión de órdenes retrasadas y asignación de drivers
+        </p>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <!-- Contador Auto-refresh -->
+        <div class="flex items-center gap-2 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg">
+          <i class="pi pi-clock text-blue-600"></i>
+          <span class="text-sm font-semibold text-blue-700">{{ countdown() }}s</span>
+        </div>
+
+        <!-- Botón Actualizar -->
+        <p-button
+          icon="pi pi-refresh"
+          [rounded]="true"
+          severity="secondary"
+          [outlined]="true"
+          (onClick)="refreshData()"
+          pTooltip="Actualizar datos"
+          tooltipPosition="bottom"
+        />
+
+        <!-- Botón Filtros -->
+        <p-button
+          icon="pi pi-filter"
+          label="Filtros"
+          [outlined]="true"
+          [badge]="activeFilters().length > 0 ? activeFilters().length.toString() : undefined"
+          badgeSeverity="info"
+          (onClick)="openFilters()"
+        />
+      </div>
+    </div>
+
+    <!-- Barra de Búsqueda -->
+    <div class="flex flex-col md:flex-row gap-3">
+      <div class="flex-1">
+        <p-iconfield iconPosition="left" class="w-full">
+          <p-inputicon styleClass="pi pi-search" />
+          <input
+            pInputText
+            type="text"
+            placeholder="Buscar por número de orden..."
+            [(ngModel)]="searchTerm"
+            (ngModelChange)="onSearchChange()"
+            class="w-full"
+          />
+        </p-iconfield>
+      </div>
+
+      <!-- Última actualización -->
+      @if (lastUpdate()) {
+        <div class="flex items-center gap-2 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg">
+          <i class="pi pi-calendar text-gray-600 text-sm"></i>
+          <span class="text-sm text-gray-700">Última actualización: {{ lastUpdate() }}</span>
+        </div>
+      }
+    </div>
+
+    <!-- Filtros Activos -->
+    @if (hasFilters()) {
+      <div class="flex flex-wrap items-center gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+        <span class="text-sm font-semibold text-blue-900">Filtros activos:</span>
+
+        @for (filter of activeFilters(); track filter.type) {
+          <div class="flex items-center gap-1 px-3 py-1 bg-blue-600 text-white rounded-full text-sm">
+            <span>{{ filter.label }}</span>
+            <button
+              (click)="removeFilter(filter)"
+              class="ml-1 hover:bg-blue-700 rounded-full p-0.5 transition-colors"
+              type="button"
+            >
+              <i class="pi pi-times text-xs"></i>
+            </button>
+          </div>
+        }
+
+        <p-button
+          label="Limpiar todos"
+          [text]="true"
+          size="small"
+          severity="danger"
+          (onClick)="clearAllFilters()"
+        />
+      </div>
+    }
+  </div>
+
+  <!-- Tabla Desktop -->
+  <div class="hidden md:block">
+    <p-table
+      [value]="orders()"
+      [lazy]="true"
+      [paginator]="true"
+      [rows]="rowsPerPage()"
+      [totalRecords]="totalRecords()"
+      [rowsPerPageOptions]="rowsPerPageOptions"
+      [loading]="isLoading()"
+      (onLazyLoad)="onPageChange($event)"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} órdenes"
+      styleClass="p-datatable-sm p-datatable-striped"
+    >
+      <!-- Columnas -->
+      <ng-template #header>
+        <tr>
+          <th>No. Orden</th>
+          <th>Driver</th>
+          <th>Canal</th>
+          <th>Unidad</th>
+          <th>Cliente</th>
+          <th>Ciudad</th>
+          <th>Fecha y Hora</th>
+          <th>Tiempo Demora</th>
+          <th class="text-center">Acciones</th>
+        </tr>
+      </ng-template>
+
+      <ng-template #body let-order>
+        <tr>
+          <!-- No. Orden -->
+          <td>
+            <div class="flex flex-col gap-1">
+              <span class="font-semibold text-gray-900">#{{ order.ordersId }}</span>
+              @if (order.poscgcOrderId) {
+                <span class="text-xs text-gray-500">POSGC: {{ order.poscgcOrderId }}</span>
+              }
+            </div>
+          </td>
+
+          <!-- Driver -->
+          <td>
+            @if (order.driverId) {
+              <span class="text-gray-900">{{ order.driverName }}</span>
+            } @else {
+              <p-button
+                label="Asignar driver"
+                icon="pi pi-user-plus"
+                size="small"
+                severity="info"
+                [outlined]="true"
+                (onClick)="openAssignDriver(order)"
+              />
+            }
+          </td>
+
+          <!-- Canal -->
+          <td>{{ order.channelName }}</td>
+
+          <!-- Unidad -->
+          <td>{{ order.store }}</td>
+
+          <!-- Cliente -->
+          <td>{{ order.customerName }}</td>
+
+          <!-- Ciudad -->
+          <td>
+            <div class="flex flex-col gap-1">
+              <span class="text-gray-900">{{ order.cityName }}</span>
+              <span class="text-xs text-gray-500">{{ order.countryName }}</span>
+            </div>
+          </td>
+
+          <!-- Fecha y Hora -->
+          <td>{{ formatDeliveryDate(order.dateDelivery) }}</td>
+
+          <!-- Tiempo Demora -->
+          <td>
+            <p-tag
+              [value]="formatDelayedTime(order.delayedOrderTime)"
+              severity="danger"
+              icon="pi pi-clock"
+            />
+          </td>
+
+          <!-- Acciones -->
+          <td class="text-center">
+            @if (order.driverId) {
+              <p-button
+                icon="pi pi-pencil"
+                [rounded]="true"
+                [text]="true"
+                severity="secondary"
+                size="small"
+                (onClick)="openAssignDriver(order)"
+                pTooltip="Reasignar driver"
+                tooltipPosition="left"
+              />
+            }
+          </td>
+        </tr>
+      </ng-template>
+
+      <!-- Loading -->
+      <ng-template #loadingbody>
+        <tr>
+          <td colspan="9">
+            <div class="flex flex-col gap-2 p-4">
+              @for (i of [1,2,3]; track i) {
+                <p-skeleton height="3rem" />
+              }
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <!-- Empty -->
+      <ng-template #emptymessage>
+        <tr>
+          <td colspan="9">
+            <div class="flex flex-col items-center justify-center py-8 text-gray-500">
+              <i class="pi pi-inbox text-4xl mb-3"></i>
+              <p class="text-lg font-semibold">No se encontraron órdenes</p>
+              <p class="text-sm">
+                @if (hasSearch()) {
+                  Intenta con otro término de búsqueda
+                } @else if (hasFilters()) {
+                  Intenta ajustando los filtros
+                } @else {
+                  No hay órdenes con demora en este momento
+                }
+              </p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+  <!-- Cards Mobile -->
+  <div class="md:hidden space-y-3">
+    @if (isLoading()) {
+      @for (i of [1,2,3]; track i) {
+        <p-skeleton height="12rem" />
+      }
+    } @else if (orders().length === 0) {
+      <div class="flex flex-col items-center justify-center py-12 text-gray-500">
+        <i class="pi pi-inbox text-5xl mb-4"></i>
+        <p class="text-lg font-semibold">No se encontraron órdenes</p>
+      </div>
+    } @else {
+      @for (order of orders(); track order.ordersId) {
+        <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+          <!-- Header -->
+          <div class="flex items-start justify-between mb-3">
+            <div>
+              <span class="text-lg font-bold text-gray-900">#{{ order.ordersId }}</span>
+              @if (order.poscgcOrderId) {
+                <p class="text-xs text-gray-500 mt-1">POSGC: {{ order.poscgcOrderId }}</p>
+              }
+            </div>
+            <p-tag
+              [value]="formatDelayedTime(order.delayedOrderTime)"
+              severity="danger"
+              icon="pi pi-clock"
+            />
+          </div>
+
+          <!-- Info Grid -->
+          <div class="space-y-2 mb-3">
+            <div class="flex items-start gap-2">
+              <i class="pi pi-building text-gray-400 mt-1"></i>
+              <div>
+                <p class="text-xs text-gray-500">Canal / Unidad</p>
+                <p class="text-sm font-medium text-gray-900">{{ order.channelName }} / {{ order.store }}</p>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-2">
+              <i class="pi pi-user text-gray-400 mt-1"></i>
+              <div>
+                <p class="text-xs text-gray-500">Cliente</p>
+                <p class="text-sm font-medium text-gray-900">{{ order.customerName }}</p>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-2">
+              <i class="pi pi-map-marker text-gray-400 mt-1"></i>
+              <div>
+                <p class="text-xs text-gray-500">Ubicación</p>
+                <p class="text-sm font-medium text-gray-900">{{ order.cityName }}, {{ order.countryName }}</p>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-2">
+              <i class="pi pi-calendar text-gray-400 mt-1"></i>
+              <div>
+                <p class="text-xs text-gray-500">Fecha de entrega</p>
+                <p class="text-sm font-medium text-gray-900">{{ formatDeliveryDate(order.dateDelivery) }}</p>
+              </div>
+            </div>
+
+            @if (order.driverId) {
+              <div class="flex items-start gap-2">
+                <i class="pi pi-car text-gray-400 mt-1"></i>
+                <div>
+                  <p class="text-xs text-gray-500">Driver asignado</p>
+                  <p class="text-sm font-medium text-gray-900">{{ order.driverName }}</p>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Actions -->
+          <div class="pt-3 border-t border-gray-200">
+            @if (order.driverId) {
+              <p-button
+                label="Reasignar driver"
+                icon="pi pi-pencil"
+                size="small"
+                severity="secondary"
+                [outlined]="true"
+                styleClass="w-full"
+                (onClick)="openAssignDriver(order)"
+              />
+            } @else {
+              <p-button
+                label="Asignar driver"
+                icon="pi pi-user-plus"
+                size="small"
+                severity="info"
+                styleClass="w-full"
+                (onClick)="openAssignDriver(order)"
+              />
+            }
+          </div>
+        </div>
+      }
+    }
+
+    <!-- Paginación Mobile -->
+    @if (orders().length > 0) {
+      <div class="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg">
+        <span class="text-sm text-gray-600">
+          Total: {{ totalRecords() }} órdenes
+        </span>
+        <div class="flex gap-2">
+          <p-button
+            icon="pi pi-chevron-left"
+            [rounded]="true"
+            [outlined]="true"
+            size="small"
+            [disabled]="currentPage() === 1"
+            (onClick)="onPageChange({ page: currentPage() - 2, rows: rowsPerPage() })"
+          />
+          <p-button
+            icon="pi pi-chevron-right"
+            [rounded]="true"
+            [outlined]="true"
+            size="small"
+            [disabled]="currentPage() * rowsPerPage() >= totalRecords()"
+            (onClick)="onPageChange({ page: currentPage(), rows: rowsPerPage() })"
+          />
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Sidebar de Filtros -->
+<app-filter-sidebar
+  [visible]="showFilterSidebar()"
+  (onClose)="showFilterSidebar.set(false)"
+  (onApply)="onFiltersApplied($event)"
+/>
+
+<!-- Diálogo de Asignación de Driver -->
+@if (selectedOrder()) {
+  <app-assign-driver-dialog
+    [visible]="showAssignDialog()"
+    [order]="selectedOrder()!"
+    (visibleChange)="showAssignDialog.set($event)"
+    (confirm)="onDriverAssigned()"
+  />
+}
+
+<!-- Toast -->
+<p-toast />

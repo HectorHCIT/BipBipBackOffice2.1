@@ -1,0 +1,296 @@
+<p-drawer
+  [visible]="visible()"
+  [header]="drawerTitle()"
+  position="right"
+  [style]="{ width: '700px' }"
+  (onHide)="onHide()"
+>
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-6">
+    <!-- Objective Name -->
+    <div class="flex flex-col gap-2">
+      <label for="objectivePublicName" class="font-semibold">
+        Nombre del Público Objetivo
+        <span class="text-red-500">*</span>
+      </label>
+      <input
+        pInputText
+        id="objectivePublicName"
+        formControlName="objectivePublicName"
+        placeholder="Ej: Usuarios activos Tegucigalpa"
+      />
+      @if (form.get('objectivePublicName')?.invalid && form.get('objectivePublicName')?.touched) {
+        <small class="text-red-500">
+          El nombre es requerido (mínimo 3 caracteres)
+        </small>
+      }
+    </div>
+
+    <!-- Country Selector -->
+    <div class="flex flex-col gap-2">
+      <label for="countryId" class="font-semibold">
+        País
+        <span class="text-red-500">*</span>
+      </label>
+      <p-select
+        formControlName="countryId"
+        [options]="countries()"
+        optionLabel="countryName"
+        optionValue="countryId"
+        placeholder="Selecciona un país"
+        [filter]="true"
+        filterPlaceholder="Buscar país..."
+      />
+      @if (form.get('countryId')?.invalid && form.get('countryId')?.touched) {
+        <small class="text-red-500">
+          Debes seleccionar un país
+        </small>
+      }
+    </div>
+
+    <!-- Cities Section -->
+    @if (form.get('countryId')?.value && availableCities().length > 0) {
+      <div class="flex flex-col gap-2">
+        <label for="cities" class="font-semibold">
+          Ciudades
+          <span class="text-red-500">*</span>
+        </label>
+        <p-multiselect
+          [(ngModel)]="selectedCities"
+          [options]="availableCities()"
+          optionLabel="cityName"
+          optionValue="cityId"
+          placeholder="Selecciona las ciudades"
+          [filter]="true"
+          filterPlaceholder="Buscar ciudad..."
+          [showClear]="true"
+          display="chip"
+          [maxSelectedLabels]="3"
+          [ngModelOptions]="{standalone: true}"
+        />
+        @if (selectedCities.length === 0) {
+          <small class="text-red-500">
+            Debes seleccionar al menos una ciudad
+          </small>
+        }
+      </div>
+    }
+
+    <!-- Divider -->
+    <p-divider />
+
+    <!-- Gender Filter Section -->
+    <div class="flex flex-col gap-3">
+      <div class="flex items-center gap-2">
+        <p-checkbox
+          formControlName="genderFlag"
+          [binary]="true"
+          inputId="genderFlag"
+        />
+        <label for="genderFlag" class="font-semibold cursor-pointer">
+          Filtrar por Género
+        </label>
+      </div>
+
+      @if (form.get('genderFlag')?.value) {
+        <div class="flex flex-col gap-2 pl-8">
+          <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2">
+              <p-checkbox
+                formControlName="genderMan"
+                [binary]="true"
+                inputId="genderMan"
+              />
+              <label for="genderMan" class="cursor-pointer">
+                Hombre
+              </label>
+            </div>
+            <div class="flex items-center gap-2">
+              <p-checkbox
+                formControlName="genderWoman"
+                [binary]="true"
+                inputId="genderWoman"
+              />
+              <label for="genderWoman" class="cursor-pointer">
+                Mujer
+              </label>
+            </div>
+          </div>
+
+          @if (form.get('genderFlag')?.value && !form.get('genderMan')?.value && !form.get('genderWoman')?.value) {
+            <small class="text-red-500">
+              Debes seleccionar al menos un género
+            </small>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Divider -->
+    <p-divider />
+
+    <!-- Age Filter Section -->
+    <div class="flex flex-col gap-3">
+      <div class="flex items-center gap-2">
+        <p-checkbox
+          formControlName="ageLimitFlag"
+          [binary]="true"
+          inputId="ageLimitFlag"
+        />
+        <label for="ageLimitFlag" class="font-semibold cursor-pointer">
+          Filtrar por Edad
+        </label>
+      </div>
+
+      @if (form.get('ageLimitFlag')?.value) {
+        <div class="flex flex-col gap-2 pl-8">
+          <div class="grid grid-cols-2 gap-3">
+            <div class="flex flex-col gap-2">
+              <label for="startingAge" class="text-sm">
+                Edad Inicial
+                <span class="text-red-500">*</span>
+              </label>
+              <p-inputNumber
+                formControlName="startingAge"
+                inputId="startingAge"
+                [min]="0"
+                [max]="120"
+                placeholder="Ej: 18"
+                [showButtons]="true"
+              />
+            </div>
+            <div class="flex flex-col gap-2">
+              <label for="ageLimit" class="text-sm">
+                Edad Límite (Opcional)
+              </label>
+              <p-inputNumber
+                formControlName="ageLimit"
+                inputId="ageLimit"
+                [min]="0"
+                [max]="120"
+                placeholder="Ej: 65"
+                [showButtons]="true"
+              />
+            </div>
+          </div>
+
+          @if (form.get('ageLimitFlag')?.value && form.get('startingAge')?.value === null) {
+            <small class="text-red-500">
+              La edad inicial es requerida
+            </small>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Divider -->
+    <p-divider />
+
+    <!-- Entry Date Filter Section -->
+    <div class="flex flex-col gap-3">
+      <div class="flex items-center gap-2">
+        <p-checkbox
+          formControlName="creationDateFlag"
+          [binary]="true"
+          inputId="creationDateFlag"
+        />
+        <label for="creationDateFlag" class="font-semibold cursor-pointer">
+          Filtrar por Fecha de Entrada
+        </label>
+      </div>
+
+      @if (form.get('creationDateFlag')?.value) {
+        <div class="flex flex-col gap-3 pl-8">
+          <div class="flex flex-col gap-2">
+            <label for="creationDate" class="text-sm">
+              Fecha de Entrada
+              <span class="text-red-500">*</span>
+            </label>
+            <p-datepicker
+              formControlName="creationDate"
+              inputId="creationDate"
+              placeholder="Selecciona fecha"
+              [showIcon]="true"
+              dateFormat="dd/mm/yy"
+            />
+          </div>
+
+          <div class="flex items-center gap-2">
+            <p-checkbox
+              formControlName="limitSpecificDateFlag"
+              [binary]="true"
+              inputId="limitSpecificDateFlag"
+            />
+            <label for="limitSpecificDateFlag" class="cursor-pointer">
+              Especificar fecha límite
+            </label>
+          </div>
+
+          @if (form.get('limitSpecificDateFlag')?.value) {
+            <div class="flex flex-col gap-2">
+              <label for="limitSpecificDate" class="text-sm">
+                Fecha Límite
+              </label>
+              <p-datepicker
+                formControlName="limitSpecificDate"
+                inputId="limitSpecificDate"
+                placeholder="Selecciona fecha límite"
+                [showIcon]="true"
+                dateFormat="dd/mm/yy"
+              />
+            </div>
+          }
+
+          @if (form.get('creationDateFlag')?.value && !form.get('creationDate')?.value) {
+            <small class="text-red-500">
+              La fecha de entrada es requerida
+            </small>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Divider -->
+    <p-divider />
+
+    <!-- Estimated Scope Display -->
+    <div class="p-4 border-2 rounded-lg" [class]="estimatedScope() !== null ? 'border-primary bg-primary-50 dark:bg-primary-900/10' : 'border-surface-border bg-surface-50'">
+      <div class="flex flex-col gap-2">
+        <span class="font-semibold" [class]="estimatedScope() !== null ? 'text-primary' : 'text-color-secondary'">
+          Alcance Estimado:
+        </span>
+        @if (isCalculating()) {
+          <div class="flex items-center gap-2">
+            <i class="pi pi-spin pi-spinner text-primary"></i>
+            <span class="text-primary">Calculando...</span>
+          </div>
+        } @else if (estimatedScope() !== null) {
+          <span class="text-2xl font-bold text-primary">
+            {{ estimatedScope() | number }} usuarios
+          </span>
+        } @else {
+          <span class="text-sm text-color-secondary">
+            Completa los campos requeridos y activa al menos un filtro para calcular el alcance
+          </span>
+        }
+      </div>
+    </div>
+
+    <!-- Footer Buttons -->
+    <div class="flex gap-2 justify-end mt-4 pt-4 border-t border-surface">
+      <p-button
+        label="Cancelar"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="onHide()"
+        type="button"
+        [disabled]="isSaving()"
+      />
+      <p-button
+        [label]="isSaving() ? 'Guardando...' : 'Guardar'"
+        type="submit"
+        [disabled]="isSaving()"
+        [loading]="isSaving()"
+      />
+    </div>
+  </form>
+</p-drawer>

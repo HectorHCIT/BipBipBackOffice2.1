@@ -159,29 +159,40 @@
           </td>
 
           <!-- Acciones -->
-          <td>
-            <div class="flex gap-2">
-              <p-button
-                icon="pi pi-pencil"
-                [rounded]="true"
-                [text]="true"
-                severity="warn"
-                size="small"
-                pTooltip="Editar incidencia"
-                tooltipPosition="top"
-                (onClick)="editOccurrence(occurrence)"
-              />
-              <p-button
-                icon="pi pi-trash"
-                [rounded]="true"
-                [text]="true"
-                severity="danger"
-                size="small"
-                pTooltip="Eliminar"
-                tooltipPosition="top"
-                (onClick)="deleteOccurrence(occurrence)"
-              />
-            </div>
+          <td class="text-center">
+            <p-button
+              icon="pi pi-ellipsis-v"
+              [text]="true"
+              [rounded]="true"
+              severity="secondary"
+              size="small"
+              (onClick)="actionsMenu.toggle($event)"
+            />
+            <p-popover #actionsMenu>
+              <div class="flex flex-col gap-1 p-2">
+                <button
+                  class="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+                  (click)="viewOrder(occurrence.orderId); actionsMenu.hide()"
+                >
+                  <i class="pi pi-eye text-blue-600"></i>
+                  <span>Ver Orden</span>
+                </button>
+                <button
+                  class="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+                  (click)="editOccurrence(occurrence); actionsMenu.hide()"
+                >
+                  <i class="pi pi-pencil text-yellow-600"></i>
+                  <span>Editar</span>
+                </button>
+                <button
+                  class="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                  (click)="deleteOccurrence(occurrence); actionsMenu.hide()"
+                >
+                  <i class="pi pi-trash text-red-600"></i>
+                  <span>Eliminar</span>
+                </button>
+              </div>
+            </p-popover>
           </td>
         </tr>
       </ng-template>

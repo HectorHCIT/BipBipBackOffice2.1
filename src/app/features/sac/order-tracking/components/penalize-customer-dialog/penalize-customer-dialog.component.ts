@@ -5,14 +5,13 @@ import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
 import { TextareaModule } from 'primeng/textarea';
-import { DatePickerModule } from 'primeng/datepicker';
 import { MessageModule } from 'primeng/message';
 import { OrderTrackingService } from '../../services';
 import { CustomerPenalty } from '../../models';
 
 interface PenaltyReason {
-  codDriverPenalty: number;
-  reason: string;
+  penaltyReasonId: number;
+  description: string;
 }
 
 @Component({
@@ -24,7 +23,6 @@ interface PenaltyReason {
     ButtonModule,
     SelectModule,
     TextareaModule,
-    DatePickerModule,
     MessageModule
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -50,18 +48,13 @@ export class PenalizeCustomerDialogComponent {
   readonly loadingReasons = signal(true);
   readonly isSubmitting = signal(false);
 
-  // Min date (today)
-  readonly minDate = new Date();
-
   // Form
   readonly penaltyForm: FormGroup;
 
   constructor() {
     this.penaltyForm = this.fb.group({
       reasonId: [null, Validators.required],
-      descripcion: ['', [Validators.required, Validators.minLength(10)]],
-      startDate: [new Date(), Validators.required],
-      endDate: [new Date(), Validators.required]
+      comments: ['', [Validators.required, Validators.minLength(10)]]
     });
 
     // Load penalty reasons when dialog opens
@@ -76,9 +69,7 @@ export class PenalizeCustomerDialogComponent {
       if (!this.visible()) {
         this.penaltyForm.reset({
           reasonId: null,
-          descripcion: '',
-          startDate: new Date(),
-          endDate: new Date()
+          comments: ''
         });
       }
     });
@@ -106,35 +97,13 @@ export class PenalizeCustomerDialogComponent {
     if (this.penaltyForm.valid) {
       const formValue = this.penaltyForm.value;
 
-      // Validate dates
-      const startDate = new Date(formValue.startDate);
-      const endDate = new Date(formValue.endDate);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      if (startDate < today) {
-        // Mostrar error en template
-        return;
-      }
-
-      if (endDate < today) {
-        // Mostrar error en template
-        return;
-      }
-
-      if (endDate < startDate) {
-        // Mostrar error en template
-        return;
-      }
-
       this.isSubmitting.set(true);
 
       const penaltyData: CustomerPenalty = {
         customerId: this.customerId(),
-        descripcion: formValue.descripcion,
-        startDate: formValue.startDate,
-        endDate: formValue.endDate,
-        reasonId: formValue.reasonId
+        penaltyReasonId: formValue.reasonId,
+        comments: formValue.comments,
+        status: true
       };
 
       this.orderTrackingService.penalizeCustomer(penaltyData).subscribe({
@@ -166,45 +135,6 @@ export class PenalizeCustomerDialogComponent {
       const minLength = field.errors?.['minlength'].requiredLength;
       return `Mínimo ${minLength} caracteres`;
     }
-    return '';
-  }
-
-  // Date validation helpers
-  isDateInvalid(): boolean {
-    const startDate = this.penaltyForm.get('startDate')?.value;
-    const endDate = this.penaltyForm.get('endDate')?.value;
-
-    if (!startDate || !endDate) return false;
-
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    return start < today || end < today || end < start;
-  }
-
-  getDateError(): string {
-    const startDate = this.penaltyForm.get('startDate')?.value;
-    const endDate = this.penaltyForm.get('endDate')?.value;
-
-    if (!startDate || !endDate) return '';
-
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    if (start < today) {
-      return 'La fecha inicial no puede ser menor al día actual';
-    }
-    if (end < today) {
-      return 'La fecha final no puede ser menor al día actual';
-    }
-    if (end < start) {
-      return 'La fecha final no puede ser menor a la fecha inicial';
-    }
-
     return '';
   }
 }

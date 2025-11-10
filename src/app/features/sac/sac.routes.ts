@@ -18,6 +18,24 @@ export const SAC_ROUTES: Routes = [
     loadChildren: () =>
       import('./order-tracking/order-tracking.routes').then((m) => m.ORDER_TRACKING_ROUTES),
     title: 'SAC - Seguimiento de Pedidos'
+  },
+  {
+    path: 'ordenes-con-demora',
+    loadChildren: () =>
+      import('./delayed-orders/delayed-orders.routes').then((m) => m.DELAYED_ORDERS_ROUTES),
+    title: 'SAC - Órdenes con Demora'
+  },
+  {
+    path: 'order-customer',
+    loadChildren: () =>
+      import('./orders-by-customer/orders-by-customer.routes').then((m) => m.ORDERS_BY_CUSTOMER_ROUTES),
+    title: 'SAC - Órdenes por Cliente'
+  },
+  {
+    path: 'cancellation-request',
+    loadChildren: () =>
+      import('./cancellation-requests/cancellation-requests.routes').then((m) => m.CANCELLATION_REQUESTS_ROUTES),
+    title: 'SAC - Solicitudes de Cancelación'
   }
   // TODO: Agregar otras rutas del módulo SAC cuando se migren:
   // - reports

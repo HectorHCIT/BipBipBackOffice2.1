@@ -1,7 +1,7 @@
 import { Component, OnInit, signal, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 // PrimeNG
 import { TableModule } from 'primeng/table';
@@ -14,6 +14,7 @@ import { SkeletonModule } from 'primeng/skeleton';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { TooltipModule } from 'primeng/tooltip';
+import { PopoverModule } from 'primeng/popover';
 import { MenuItem, MessageService, ConfirmationService } from 'primeng/api';
 
 // Models & Services
@@ -41,6 +42,7 @@ import { EditOccurrenceDialogComponent } from '../../components/edit-occurrence-
     ToastModule,
     ConfirmDialogModule,
     TooltipModule,
+    PopoverModule,
     SolutionDialogComponent,
     EditOccurrenceDialogComponent
   ],
@@ -53,6 +55,7 @@ export class OccurrencesPageComponent implements OnInit {
   readonly occurrenceService = inject(OccurrenceService);
   private readonly messageService = inject(MessageService);
   private readonly confirmationService = inject(ConfirmationService);
+  private readonly router = inject(Router);
 
   // Breadcrumb
   readonly breadcrumbItems: MenuItem[] = [
@@ -164,16 +167,9 @@ export class OccurrencesPageComponent implements OnInit {
 
   /**
    * Navega al detalle de la orden
-   * TODO: Implementar cuando se migre el módulo de order-tracking
    */
   viewOrder(orderId: string): void {
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Funcionalidad pendiente',
-      detail: 'La navegación a detalles de orden estará disponible cuando se migre el módulo Order Tracking'
-    });
-    // Cuando esté listo:
-    // this.router.navigate(['/sac/order-tracking', orderId]);
+    this.router.navigate(['/sac/order-tracking', orderId]);
   }
 
   /**

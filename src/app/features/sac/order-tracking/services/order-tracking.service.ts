@@ -266,7 +266,7 @@ export class OrderTrackingService {
   getCustomerPenaltyReasons(): Observable<any[]> {
     // Si hay un endpoint específico, usar: 'Customer/penalty/reasons'
     // De lo contrario, usar el mismo que drivers
-    return this.dataService.get$('OrderTracking/penalty/reasons');
+    return this.dataService.get$('Customer/penaltyReasons');
   }
 
   /**
@@ -337,6 +337,27 @@ export class OrderTrackingService {
    */
   getReasonsCancels(): Observable<any[]> {
     return this.dataService.get$('OrderTracking/cancel/reasons');
+  }
+
+  /**
+   * Obtiene la lista global de solicitudes de cancelación
+   */
+  getCancellationRequests(params?: {
+    pageNumber?: number;
+    pageSize?: number;
+    filter?: string;
+    status?: string;
+    dateFrom?: string;
+    dateTo?: string;
+  }): Observable<any> {
+    return this.dataService.get$('CancelRequest/CancelRequestList', {
+      ...(params?.pageNumber && { pageNumber: params.pageNumber }),
+      ...(params?.pageSize && { pageSize: params.pageSize }),
+      ...(params?.filter && { filter: params.filter }),
+      ...(params?.status && { status: params.status }),
+      ...(params?.dateFrom && { dateFrom: params.dateFrom }),
+      ...(params?.dateTo && { dateTo: params.dateTo })
+    });
   }
 
   /**

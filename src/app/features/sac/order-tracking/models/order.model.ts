@@ -672,20 +672,17 @@ export interface MotivePenalized {
  * Datos para penalizar cliente
  */
 export interface CustomerPenalty {
-  /** Fecha de inicio de la penalización */
-  startDate: Date;
-
-  /** Fecha de fin de la penalización */
-  endDate: Date;
-
   /** ID del cliente */
   customerId: number;
 
-  /** Descripción de la penalización */
-  descripcion: string;
-
   /** ID del motivo de penalización */
-  reasonId: number;
+  penaltyReasonId: number;
+
+  /** Comentarios de la penalización */
+  comments: string;
+
+  /** Estado de la penalización (siempre true al crear) */
+  status: boolean;
 }
 
 // ============================================

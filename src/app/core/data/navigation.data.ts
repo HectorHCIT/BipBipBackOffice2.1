@@ -579,6 +579,12 @@ export const navigationData: NavigationItem[] = [
         type: 'basic',
         link: '/accounting/document-types',
       },
+      {
+        id: 910,
+        title: 'Reportes de transacciones',
+        type: 'basic',
+        link: '/accounting/transaction-reports',
+      },
     ],
   },
   {

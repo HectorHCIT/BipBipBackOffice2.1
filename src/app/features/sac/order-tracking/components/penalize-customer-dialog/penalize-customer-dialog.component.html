@@ -27,7 +27,7 @@
       <ng-template #content>
         <div class="flex flex-col gap-1">
           <span class="font-semibold">Atención</span>
-          <span class="text-sm">El cliente será penalizado y no podrá realizar pedidos durante el período seleccionado.</span>
+          <span class="text-sm">El cliente será penalizado y no podrá realizar pedidos.</span>
         </div>
       </ng-template>
     </p-message>
@@ -43,8 +43,8 @@
           inputId="reasonId"
           formControlName="reasonId"
           [options]="penaltyReasons()"
-          optionLabel="reason"
-          optionValue="codDriverPenalty"
+          optionLabel="description"
+          optionValue="penaltyReasonId"
           placeholder="Seleccione un motivo"
           [loading]="loadingReasons()"
           styleClass="w-full"
@@ -56,81 +56,25 @@
         }
       </div>
 
-      <!-- Description -->
+      <!-- Comments -->
       <div class="flex flex-col gap-2">
-        <label for="descripcion" class="text-sm font-semibold text-gray-700">
-          Descripción <span class="text-red-500">*</span>
+        <label for="comments" class="text-sm font-semibold text-gray-700">
+          Comentarios <span class="text-red-500">*</span>
         </label>
         <textarea
           pTextarea
-          id="descripcion"
-          formControlName="descripcion"
+          id="comments"
+          formControlName="comments"
           rows="4"
           placeholder="Describa el motivo de la penalización..."
-          [class.ng-invalid]="isFieldInvalid('descripcion')"
-          [class.ng-dirty]="isFieldInvalid('descripcion')"
+          [class.ng-invalid]="isFieldInvalid('comments')"
+          [class.ng-dirty]="isFieldInvalid('comments')"
           styleClass="w-full"
         ></textarea>
-        @if (isFieldInvalid('descripcion')) {
-          <small class="text-red-500">{{ getFieldError('descripcion') }}</small>
+        @if (isFieldInvalid('comments')) {
+          <small class="text-red-500">{{ getFieldError('comments') }}</small>
         }
       </div>
-
-      <!-- Date Range -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <!-- Start Date -->
-        <div class="flex flex-col gap-2">
-          <label for="startDate" class="text-sm font-semibold text-gray-700">
-            Fecha inicio <span class="text-red-500">*</span>
-          </label>
-          <p-datepicker
-            inputId="startDate"
-            formControlName="startDate"
-            [minDate]="minDate"
-            dateFormat="dd/mm/yy"
-            placeholder="dd/mm/aaaa"
-            [showIcon]="true"
-            iconDisplay="input"
-            styleClass="w-full"
-            [class.ng-invalid]="isFieldInvalid('startDate')"
-            [class.ng-dirty]="isFieldInvalid('startDate')"
-          />
-          @if (isFieldInvalid('startDate')) {
-            <small class="text-red-500">{{ getFieldError('startDate') }}</small>
-          }
-        </div>
-
-        <!-- End Date -->
-        <div class="flex flex-col gap-2">
-          <label for="endDate" class="text-sm font-semibold text-gray-700">
-            Fecha fin <span class="text-red-500">*</span>
-          </label>
-          <p-datepicker
-            inputId="endDate"
-            formControlName="endDate"
-            [minDate]="minDate"
-            dateFormat="dd/mm/yy"
-            placeholder="dd/mm/aaaa"
-            [showIcon]="true"
-            iconDisplay="input"
-            styleClass="w-full"
-            [class.ng-invalid]="isFieldInvalid('endDate')"
-            [class.ng-dirty]="isFieldInvalid('endDate')"
-          />
-          @if (isFieldInvalid('endDate')) {
-            <small class="text-red-500">{{ getFieldError('endDate') }}</small>
-          }
-        </div>
-      </div>
-
-      <!-- Date Validation Error -->
-      @if (isDateInvalid()) {
-        <p-message
-          severity="error"
-          styleClass="w-full"
-          [text]="getDateError()"
-        />
-      }
     </form>
   </div>
 
@@ -150,7 +94,7 @@
         icon="pi pi-exclamation-triangle"
         (onClick)="onSubmit()"
         [loading]="isSubmitting()"
-        [disabled]="penaltyForm.invalid || isDateInvalid()"
+        [disabled]="penaltyForm.invalid"
       />
     </div>
   </ng-template>

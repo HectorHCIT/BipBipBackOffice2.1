@@ -4,6 +4,8 @@ import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { CardModule } from 'primeng/card';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { BreadcrumbModule } from 'primeng/breadcrumb';
+import { MenuItem } from 'primeng/api';
 
 import { PaymentMethodsService } from '../../services';
 
@@ -14,7 +16,8 @@ import { PaymentMethodsService } from '../../services';
     TableModule,
     TagModule,
     CardModule,
-    ProgressSpinnerModule
+    ProgressSpinnerModule,
+    BreadcrumbModule
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './payment-methods-page.component.html',
@@ -22,6 +25,13 @@ import { PaymentMethodsService } from '../../services';
 })
 export class PaymentMethodsPageComponent implements OnInit {
   private readonly paymentMethodsService = inject(PaymentMethodsService);
+
+  // Breadcrumb
+  readonly breadcrumbItems: MenuItem[] = [
+    { label: 'Gest. Notificaciones', routerLink: '/notification-managements' },
+    { label: 'Métodos de Pago' }
+  ];
+  readonly home: MenuItem = { icon: 'pi pi-home', routerLink: '/' };
 
   // Expose service signals to template
   readonly paymentMethods = this.paymentMethodsService.paymentMethods;

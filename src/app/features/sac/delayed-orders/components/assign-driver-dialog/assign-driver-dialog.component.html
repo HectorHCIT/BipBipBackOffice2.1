@@ -1,0 +1,133 @@
+<p-dialog
+  [visible]="visible()"
+  (visibleChange)="visibleChange.emit($event)"
+  [modal]="true"
+  [closable]="true"
+  [draggable]="false"
+  [resizable]="false"
+  styleClass="w-full max-w-3xl"
+>
+  <ng-template #header>
+    <div class="flex items-center gap-3">
+      <i class="pi pi-user-plus text-2xl text-blue-600"></i>
+      <div>
+        <h2 class="text-xl font-bold ">Asignar Driver</h2>
+        <p class="text-sm ">Orden #{{ order().ordersId }} - {{ order().cityName }}</p>
+      </div>
+    </div>
+  </ng-template>
+
+  <!-- Content -->
+  <div class="space-y-4 py-2">
+    <!-- Búsqueda de Drivers -->
+    <div class="flex flex-col gap-2">
+      <label class="text-sm font-semibold ">
+        Buscar driver por código o nombre
+      </label>
+      <p-iconfield iconPosition="left" class="w-full">
+        <p-inputicon styleClass="pi pi-search" />
+        <input
+          pInputText
+          type="text"
+          placeholder="Buscar driver..."
+          [(ngModel)]="searchTerm"
+          class="w-full"
+        />
+      </p-iconfield>
+    </div>
+
+    <!-- Lista de Drivers -->
+    <div class="border border-gray-200 rounded-lg overflow-hidden">
+      <div class="bg-gray-50 px-4 py-3 border-b border-gray-200">
+        <div class="flex items-center justify-between">
+          <span class="text-sm font-semibold ">
+            Drivers disponibles en {{ order().cityName }}
+          </span>
+          <span class="text-xs ">
+            {{ filteredDrivers().length }} disponibles
+          </span>
+        </div>
+      </div>
+
+      <div class="max-h-96 overflow-y-auto">
+        @if (filteredDrivers().length === 0) {
+          <div class="flex flex-col items-center justify-center py-12 ">
+            <i class="pi pi-inbox text-4xl mb-3"></i>
+            <p class="text-sm font-semibold">No hay drivers disponibles</p>
+            <p class="text-xs mt-1">
+              @if (searchTerm()) {
+                Intenta con otro término de búsqueda
+              } @else {
+                No hay drivers disponibles en esta ciudad
+              }
+            </p>
+          </div>
+        } @else {
+          <div class="divide-y divide-gray-200">
+            @for (driver of filteredDrivers(); track driver.driverId) {
+              <div
+                class="flex items-center justify-between p-4  transition-colors cursor-pointer"
+                (click)="confirmAssignment(driver)"
+              >
+                <div class="flex-1">
+                  <!-- Código y Nombre -->
+                  <div class="flex items-center gap-2 mb-1">
+                    <span class="font-semibold ">{{ driver.driverFullName }}</span>
+                    <span class="text-xs  font-mono bg-gray-100 px-2 py-0.5 rounded">
+                      {{ driver.driverCode }}
+                    </span>
+                  </div>
+
+                  <!-- Ubicación -->
+                  <div class="flex items-center gap-1 text-sm ">
+                    <i class="pi pi-map-marker text-xs"></i>
+                    <span>{{ driver.cityName }}, {{ driver.countryName }}</span>
+                  </div>
+                </div>
+
+                <!-- Estado -->
+                <div class="flex items-center gap-2">
+                  <p-tag
+                    [value]="driver.driverStatusName"
+                    [severity]="getDriverStatusSeverity(driver.driverStatusName)"
+                    icon="pi pi-circle-fill"
+                  />
+                  <i class="pi pi-chevron-right "></i>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Info adicional -->
+    <div class="flex items-start gap-2 p-3  border border-blue-200 rounded-lg">
+      <i class="pi pi-info-circle text-blue-600 mt-0.5"></i>
+      <div class="text-sm text-blue-900">
+        <p class="font-semibold mb-1">Información importante:</p>
+        <ul class="text-xs space-y-1 text-blue-800">
+          <li>• Solo se muestran drivers disponibles en la ciudad de la orden</li>
+          <li>• Los drivers con estado "Disponible" aparecen primero</li>
+          <li>• Se muestran máximo 50 drivers</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <ng-template #footer>
+    <div class="flex justify-end">
+      <p-button
+        label="Cancelar"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="close()"
+        [disabled]="isAssigning()"
+      />
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Confirm Dialog -->
+<p-confirmDialog />

@@ -1,0 +1,248 @@
+<div class="flex flex-col gap-4 p-4">
+  <!-- Header -->
+  <div class="flex flex-col gap-4">
+    <!-- Breadcrumb -->
+    <p-breadcrumb [model]="breadcrumbItems" [home]="home" />
+
+    <!-- Título -->
+    <div>
+      <h1 class="text-2xl font-bold">Solicitudes de Cancelación</h1>
+      <p class="text-sm text-gray-600 mt-1">
+        Visualización global de todas las solicitudes de cancelación de órdenes
+      </p>
+    </div>
+
+    <!-- Barra de Búsqueda -->
+    <div class="flex flex-col md:flex-row gap-3">
+      <!-- Búsqueda -->
+      <div class="flex-1">
+        <p-iconfield iconPosition="left" class="w-full">
+          <p-inputicon styleClass="pi pi-search" />
+          <input
+            pInputText
+            type="text"
+            placeholder="Buscar por número de orden, canal, tienda..."
+            [(ngModel)]="searchTerm"
+            class="w-full"
+          />
+        </p-iconfield>
+      </div>
+
+      <!-- Botón Limpiar -->
+      @if (hasSearch()) {
+        <p-button
+          icon="pi pi-times"
+          label="Limpiar"
+          severity="secondary"
+          [outlined]="true"
+          (onClick)="clearSearch()"
+        />
+      }
+    </div>
+  </div>
+
+  <!-- Tabla Desktop -->
+  <div class="hidden md:block">
+    <p-table
+      [value]="filteredRequests()"
+      [paginator]="true"
+      [rows]="10"
+      [rowsPerPageOptions]="rowsPerPageOptions"
+      [loading]="isLoading()"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} solicitudes"
+      styleClass="p-datatable-sm p-datatable-striped"
+    >
+      <!-- Columnas -->
+      <ng-template #header>
+        <tr>
+          <th>No. Orden</th>
+          <th>POSGC</th>
+          <th>Canal</th>
+          <th>Tienda</th>
+          <th>Usuario</th>
+          <th>Fecha Solicitud</th>
+          <th>Comentario</th>
+          <th>Estado</th>
+          <th class="text-center">Acciones</th>
+        </tr>
+      </ng-template>
+
+      <ng-template #body let-request>
+        <tr>
+          <!-- No. Orden -->
+          <td>
+            <span class="font-semibold text-gray-900">#{{ request.orderId }}</span>
+          </td>
+
+          <!-- POSGC -->
+          <td>
+            @if (request.posgcOrderId) {
+              <span class="text-gray-700">{{ request.posgcOrderId }}</span>
+            } @else {
+              <span class="text-gray-400">-</span>
+            }
+          </td>
+
+          <!-- Canal -->
+          <td>
+            <span class="text-sm text-gray-700">{{ request.channelName }}</span>
+          </td>
+
+          <!-- Tienda -->
+          <td>
+            <span class="text-sm text-gray-700">{{ request.storeName }}</span>
+          </td>
+
+          <!-- Usuario -->
+          <td>
+            <span class="text-sm text-gray-700">{{ request.userRequest }}</span>
+          </td>
+
+          <!-- Fecha Solicitud -->
+          <td>
+            <span class="text-sm text-gray-700">{{ formatDate(request.requestTime) }}</span>
+          </td>
+
+          <!-- Comentario -->
+          <td>
+            <div class="max-w-xs">
+              <span class="text-sm text-gray-600 line-clamp-2" [title]="request.comment">
+                {{ request.comment }}
+              </span>
+            </div>
+          </td>
+
+          <!-- Estado -->
+          <td>
+            <p-tag
+              [value]="request.status"
+              [severity]="getStatusSeverity(request.status)"
+            />
+          </td>
+
+          <!-- Acciones -->
+          <td class="text-center">
+            <p-button
+              icon="pi pi-eye"
+              [text]="true"
+              [rounded]="true"
+              severity="info"
+              size="small"
+              pTooltip="Ver Orden"
+              tooltipPosition="top"
+              (onClick)="viewOrderDetail(request.orderId)"
+            />
+          </td>
+        </tr>
+      </ng-template>
+
+      <!-- Loading -->
+      <ng-template #loadingbody>
+        <tr>
+          <td colspan="9">
+            <div class="flex flex-col gap-2 p-4">
+              @for (i of [1,2,3]; track i) {
+                <p-skeleton height="3rem" />
+              }
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <!-- Empty -->
+      <ng-template #emptymessage>
+        <tr>
+          <td colspan="9">
+            <div class="flex flex-col items-center justify-center py-8 text-gray-500">
+              <i class="pi pi-inbox text-4xl mb-3"></i>
+              <p class="text-lg font-semibold">No se encontraron solicitudes</p>
+              <p class="text-sm">
+                @if (hasSearch()) {
+                  Intenta con otro término de búsqueda
+                } @else {
+                  No hay solicitudes de cancelación registradas
+                }
+              </p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+  <!-- Cards Mobile -->
+  <div class="md:hidden space-y-3">
+    @if (isLoading()) {
+      @for (i of [1,2,3]; track i) {
+        <p-skeleton height="16rem" />
+      }
+    } @else if (filteredRequests().length === 0) {
+      <div class="flex flex-col items-center justify-center py-12 text-gray-500">
+        <i class="pi pi-inbox text-5xl mb-4"></i>
+        <p class="text-lg font-semibold">No se encontraron solicitudes</p>
+      </div>
+    } @else {
+      @for (request of filteredRequests(); track request.id) {
+        <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+          <!-- Header -->
+          <div class="flex items-start justify-between mb-3">
+            <div>
+              <span class="text-lg font-bold text-gray-900">#{{ request.orderId }}</span>
+              @if (request.posgcOrderId) {
+                <p class="text-xs text-gray-500 mt-1">POSGC: {{ request.posgcOrderId }}</p>
+              }
+            </div>
+            <p-tag
+              [value]="request.status"
+              [severity]="getStatusSeverity(request.status)"
+            />
+          </div>
+
+          <!-- Info Grid -->
+          <div class="grid grid-cols-2 gap-3 mb-3">
+            <div>
+              <p class="text-xs text-gray-500">Canal</p>
+              <p class="text-sm font-medium text-gray-900">{{ request.channelName }}</p>
+            </div>
+
+            <div>
+              <p class="text-xs text-gray-500">Tienda</p>
+              <p class="text-sm font-medium text-gray-900">{{ request.storeName }}</p>
+            </div>
+
+            <div class="col-span-2">
+              <p class="text-xs text-gray-500">Usuario</p>
+              <p class="text-sm font-medium text-gray-900">{{ request.userRequest }}</p>
+            </div>
+
+            <div class="col-span-2">
+              <p class="text-xs text-gray-500">Fecha Solicitud</p>
+              <p class="text-sm font-medium text-gray-900">{{ formatDate(request.requestTime) }}</p>
+            </div>
+
+            <div class="col-span-2">
+              <p class="text-xs text-gray-500">Comentario</p>
+              <p class="text-sm text-gray-700">{{ request.comment }}</p>
+            </div>
+          </div>
+
+          <!-- Acción -->
+          <div class="border-t border-gray-200 pt-3">
+            <p-button
+              icon="pi pi-eye"
+              label="Ver Orden"
+              [outlined]="true"
+              size="small"
+              styleClass="w-full"
+              (onClick)="viewOrderDetail(request.orderId)"
+            />
+          </div>
+        </div>
+      }
+    }
+  </div>
+</div>
+
+<!-- Toast -->
+<p-toast />
