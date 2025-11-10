@@ -270,12 +270,103 @@ export class OrderTrackingPageComponent implements OnInit {
     this.showFilterSidebar.set(false);
     this.currentPage.set(1);
 
-    // TODO: Implement advanced filters
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Filtros aplicados',
-      detail: 'Los filtros avanzados se aplicarán próximamente'
+    // Format dates if present
+    let startDate: string | undefined;
+    let endDate: string | undefined;
+
+    if (filters.dateRange && filters.dateRange.length === 2) {
+      const [start, end] = filters.dateRange;
+      startDate = this.formatDateToISO(start);
+      endDate = this.formatDateToISO(end);
+    }
+
+    // Build advanced filters object
+    const advancedFilters = {
+      pageNumber: this.currentPage(),
+      pageSize: this.pageSize(),
+      StartDate: startDate,
+      EndDate: endDate,
+      CountryIds: filters.selectedCountries || [],
+      CityIds: filters.selectedCities || [],
+      Brands: filters.selectedBrands || []
+    };
+
+    // Update active filters display
+    this.updateActiveFiltersFromAdvanced(filters, startDate, endDate);
+
+    // Call service
+    this.orderTrackingService.searchWithAdvancedFilters(advancedFilters).subscribe({
+      next: (response) => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Filtros aplicados',
+          detail: `Se encontraron ${response.records.length} órdenes`
+        });
+      },
+      error: (error) => {
+        console.error('Error applying advanced filters:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'No se pudieron aplicar los filtros avanzados'
+        });
+      }
     });
+  }
+
+  /**
+   * Formatea una fecha a ISO string (YYYY-MM-DD)
+   */
+  private formatDateToISO(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  /**
+   * Actualiza los filtros activos basándose en los filtros avanzados aplicados
+   */
+  private updateActiveFiltersFromAdvanced(filters: any, startDate?: string, endDate?: string): void {
+    const newActiveFilters: ActiveFilter[] = [];
+
+    // Add date range filter
+    if (startDate && endDate) {
+      newActiveFilters.push({
+        type: 'date',
+        label: `Fecha: ${startDate} - ${endDate}`,
+        value: { startDate, endDate }
+      });
+    }
+
+    // Add countries filter
+    if (filters.selectedCountries && filters.selectedCountries.length > 0) {
+      newActiveFilters.push({
+        type: 'country',
+        label: `Países: ${filters.selectedCountries.length} seleccionados`,
+        value: filters.selectedCountries
+      });
+    }
+
+    // Add cities filter
+    if (filters.selectedCities && filters.selectedCities.length > 0) {
+      newActiveFilters.push({
+        type: 'city',
+        label: `Ciudades: ${filters.selectedCities.length} seleccionadas`,
+        value: filters.selectedCities
+      });
+    }
+
+    // Add brands filter
+    if (filters.selectedBrands && filters.selectedBrands.length > 0) {
+      newActiveFilters.push({
+        type: 'brand',
+        label: `Marcas: ${filters.selectedBrands.length} seleccionadas`,
+        value: filters.selectedBrands
+      });
+    }
+
+    this.activeFilters.set(newActiveFilters);
   }
 
   /**
@@ -292,6 +383,20 @@ export class OrderTrackingPageComponent implements OnInit {
         const filtered = filters.filter(f => f.type !== 'time');
         return [...filtered, { type: 'time', label: 'Tiempo: Última hora', value: TimeFilterType.LAST_HOUR }];
       });
+    } else if (['date', 'country', 'city', 'brand'].includes(filter.type)) {
+      // Remove advanced filter
+      this.activeFilters.update(filters => filters.filter(f => f.type !== filter.type));
+
+      // If all advanced filters are removed, reload with basic search
+      const remainingAdvancedFilters = this.activeFilters().filter(f =>
+        ['date', 'country', 'city', 'brand'].includes(f.type)
+      );
+
+      if (remainingAdvancedFilters.length === 0) {
+        // Reload with basic search
+        this.loadOrders();
+        return;
+      }
     }
 
     this.loadOrders();

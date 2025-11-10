@@ -1,0 +1,85 @@
+<div class="p-6">
+  <!-- Header -->
+  <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+        Gestión de Métodos de Pago
+      </h1>
+      <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+        Administra los métodos de pago disponibles en el sistema
+      </p>
+    </div>
+  </div>
+
+  <!-- Desktop Table -->
+  <div class="hidden sm:block">
+    <p-table
+      [value]="paymentMethods()"
+      [loading]="isLoading()"
+      styleClass="p-datatable-sm"
+      [tableStyle]="{ 'min-width': '50rem' }"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="width: 5rem">ID</th>
+          <th>Nombre del Método de Pago</th>
+          <th class="text-center" style="width: 12rem">Estado</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-method>
+        <tr>
+          <td>{{ method.id }}</td>
+          <td>{{ method.name }}</td>
+          <td class="text-center">
+            <p-tag
+              [value]="getStatusLabel(method.isActive)"
+              [severity]="getStatusSeverity(method.isActive)"
+            />
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="3" class="text-center py-4">
+            No hay métodos de pago disponibles
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+  <!-- Mobile Cards -->
+  <div class="block sm:hidden">
+    @if (isLoading()) {
+      <div class="text-center py-8">
+        <p-progressSpinner />
+      </div>
+    } @else if (paymentMethods().length === 0) {
+      <p-card>
+        <div class="text-center py-4">
+          No hay métodos de pago disponibles
+        </div>
+      </p-card>
+    } @else {
+      @for (method of paymentMethods(); track method.id) {
+        <p-card styleClass="mb-4">
+          <div class="flex justify-between items-center mb-3">
+            <span class="font-bold text-lg">ID: {{ method.id }}</span>
+            <p-tag
+              [value]="getStatusLabel(method.isActive)"
+              [severity]="getStatusSeverity(method.isActive)"
+            />
+          </div>
+
+          <div class="flex justify-between">
+            <span class="text-color-secondary text-sm">Nombre</span>
+            <span class="font-semibold">{{ method.name }}</span>
+          </div>
+        </p-card>
+      }
+    }
+  </div>
+
+</div>

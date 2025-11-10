@@ -12,7 +12,10 @@
       "Bash(git log:*)",
       "Bash(npm view:*)",
       "Bash(curl:*)",
-      "Bash(nul)"
+      "Bash(nul)",
+      "Bash(robocopy:*)",
+      "Bash(xcopy:*)",
+      "Bash(2)"
     ]
   },
   "enableAllProjectMcpServers": true,

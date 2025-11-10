@@ -18,6 +18,7 @@ import {
   DriverStatus,
   ReAssignDriver,
   MotivePenalized,
+  CustomerPenalty,
   CreateIncidentRequest,
   ChangeStoreRequest,
   ProductSplit
@@ -249,6 +250,23 @@ export class OrderTrackingService {
    */
   penalizeDriver(data: MotivePenalized): Observable<any> {
     return this.dataService.post$('Driver/penalize', data);
+  }
+
+  /**
+   * Penaliza un cliente
+   */
+  penalizeCustomer(data: CustomerPenalty): Observable<any> {
+    return this.dataService.post$('Customer/penalize', data);
+  }
+
+  /**
+   * Obtiene la lista de motivos de penalización para clientes
+   * (asumiendo que usa el mismo catálogo que drivers)
+   */
+  getCustomerPenaltyReasons(): Observable<any[]> {
+    // Si hay un endpoint específico, usar: 'Customer/penalty/reasons'
+    // De lo contrario, usar el mismo que drivers
+    return this.dataService.get$('OrderTracking/penalty/reasons');
   }
 
   /**

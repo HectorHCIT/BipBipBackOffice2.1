@@ -62,6 +62,11 @@ export const routes: Routes = [
       {
         path: 'sac',
         loadChildren: () => import('./features/sac/sac.routes').then(m => m.SAC_ROUTES)
+      },
+      // Gestión de Notificaciones (Notification Management)
+      {
+        path: 'notification-managements',
+        loadChildren: () => import('./features/notification-managements/notification-managements.routes').then(m => m.NOTIFICATION_MANAGEMENTS_ROUTES)
       }
       // TODO: Agregar más módulos padre aquí (Drivers, etc.)
     ]

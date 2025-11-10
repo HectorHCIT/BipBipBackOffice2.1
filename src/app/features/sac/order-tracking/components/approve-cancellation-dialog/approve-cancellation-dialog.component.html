@@ -1,0 +1,132 @@
+<p-dialog
+  [visible]="visible()"
+  [modal]="true"
+  [closable]="true"
+  [draggable]="false"
+  [resizable]="false"
+  styleClass="w-full max-w-2xl"
+  (visibleChange)="visibleChange.emit($event)"
+>
+  <ng-template #header>
+    <div class="flex items-center gap-3">
+      <i class="pi pi-check-circle text-2xl text-green-600"></i>
+      <div>
+        <h3 class="text-xl font-semibold text-gray-900">Aprobar Solicitud de Cancelación</h3>
+        <p class="text-sm text-gray-600 mt-1">Orden #{{ request().orderId }}</p>
+      </div>
+    </div>
+  </ng-template>
+
+  <form [formGroup]="approveForm" class="space-y-4">
+    <!-- Info Alert -->
+    <div class="border-l-4 border-green-500 bg-green-50 p-4 rounded">
+      <div class="flex items-start gap-2">
+        <i class="pi pi-info-circle text-green-600 mt-0.5"></i>
+        <div class="flex-1">
+          <h4 class="text-sm font-semibold text-green-800 mb-1">Información de la Solicitud</h4>
+          <p class="text-sm text-green-700 mb-2">
+            <strong>Solicitado por:</strong> {{ request().userRequest }}
+          </p>
+          <p class="text-sm text-green-700 mb-2">
+            <strong>Fecha:</strong> {{ request().dateRequest | date:'dd/MM/yyyy HH:mm' }}
+          </p>
+          @if (request().comment) {
+            <p class="text-sm text-green-700">
+              <strong>Comentario:</strong> {{ request().comment }}
+            </p>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Cancel Reason -->
+    <div class="flex flex-col gap-2">
+      <label for="reason" class="text-sm font-semibold text-gray-700">
+        Motivo de Cancelación <span class="text-red-500">*</span>
+      </label>
+      <p-select
+        inputId="reason"
+        formControlName="reason"
+        [options]="cancelReasons()"
+        optionLabel="reason"
+        optionValue="id"
+        placeholder="Seleccione el motivo"
+        styleClass="w-full"
+        [loading]="loadingReasons()"
+        [class.ng-invalid]="isFieldInvalid('reason')"
+        [class.ng-dirty]="isFieldInvalid('reason')"
+      />
+      @if (isFieldInvalid('reason')) {
+        <small class="text-red-500">{{ getFieldError('reason') }}</small>
+      }
+    </div>
+
+    <!-- Comment -->
+    <div class="flex flex-col gap-2">
+      <label for="comment" class="text-sm font-semibold text-gray-700">
+        Comentario <span class="text-red-500">*</span>
+      </label>
+      <textarea
+        pTextarea
+        id="comment"
+        formControlName="comment"
+        placeholder="Agregue un comentario detallado sobre la aprobación"
+        rows="4"
+        class="w-full"
+        [class.ng-invalid]="isFieldInvalid('comment')"
+        [class.ng-dirty]="isFieldInvalid('comment')"
+      ></textarea>
+      @if (isFieldInvalid('comment')) {
+        <small class="text-red-500">{{ getFieldError('comment') }}</small>
+      }
+    </div>
+
+    <!-- Product Processed Checkbox -->
+    <div class="flex items-start gap-3 border border-gray-200 rounded-lg p-4 bg-gray-50">
+      <p-checkbox
+        inputId="productProcessed"
+        formControlName="productProcessed"
+        [binary]="true"
+      />
+      <label for="productProcessed" class="text-sm text-gray-700 cursor-pointer flex-1">
+        <span class="font-medium">¿El producto fue preparado?</span>
+        <p class="text-xs text-gray-600 mt-1">
+          Marque esta casilla si el restaurante ya preparó el producto antes de la cancelación
+        </p>
+      </label>
+    </div>
+
+    <!-- Warning -->
+    <div class="border-l-4 border-yellow-500 bg-yellow-50 p-4 rounded">
+      <div class="flex items-start gap-2">
+        <i class="pi pi-exclamation-triangle text-yellow-600 mt-0.5"></i>
+        <div>
+          <h4 class="text-sm font-semibold text-yellow-800">Atención</h4>
+          <p class="text-sm text-yellow-700 mt-1">
+            Al aprobar esta solicitud, la orden será cancelada de forma definitiva y no se podrá revertir.
+          </p>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <ng-template #footer>
+    <div class="flex justify-end gap-2">
+      <p-button
+        label="Cancelar"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="onCancel()"
+        [disabled]="loading()"
+      />
+      <p-button
+        label="Aprobar Cancelación"
+        severity="success"
+        icon="pi pi-check"
+        (onClick)="onSubmit()"
+        [loading]="loading()"
+        [disabled]="approveForm.invalid"
+      />
+    </div>
+  </ng-template>
+</p-dialog>

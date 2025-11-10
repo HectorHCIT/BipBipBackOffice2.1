@@ -72,9 +72,17 @@
       </div>
 
       <!-- Tabs -->
-      <p-tabs [value]="activeTabIndex()" (valueChange)="activeTabIndex.set(typeof $event === 'number' ? $event : 0)">
-        <!-- TAB 1: DETALLE -->
-        <p-tabpanel [value]="0" header="Detalle">
+      <p-tabs [value]="activeTabIndex()">
+        <p-tablist>
+          <p-tab [value]="0">Detalle</p-tab>
+          <p-tab [value]="1">Solicitudes de Cancelación</p-tab>
+          <p-tab [value]="2">Ocurrencias</p-tab>
+          <p-tab [value]="3">Incidencias</p-tab>
+        </p-tablist>
+
+        <p-tabpanels>
+          <!-- TAB 1: DETALLE -->
+          <p-tabpanel [value]="0">
           <div class="py-4 space-y-4">
 
             <!-- Section 1: Header with POSGC and Actions -->
@@ -173,7 +181,12 @@
                       {{ order.customerName.charAt(0).toUpperCase() }}
                     </div>
                     <div class="flex-1">
-                      <label class="text-xs font-semibold  uppercase">Cliente</label>
+                      <div class="flex items-center justify-between mb-1">
+                        <label class="text-xs font-semibold  uppercase">Cliente</label>
+                        @if (order.customerPenalized) {
+                          <p-badge value="Penalizado" severity="danger" styleClass="text-xs" />
+                        }
+                      </div>
                       <p class="text-base font-medium ">{{ order.customerName }}</p>
                       <div class="flex items-center gap-1 text-sm ">
                         <i class="pi pi-phone text-xs"></i>
@@ -183,6 +196,19 @@
                         <div class="flex items-center gap-1 text-sm text-gray-600">
                           <i class="pi pi-phone text-xs"></i>
                           <span>{{ order.customerSecondaryPhone }} (Secundario)</span>
+                        </div>
+                      }
+                      <!-- Penalize Customer Button -->
+                      @if (!order.customerPenalized) {
+                        <div class="mt-2">
+                          <p-button
+                            label="Penalizar Cliente"
+                            icon="pi pi-exclamation-triangle"
+                            severity="danger"
+                            size="small"
+                            [outlined]="true"
+                            (onClick)="onPenalizeCustomerClick()"
+                          />
                         </div>
                       }
                     </div>
@@ -222,11 +248,22 @@
                   <!-- Store/Brand -->
                   <div>
                     <label class="text-xs font-semibold  uppercase block mb-1">Tienda / Marca</label>
-                    <div class="flex items-center gap-3">
-                      @if (order.brandLogo) {
-                        <img [src]="order.brandLogo" [alt]="order.storeShortName" class="w-12 h-12 rounded object-contain border border-gray-200" />
-                      }
-                      <p class="text-base font-medium ">{{ order.storeShortName }}</p>
+                    <div class="flex items-center justify-between gap-3">
+                      <div class="flex items-center gap-3">
+                        @if (order.brandLogo) {
+                          <img [src]="order.brandLogo" [alt]="order.storeShortName" class="w-12 h-12 rounded object-contain border border-gray-200" />
+                        }
+                        <p class="text-base font-medium ">{{ order.storeShortName }}</p>
+                      </div>
+                      <!-- Change Store Button -->
+                      <p-button
+                        label="Cambiar"
+                        icon="pi pi-building"
+                        severity="secondary"
+                        size="small"
+                        [outlined]="true"
+                        (onClick)="onChangeStoreClick()"
+                      />
                     </div>
                   </div>
 
@@ -560,61 +597,25 @@
           </div>
         </p-tabpanel>
 
-        <!-- TAB 2: SOLICITUDES DE CANCELACIÓN -->
-        <p-tabpanel [value]="1" header="Solicitudes de cancelación">
-          <div class="py-4">
-            @if (order.cancelRequest && order.cancelRequest.length > 0) {
-              <div class="space-y-3">
-                @for (request of order.cancelRequest; track request.idRequest) {
-                  <div class="border border-gray-200 rounded-lg p-4">
-                    <div class="flex justify-between items-start mb-2">
-                      <p class="font-medium ">{{ request.reason }}</p>
-                      <p-badge [value]="request.status" />
-                    </div>
-                    <p class="text-sm  mb-2">{{ request.comments }}</p>
-                    <div class="text-xs ">
-                      <p>Solicitado por: {{ request.requestedBy }}</p>
-                      <p>Fecha: {{ request.requestDate | date:'medium' }}</p>
-                    </div>
-                  </div>
-                }
-              </div>
-            } @else {
-              <div class="text-center py-8 ">
-                <i class="pi pi-inbox text-4xl mb-2"></i>
-                <p>No hay solicitudes de cancelación</p>
-              </div>
-            }
-          </div>
-        </p-tabpanel>
+          <!-- TAB 2: SOLICITUDES DE CANCELACIÓN -->
+          <p-tabpanel [value]="1">
+            <app-cancellation-requests-table
+              [cancelRequests]="order.cancelRequest || []"
+              (approveRequest)="onApproveRequest($event)"
+              (denyRequest)="onDenyRequest($event)"
+            />
+          </p-tabpanel>
 
-        <!-- TAB 3: INCIDENCIAS -->
-        <p-tabpanel [value]="2" header="Incidencias">
-          <div class="py-4">
-            @if (order.incidents && order.incidents.length > 0) {
-              <div class="space-y-3">
-                @for (incident of order.incidents; track incident.idIncident) {
-                  <div class="border border-gray-200 rounded-lg p-4">
-                    <div class="flex justify-between items-start mb-2">
-                      <p class="font-medium ">{{ incident.incidentType }}</p>
-                      <p-badge [value]="incident.status" />
-                    </div>
-                    <p class="text-sm  mb-2">{{ incident.description }}</p>
-                    <div class="text-xs ">
-                      <p>Creado por: {{ incident.createdBy }}</p>
-                      <p>Fecha: {{ incident.createdAt | date:'medium' }}</p>
-                    </div>
-                  </div>
-                }
-              </div>
-            } @else {
-              <div class="text-center py-8 ">
-                <i class="pi pi-inbox text-4xl mb-2"></i>
-                <p>No hay incidencias registradas</p>
-              </div>
-            }
-          </div>
-        </p-tabpanel>
+          <!-- TAB 3: OCURRENCIAS (Manual Incidents) -->
+          <p-tabpanel [value]="2">
+            <app-occurrences-list [incidents]="order.incidents || []" />
+          </p-tabpanel>
+
+          <!-- TAB 4: INCIDENCIAS (System Audit) -->
+          <p-tabpanel [value]="3">
+            <app-incidents-table [orderId]="orderId()!" />
+          </p-tabpanel>
+        </p-tabpanels>
       </p-tabs>
     </div>
   }
@@ -650,5 +651,48 @@
     [loading]="incidentLoading()"
     (visibleChange)="showIncidentDialog.set($event)"
     (confirm)="onConfirmIncident($event)"
+  />
+
+  <!-- Approve Cancellation Dialog -->
+  @if (selectedCancelRequest(); as request) {
+    <app-approve-cancellation-dialog
+      [visible]="showApproveCancellationDialog()"
+      [request]="request"
+      [loading]="approveCancellationLoading()"
+      (visibleChange)="showApproveCancellationDialog.set($event)"
+      (confirm)="onConfirmApprove()"
+    />
+  }
+
+  <!-- Deny Cancellation Dialog -->
+  @if (selectedCancelRequest(); as request) {
+    <app-deny-cancellation-dialog
+      [visible]="showDenyCancellationDialog()"
+      [request]="request"
+      [loading]="denyCancellationLoading()"
+      (visibleChange)="showDenyCancellationDialog.set($event)"
+      (confirm)="onConfirmDeny()"
+    />
+  }
+
+  <!-- Penalize Customer Dialog -->
+  <app-penalize-customer-dialog
+    [visible]="showPenalizeCustomerDialog()"
+    [customerId]="order.idCustomer"
+    [customerName]="order.customerName"
+    [loading]="penalizeCustomerLoading()"
+    (visibleChange)="showPenalizeCustomerDialog.set($event)"
+    (confirm)="onConfirmPenalizeCustomer()"
+  />
+
+  <!-- Change Store Dialog -->
+  <app-change-store-dialog
+    [visible]="showChangeStoreDialog()"
+    [orderId]="order.numOrder"
+    [currentStoreId]="order.idCompany"
+    [currentStoreName]="order.storeShortName"
+    [loading]="changeStoreLoading()"
+    (visibleChange)="showChangeStoreDialog.set($event)"
+    (confirm)="onConfirmChangeStore()"
   />
 }

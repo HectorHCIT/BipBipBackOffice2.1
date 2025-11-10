@@ -10,7 +10,7 @@ import { ToastModule } from 'primeng/toast';
 import { MenuItem, MessageService } from 'primeng/api';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { OrderTrackingService } from '../../services';
-import { TrackOrderDetails, CreateIncidentRequest } from '../../models';
+import { TrackOrderDetails, CreateIncidentRequest, CancelRequest } from '../../models';
 import { environment } from '../../../../../../environments/environment';
 import { AuthService } from '../../../../../core/services/auth.service';
 import {
@@ -22,7 +22,14 @@ import {
   AssignDriverDialogComponent,
   ReleaseDriverDialogComponent,
   PenalizeDriverDialogComponent,
-  DriverDetailsDialogComponent
+  DriverDetailsDialogComponent,
+  IncidentsTableComponent,
+  CancellationRequestsTableComponent,
+  OccurrencesListComponent,
+  ApproveCancellationDialogComponent,
+  DenyCancellationDialogComponent,
+  PenalizeCustomerDialogComponent,
+  ChangeStoreDialogComponent
 } from '../../components';
 
 @Component({
@@ -38,7 +45,14 @@ import {
     DriverAssignmentComponent,
     CompleteOrderDialogComponent,
     SendOrderDialogComponent,
-    CreateIncidentDialogComponent
+    CreateIncidentDialogComponent,
+    IncidentsTableComponent,
+    CancellationRequestsTableComponent,
+    OccurrencesListComponent,
+    ApproveCancellationDialogComponent,
+    DenyCancellationDialogComponent,
+    PenalizeCustomerDialogComponent,
+    ChangeStoreDialogComponent
   ],
   providers: [MessageService, DialogService],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -69,11 +83,22 @@ export class OrderDetailPageComponent implements OnInit {
   readonly showCompleteDialog = signal(false);
   readonly showSendDialog = signal(false);
   readonly showIncidentDialog = signal(false);
+  readonly showApproveCancellationDialog = signal(false);
+  readonly showDenyCancellationDialog = signal(false);
+  readonly showPenalizeCustomerDialog = signal(false);
+  readonly showChangeStoreDialog = signal(false);
+
+  // Selected cancellation request
+  readonly selectedCancelRequest = signal<CancelRequest | null>(null);
 
   // Action loading states
   readonly completeLoading = signal(false);
   readonly sendLoading = signal(false);
   readonly incidentLoading = signal(false);
+  readonly approveCancellationLoading = signal(false);
+  readonly denyCancellationLoading = signal(false);
+  readonly penalizeCustomerLoading = signal(false);
+  readonly changeStoreLoading = signal(false);
 
   // Breadcrumb
   readonly breadcrumbItems = computed<MenuItem[]>(() => {
@@ -440,5 +465,89 @@ export class OrderDetailPageComponent implements OnInit {
 
     const invoiceUrl = `${environment.invoicesURL}${id}.pdf`;
     window.open(invoiceUrl, '_blank');
+  }
+
+  /**
+   * Handler para aprobar solicitud de cancelación
+   */
+  onApproveRequest(request: CancelRequest): void {
+    this.selectedCancelRequest.set(request);
+    this.showApproveCancellationDialog.set(true);
+  }
+
+  /**
+   * Handler para denegar solicitud de cancelación
+   */
+  onDenyRequest(request: CancelRequest): void {
+    this.selectedCancelRequest.set(request);
+    this.showDenyCancellationDialog.set(true);
+  }
+
+  /**
+   * Handler cuando se confirma la aprobación de solicitud
+   */
+  onConfirmApprove(): void {
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Éxito',
+      detail: 'Solicitud de cancelación aprobada exitosamente'
+    });
+    this.showApproveCancellationDialog.set(false);
+    this.selectedCancelRequest.set(null);
+    this.reload();
+  }
+
+  /**
+   * Handler cuando se confirma el rechazo de solicitud
+   */
+  onConfirmDeny(): void {
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Éxito',
+      detail: 'Solicitud de cancelación denegada exitosamente'
+    });
+    this.showDenyCancellationDialog.set(false);
+    this.selectedCancelRequest.set(null);
+    this.reload();
+  }
+
+  /**
+   * Handler para abrir diálogo de penalizar cliente
+   */
+  onPenalizeCustomerClick(): void {
+    this.showPenalizeCustomerDialog.set(true);
+  }
+
+  /**
+   * Handler cuando se confirma la penalización del cliente
+   */
+  onConfirmPenalizeCustomer(): void {
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Cliente penalizado',
+      detail: 'El cliente ha sido penalizado exitosamente'
+    });
+    this.showPenalizeCustomerDialog.set(false);
+    this.reload();
+  }
+
+  /**
+   * Handler para abrir diálogo de cambiar restaurante
+   */
+  onChangeStoreClick(): void {
+    this.showChangeStoreDialog.set(true);
+  }
+
+  /**
+   * Handler cuando se confirma el cambio de restaurante
+   */
+  onConfirmChangeStore(): void {
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Restaurante cambiado',
+      detail: 'El restaurante de la orden ha sido cambiado exitosamente'
+    });
+    this.showChangeStoreDialog.set(false);
+    this.reload();
   }
 }

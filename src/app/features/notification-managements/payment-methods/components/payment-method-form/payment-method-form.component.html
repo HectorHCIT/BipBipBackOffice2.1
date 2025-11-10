@@ -1,0 +1,57 @@
+<p-drawer
+  [visible]="visible()"
+  [header]="drawerTitle"
+  position="right"
+  [style]="{ width: '600px' }"
+  (onHide)="onHide()"
+>
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-6">
+    <!-- Name Field -->
+    <div class="flex flex-col gap-2">
+      <label for="name" class="font-semibold">
+        Nombre del Método de Pago
+        <span class="text-red-500">*</span>
+      </label>
+      <input
+        pInputText
+        id="name"
+        formControlName="name"
+        placeholder="Ej: Tarjeta de crédito"
+        [class.ng-invalid]="hasError('name')"
+        [class.ng-dirty]="hasError('name')"
+      />
+      @if (hasError('name')) {
+        <small class="text-red-500">
+          {{ getErrorMessage('name') }}
+        </small>
+      }
+    </div>
+
+    <!-- Status Toggle -->
+    <div class="flex items-center gap-3">
+      <p-toggleSwitch
+        formControlName="isActive"
+        inputId="isActive"
+      />
+      <label for="isActive" class="font-semibold cursor-pointer">
+        Activo
+      </label>
+    </div>
+
+    <!-- Footer Buttons -->
+    <div class="flex gap-2 justify-end mt-auto">
+      <p-button
+        label="Cancelar"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="onHide()"
+        type="button"
+      />
+      <p-button
+        label="Guardar"
+        type="submit"
+        [disabled]="form.invalid"
+      />
+    </div>
+  </form>
+</p-drawer>

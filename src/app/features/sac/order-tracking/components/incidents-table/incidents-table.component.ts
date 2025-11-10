@@ -123,13 +123,14 @@ export class IncidentsTableComponent implements OnInit, OnChanges {
       next: (driversData: DriverStatus[]) => {
         const newMap = new Map(this.driverInfoMap());
         driversData.forEach(driverData => {
-          // Convertir DriverStatus a DriverInfo
+          // Convertir DriverStatus a DriverInfo usando datos reales del backend
+          const driverId = driverData.driverId || driverData.idDriver || 0;
           const driverInfo: DriverInfo = {
-            driverId: driverData.idDriver,
-            driverCode: `DRV-${driverData.idDriver}`, // Código generado
-            fullname: `Driver #${driverData.idDriver}` // Nombre temporal
+            driverId: driverId,
+            driverCode: driverData.driverCode || `DRV-${driverId}`,
+            fullname: driverData.fullname || `Driver #${driverId}`
           };
-          newMap.set(driverData.idDriver, driverInfo);
+          newMap.set(driverId, driverInfo);
         });
         this.driverInfoMap.set(newMap);
         this.loadingDrivers.set(new Set());

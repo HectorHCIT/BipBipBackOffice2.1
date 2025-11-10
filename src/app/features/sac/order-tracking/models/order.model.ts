@@ -592,25 +592,46 @@ export interface DriverDetails {
  */
 export interface DriverStatus {
   /** ID del driver */
-  idDriver: number;
+  idDriver?: number;
 
-  /** Estado: "Disponible", "En ruta", "Ocupado" */
-  status: string;
+  /** ID del driver (alternativa) */
+  driverId?: number;
+
+  /** Código del driver */
+  driverCode?: string;
+
+  /** Nombre completo del driver */
+  fullname?: string;
+
+  /** ID de la ciudad */
+  cityId?: number;
+
+  /** Disponible para asignación */
+  isAvailableForAssignment?: boolean;
+
+  /** Está trabajando actualmente */
+  isCurrentlyWorking?: boolean | null;
+
+  /** Estado activo/inactivo */
+  status?: boolean | string;
 
   /** ID del estado */
-  statusId: number;
+  statusId?: number;
+
+  /** Tiene penalización activa */
+  hasActivePenalty?: boolean;
 
   /** Orden actual (si tiene) */
-  currentOrderId: number | null;
+  currentOrderId?: number | null;
 
   /** Última ubicación - latitud */
-  latitude: number;
+  latitude?: number;
 
   /** Última ubicación - longitud */
-  longitude: number;
+  longitude?: number;
 
   /** Última actualización */
-  lastUpdate: Date;
+  lastUpdate?: Date;
 }
 
 /**
@@ -639,6 +660,26 @@ export interface MotivePenalized {
 
   /** ID del driver */
   driverId: number;
+
+  /** Descripción de la penalización */
+  descripcion: string;
+
+  /** ID del motivo de penalización */
+  reasonId: number;
+}
+
+/**
+ * Datos para penalizar cliente
+ */
+export interface CustomerPenalty {
+  /** Fecha de inicio de la penalización */
+  startDate: Date;
+
+  /** Fecha de fin de la penalización */
+  endDate: Date;
+
+  /** ID del cliente */
+  customerId: number;
 
   /** Descripción de la penalización */
   descripcion: string;
