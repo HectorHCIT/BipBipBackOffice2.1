@@ -281,3 +281,10 @@ html.dark {
   padding: 0 !important;
   margin: 10px !important;
 }
+
+.p-datatable{
+  border-radius: 8px;
+  border: 1px solid var(--p-secondary-500);
+  padding: 4px;
+
+}

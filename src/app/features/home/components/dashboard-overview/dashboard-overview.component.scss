@@ -1,0 +1,191 @@
+.dashboard-overview {
+  padding: 1.5rem;
+
+  .filters-section {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+    label {
+      color: #374151;
+      font-size: 0.875rem;
+    }
+  }
+
+  // Dark mode para filtros
+  :host-context(.dark) & .filters-section {
+    background: #1f2937;
+
+    label {
+      color: #e5e7eb;
+    }
+  }
+
+  .kpis-section {
+    :host ::ng-deep .kpi-card {
+      .p-card-body {
+        padding: 1.25rem;
+      }
+
+      .p-card-content {
+        padding: 0;
+      }
+    }
+
+    .kpi-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 60px;
+      height: 60px;
+      border-radius: 12px;
+      background: rgba(var(--primary-500), 0.1);
+    }
+  }
+
+  // Estilos para las tarjetas de tabla y gráfico
+  :host ::ng-deep p-card {
+    .p-card {
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+
+      .p-card-header {
+        padding: 0;
+      }
+
+      .p-card-body {
+        padding: 1rem;
+      }
+    }
+  }
+
+  // Estilos de tabla mejorados
+  :host ::ng-deep .payment-methods-table {
+    .p-datatable-thead > tr > th {
+      border-bottom: 2px solid #FB0021;
+      padding: 1rem 0.75rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+
+    .p-datatable-tbody > tr {
+      transition: all 0.2s ease;
+
+      > td {
+        padding: 1rem 0.75rem;
+      }
+    }
+
+    .p-datatable-tfoot > tr > td {
+      border-top: 2px solid #FB0021;
+      padding: 1rem 0.75rem;
+      font-weight: 700;
+    }
+
+    .method-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    // Paginador
+    .p-paginator {
+      padding: 0.75rem;
+    }
+  }
+
+  // Dark mode para tabla
+  :host-context(.dark) ::ng-deep .payment-methods-table {
+    .p-datatable-thead > tr > th {
+      border-bottom: 2px solid #FB0021;
+    }
+
+    .p-datatable-tfoot > tr > td {
+      border-top: 2px solid #FB0021;
+    }
+  }
+
+  // Estilos del gráfico
+  .chart-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1rem;
+
+    .chart-wrapper {
+      width: 100%;
+      max-width: 280px;
+      height: 280px;
+
+      :host ::ng-deep .chart-canvas {
+        width: 100%;
+        height: 100%;
+
+        canvas {
+          max-height: 280px;
+        }
+      }
+    }
+
+    .chart-legends {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem 1.5rem;
+      justify-content: center;
+      width: 100%;
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+
+        .legend-color {
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          flex-shrink: 0;
+        }
+
+        .legend-text {
+          font-size: 0.813rem;
+          font-weight: 500;
+          color: #374151;
+        }
+      }
+    }
+  }
+
+  // Dark mode para leyendas
+  :host-context(.dark) {
+    .chart-container {
+      .chart-legends {
+        .legend-item {
+          .legend-text {
+            color: #e5e7eb;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .dashboard-overview {
+    padding: 1rem;
+
+    .filters-section form {
+      flex-direction: column;
+      gap: 1rem;
+
+      .filter-item {
+        width: 100%;
+      }
+    }
+  }
+}

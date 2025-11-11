@@ -36,7 +36,11 @@ export const SAC_ROUTES: Routes = [
     loadChildren: () =>
       import('./cancellation-requests/cancellation-requests.routes').then((m) => m.CANCELLATION_REQUESTS_ROUTES),
     title: 'SAC - Solicitudes de Cancelación'
+  },
+  {
+    path: 'reportes',
+    loadChildren: () =>
+      import('./reports/reports.routes').then((m) => m.REPORTS_ROUTES),
+    title: 'SAC - Reportes'
   }
-  // TODO: Agregar otras rutas del módulo SAC cuando se migren:
-  // - reports
 ];

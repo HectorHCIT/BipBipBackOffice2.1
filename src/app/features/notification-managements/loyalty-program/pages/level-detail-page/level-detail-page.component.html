@@ -1,0 +1,240 @@
+<div class="flex flex-col gap-6">
+  <!-- Breadcrumb -->
+  <p-breadcrumb [model]="breadcrumbItems" [home]="home" />
+
+  <!-- Header -->
+  <p-card>
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-3xl font-bold text-color m-0 mb-2">{{ pageTitle() }}</h1>
+        <p class="text-color-secondary m-0">
+          @if (isEditMode()) {
+            Edita los datos del nivel de lealtad
+          } @else {
+            Crea un nuevo nivel de lealtad
+          }
+        </p>
+      </div>
+    </div>
+  </p-card>
+
+  <!-- Form -->
+  <form [formGroup]="form()" (ngSubmit)="onSave()">
+    <!-- Basic Information -->
+    <p-card>
+      <ng-template pTemplate="header">
+        <div class="p-4">
+          <h2 class="text-xl font-semibold m-0">Información Básica</h2>
+        </div>
+      </ng-template>
+
+      <div class="flex flex-col gap-4">
+        <!-- Level Name -->
+        <div class="flex flex-col gap-2">
+          <label for="levelName" class="font-semibold">
+            Nombre del Nivel
+            <span class="text-red-500">*</span>
+          </label>
+          <input
+            pInputText
+            id="levelName"
+            formControlName="levelName"
+            placeholder="Ej: Bronce, Plata, Oro..."
+          />
+          @if (form().get('levelName')?.invalid && form().get('levelName')?.touched) {
+            <small class="text-red-500">El nombre es requerido (mínimo 3 caracteres)</small>
+          }
+        </div>
+
+        <!-- Description -->
+        <div class="flex flex-col gap-2">
+          <label for="levelDesc" class="font-semibold">Descripción</label>
+          <input
+            pInputText
+            id="levelDesc"
+            formControlName="levelDesc"
+            placeholder="Mensaje para el usuario"
+          />
+        </div>
+
+        <!-- Points Range -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="flex flex-col gap-2">
+            <label for="requieredPts" class="font-semibold">
+              Puntos Mínimos
+              <span class="text-red-500">*</span>
+            </label>
+            <p-inputnumber
+              inputId="requieredPts"
+              formControlName="requieredPts"
+              [min]="minPoints()"
+              [max]="maxPoints()"
+              placeholder="Puntos requeridos"
+            />
+            <small class="text-color-secondary">
+              Rango permitido: {{ minPoints() | number }} - {{ maxPoints() | number }}
+            </small>
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label for="maxPts" class="font-semibold">
+              Puntos Máximos
+              <span class="text-red-500">*</span>
+            </label>
+            <p-inputnumber
+              inputId="maxPts"
+              formControlName="maxPts"
+              [min]="minPoints()"
+              [max]="maxPoints()"
+              placeholder="Límite de puntos"
+            />
+          </div>
+        </div>
+
+        <!-- Status Checkboxes -->
+        <div class="flex gap-6">
+          <div class="flex items-center gap-2">
+            <p-checkbox formControlName="isActive" [binary]="true" inputId="isActive" />
+            <label for="isActive">Activo</label>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <p-checkbox formControlName="isPublish" [binary]="true" inputId="isPublish" />
+            <label for="isPublish">Publicado</label>
+          </div>
+        </div>
+      </div>
+    </p-card>
+
+    <p-divider />
+
+    <!-- Benefits Section -->
+    <p-card>
+      <ng-template pTemplate="header">
+        <div class="p-4 flex items-center justify-between">
+          <h2 class="text-xl font-semibold m-0">Beneficios</h2>
+          <p-button
+            label="Agregar Beneficio"
+            icon="pi pi-plus"
+            (onClick)="onAddBenefit()"
+            [outlined]="true"
+            size="small"
+          />
+        </div>
+      </ng-template>
+
+      @if (benefitsArray.length === 0) {
+        <div class="text-center p-8">
+          <i class="pi pi-gift text-4xl text-color-secondary mb-3"></i>
+          <p class="text-color-secondary m-0">
+            No hay beneficios agregados. Haz clic en "Agregar Beneficio" para comenzar.
+          </p>
+        </div>
+      }
+
+      <!-- Benefits List -->
+      <div class="flex flex-col gap-4" formArrayName="benefitsList">
+        @for (benefit of benefitsArray.controls; track $index) {
+          <div [formGroupName]="$index" class="p-4 border border-surface rounded-lg">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold m-0">Beneficio {{ $index + 1 }}</h3>
+              <p-button
+                icon="pi pi-trash"
+                [rounded]="true"
+                [text]="true"
+                severity="danger"
+                (onClick)="onRemoveBenefit($index)"
+                size="small"
+              />
+            </div>
+
+            <div class="flex flex-col gap-4">
+              <!-- Benefit Type -->
+              <div class="flex flex-col gap-2">
+                <label class="font-semibold">
+                  Tipo de Beneficio
+                  <span class="text-red-500">*</span>
+                </label>
+                <p-select
+                  formControlName="type"
+                  [options]="benefitTypeOptions"
+                  placeholder="Selecciona el tipo"
+                  optionLabel="label"
+                  optionValue="value"
+                />
+              </div>
+
+              <!-- Benefit Name -->
+              <div class="flex flex-col gap-2">
+                <label class="font-semibold">
+                  Nombre del Beneficio
+                  <span class="text-red-500">*</span>
+                </label>
+                <input
+                  pInputText
+                  formControlName="nameBenefit"
+                  placeholder="Ej: Envío gratis en tu pedido"
+                />
+              </div>
+
+              <!-- Benefit Description -->
+              <div class="flex flex-col gap-2">
+                <label class="font-semibold">Descripción</label>
+                <input
+                  pInputText
+                  formControlName="descriptionBenefit"
+                  placeholder="Descripción detallada"
+                />
+              </div>
+
+              <!-- Discount Fields (only for DF/DP) -->
+              @if (shouldShowDiscount($index)) {
+                <div class="flex flex-col gap-2">
+                  <label class="font-semibold">
+                    Valor del Descuento
+                    <span class="text-red-500">*</span>
+                  </label>
+                  <p-inputnumber
+                    formControlName="priceDiscount"
+                    [suffix]="benefit.get('type')?.value === 'DP' ? ' %' : ''"
+                    [prefix]="benefit.get('type')?.value === 'DF' ? '$ ' : ''"
+                    placeholder="Ingresa el valor"
+                  />
+                </div>
+              }
+
+              <!-- Product Selection Section (for PG/AG) -->
+              @if (shouldShowProducts($index)) {
+                <app-product-selector
+                  [benefitIndex]="$index"
+                  [parentForm]="form()"
+                  [brands]="brands()"
+                />
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </p-card>
+
+    <!-- Footer Actions -->
+    <div class="flex gap-3 justify-end mt-6">
+      <p-button
+        label="Cancelar"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="onCancel()"
+        [disabled]="isSaving()"
+      />
+      <p-button
+        label="{{ isEditMode() ? 'Actualizar' : 'Crear' }} Nivel"
+        icon="pi pi-check"
+        type="submit"
+        [loading]="isSaving()"
+      />
+    </div>
+  </form>
+</div>
+
+<!-- Toast Messages -->
+<p-toast />

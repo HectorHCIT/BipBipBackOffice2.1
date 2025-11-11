@@ -1,0 +1,76 @@
+<p-dialog
+  [visible]="visible()"
+  [modal]="true"
+  [closable]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '90vw', maxWidth: '500px' }"
+  (onHide)="close()"
+>
+  <ng-template pTemplate="header">
+    <div class="flex items-center gap-2">
+      <i class="pi pi-file-pdf text-xl"></i>
+      <span class="font-semibold text-xl">Seleccionar Tipo de Reporte</span>
+    </div>
+  </ng-template>
+
+  <ng-template pTemplate="content">
+    <form [formGroup]="form" class="flex flex-col gap-4">
+      <!-- Tipo de Reporte -->
+      <div class="flex flex-col gap-2">
+        <label for="reportType" class="font-semibold">
+          Tipo de Reporte <span class="text-red-500">*</span>
+        </label>
+        <p-select
+          inputId="reportType"
+          formControlName="reportType"
+          [options]="reportTypes"
+          optionLabel="label"
+          optionValue="id"
+          placeholder="Selecciona el tipo de reporte"
+          styleClass="w-full"
+          appendTo="body"
+        />
+      </div>
+
+      <!-- Formato de Archivo -->
+      <div class="flex flex-col gap-2">
+        <label for="format" class="font-semibold">
+          Formato de Archivo <span class="text-red-500">*</span>
+        </label>
+        <p-select
+          inputId="format"
+          formControlName="format"
+          [options]="availableFormats()"
+          optionLabel="label"
+          optionValue="id"
+          placeholder="Selecciona el formato"
+          styleClass="w-full"
+          appendTo="body"
+        />
+        @if (!selectedType()) {
+          <small class="text-surface-500">
+            Primero selecciona un tipo de reporte
+          </small>
+        }
+      </div>
+    </form>
+  </ng-template>
+
+  <ng-template pTemplate="footer">
+    <div class="flex gap-2 justify-end">
+      <p-button
+        label="Cancelar"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="cancel()"
+      />
+      <p-button
+        label="Generar Reporte"
+        icon="pi pi-download"
+        (onClick)="confirm()"
+        [disabled]="form.invalid"
+      />
+    </div>
+  </ng-template>
+</p-dialog>

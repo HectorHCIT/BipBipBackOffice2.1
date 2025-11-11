@@ -1,7 +1,7 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, of, tap, catchError } from 'rxjs';
+import { Observable, of, tap, catchError, throwError, from, switchMap } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
 // TODO: Importar Firestore cuando se migren los métodos de Firebase
 // import { Firestore, collection, doc, docData, onSnapshot } from '@angular/fire/firestore';
@@ -60,6 +60,7 @@ export class AuthService {
   readonly routeBackend = signal<Route[]>([]);
   readonly tokensData = signal<Tokens | null>(null);
   readonly currentUser = signal<User | null>(this.getUser());
+  readonly routesLoaded = signal<boolean>(false);
 
   // 🔥 COMPUTED - Estado derivado
   readonly isLoggedIn = computed(() => !!this.getJwtToken());
@@ -133,47 +134,133 @@ export class AuthService {
 
   /**
    * Login usuario
+   *
+   * ⚠️ IMPORTANTE: Este método ahora maneja correctamente todos los estados asíncronos
+   * y NO swallow errores. Los errores se propagan al componente para manejo adecuado.
    */
-  login(credentials: Login): Observable<Tokens | null> {
+  login(credentials: Login): Observable<Tokens> {
+    // Resetear estado de rutas cargadas
+    this.routesLoaded.set(false);
+
     return this.http.post<Tokens>(`${environment.apiURL}Access/Login`, credentials).pipe(
-      tap(async (result) => {
-        // Limpiar storage ANTES de guardar nueva data
-        await this.clearStorageOnLogin();
-
-        // Guardar datos de autenticación (ahora esperamos a que termine)
-        this.routeBackend.set(result.modules);
-        this.routesAllow.set(result.modules as any);
-        await this.authSave(result);
-
-        // Actualizar signals después de guardar
-        this.tokensData.set(result);
-        this.currentUser.set(this.getUser());
-
-        // Cache routes for the user
-        const userId = this.getUserId();
-        const roleData = this.getUserRole();
-        if (userId && roleData?.UserRole) {
-          const navigationItems = this.convertRoutesToNavigationItem(result.modules);
-          await this.navigationCache.saveUserRoutes(
-            userId,
-            navigationItems,
-            roleData.UserRole
-          );
-        }
-
-        // Obtener rutas completas del servidor (con todos los niveles)
-        this.loadCompleteRoutes(result.modules);
-      }),
+      // Convertir todas las operaciones async en un Observable secuencial
+      switchMap((result) => from(this.processLoginSuccess(result))),
+      // Propagar errores sin swallowing - el componente los manejará
       catchError((error) => {
-        console.error('Error en login:', error);
-        return of(null);
+        console.error('❌ Error en login:', error);
+        // NO convertir a null - propagar el error
+        return throwError(() => error);
       })
     );
   }
 
   /**
+   * Procesa el login exitoso de forma secuencial
+   * Retorna Promise que resuelve solo cuando TODO está listo para navegar
+   */
+  private async processLoginSuccess(result: Tokens): Promise<Tokens> {
+    try {
+      console.log('✅ Login exitoso - iniciando proceso de autenticación');
+
+      // 1. Limpiar storage ANTES de guardar nueva data
+      await this.clearStorageOnLogin();
+      console.log('✅ Storage limpiado');
+
+      // 2. Guardar datos de autenticación (esperamos a que termine)
+      this.routeBackend.set(result.modules);
+      this.routesAllow.set(result.modules as any);
+      await this.authSave(result);
+      console.log('✅ Token guardado en localStorage');
+
+      // 3. Actualizar signals después de guardar
+      this.tokensData.set(result);
+      this.currentUser.set(this.getUser());
+      console.log('✅ Signals actualizados');
+
+      // 4. Cache routes for the user
+      const userId = this.getUserId();
+      const roleData = this.getUserRole();
+      if (userId && roleData?.UserRole) {
+        const navigationItems = this.convertRoutesToNavigationItem(result.modules);
+        await this.navigationCache.saveUserRoutes(
+          userId,
+          navigationItems,
+          roleData.UserRole
+        );
+        console.log('✅ Rutas guardadas en cache');
+      }
+
+      // 5. Obtener rutas completas del servidor (ESPERAMOS a que termine)
+      await this.loadCompleteRoutesPromise(result.modules);
+      console.log('✅ Rutas completas cargadas');
+
+      // 6. Marcar que las rutas están listas
+      this.routesLoaded.set(true);
+      console.log('✅ Sistema listo para navegación');
+
+      // Retornar result para que el componente sepa que todo salió bien
+      return result;
+
+    } catch (error) {
+      console.error('❌ Error procesando login:', error);
+      // Si algo falla, limpiar todo
+      this.doLogoutUser();
+      throw error;
+    }
+  }
+
+  /**
+   * Carga las rutas completas desde el servidor usando DataService
+   * Versión Promise para mejor control de flujo asíncrono
+   */
+  private loadCompleteRoutesPromise(allowedRoutes: Route[]): Promise<void> {
+    return new Promise((resolve) => {
+      this.dataService.get$<Route[]>('Access/modules').subscribe({
+        next: (completeRoutes) => {
+          // Almacenar las rutas en el signal Y localStorage
+          this.routeBackend.set(completeRoutes);
+          localStorage.setItem(this.ROUTES_BACKEND, JSON.stringify(completeRoutes));
+
+          // Cargar navegación con rutas completas
+          this.navigationService.loadNavigation(completeRoutes);
+
+          // Conectar notificaciones de Firebase
+          const currentUserId = this.getUserId();
+          if (currentUserId) {
+            this.navigationService.connectChatNotifications(currentUserId);
+          }
+
+          // 🌍 Cargar datos globales después del login
+          this.globalDataService.loadAll();
+
+          resolve();
+        },
+        error: (error) => {
+          console.error('⚠️ Error cargando rutas completas, usando fallback:', error);
+
+          // Fallback: usar las rutas del login
+          this.routeBackend.set(allowedRoutes);
+          this.navigationService.loadNavigation(allowedRoutes);
+
+          const currentUserId = this.getUserId();
+          if (currentUserId) {
+            this.navigationService.connectChatNotifications(currentUserId);
+          }
+
+          // 🌍 Cargar datos globales incluso si hay error en rutas
+          this.globalDataService.loadAll();
+
+          // Resolver de todas formas (no queremos bloquear el login por un error de rutas)
+          resolve();
+        }
+      });
+    });
+  }
+
+  /**
    * Carga las rutas completas desde el servidor usando DataService
    * Esto incluye todos los niveles de submodules
+   * @deprecated Use loadCompleteRoutesPromise instead
    */
   private loadCompleteRoutes(allowedRoutes: Route[]): void {
     this.dataService.get$<Route[]>('Access/modules').subscribe({

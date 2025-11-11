@@ -1,0 +1,81 @@
+<div class="container-fluid">
+  <!-- Breadcrumb -->
+  <p-breadcrumb
+    [model]="breadcrumbItems"
+    [home]="home"
+    styleClass="bg-transparent border-none p-0 mb-4"
+  />
+
+  <!-- Card Principal -->
+  <p-card>
+    <ng-template pTemplate="header">
+      <div class="px-4 pt-4">
+        <h2 class="text-2xl font-semibold m-0">Reporte de Chats SAC</h2>
+        <p class="text-surface-500 mt-2 mb-0">
+          Genera reportes de chats por fecha o por usuario en formato PDF o Excel
+        </p>
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="content">
+      <form [formGroup]="form" class="flex flex-col gap-4">
+        <!-- Rango de Fechas -->
+        <div class="flex flex-col gap-2">
+          <label for="dateRange" class="font-semibold">
+            Rango de Fechas <span class="text-red-500">*</span>
+          </label>
+          <p-datepicker
+            inputId="dateRange"
+            formControlName="dateRange"
+            selectionMode="range"
+            [maxDate]="maxDate"
+            dateFormat="dd/mm/yy"
+            [showIcon]="true"
+            placeholder="Selecciona un rango de fechas"
+            styleClass="w-full"
+            [readonlyInput]="true"
+          />
+        </div>
+
+        <!-- Información -->
+        <div class="flex items-start gap-2 text-sm text-blue-600 bg-blue-50 px-3 py-2 rounded">
+          <i class="pi pi-info-circle mt-0.5"></i>
+          <div>
+            <p class="m-0 font-semibold">Tipos de reporte disponibles:</p>
+            <ul class="m-0 mt-1 pl-4">
+              <li><strong>Por Fecha:</strong> Estadísticas generales de chats en el período</li>
+              <li><strong>Por Usuario:</strong> Detalle de chats por agente</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="flex gap-2 justify-end mt-4">
+          <p-button
+            label="Limpiar"
+            icon="pi pi-times"
+            severity="secondary"
+            [outlined]="true"
+            (onClick)="clearForm()"
+            [disabled]="isLoading()"
+          />
+          <p-button
+            label="Descargar Reporte"
+            icon="pi pi-download"
+            (onClick)="openReportModal()"
+            [loading]="isLoading()"
+          />
+        </div>
+      </form>
+    </ng-template>
+  </p-card>
+</div>
+
+<!-- Toast para notificaciones -->
+<p-toast />
+
+<!-- Modal de selección de tipo y formato -->
+<app-chat-report-modal
+  #modal
+  (formatSelected)="onFormatSelected($event)"
+/>

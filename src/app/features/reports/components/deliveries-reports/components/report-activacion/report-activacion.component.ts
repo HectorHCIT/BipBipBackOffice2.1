@@ -92,7 +92,7 @@ export class ReportActivacionComponent implements OnInit {
         this.messageService.add({
           severity: 'success',
           summary: 'Reporte generado',
-          detail: `Se descargó ${filename}.xls correctamente`,
+          detail: `Se descargó ${filename}.xlsx correctamente`,
           life: 3000
         });
 

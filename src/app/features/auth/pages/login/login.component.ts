@@ -101,6 +101,9 @@ export class LoginComponent {
 
   /**
    * Handle form submission
+   *
+   * ⚠️ CORREGIDO: Eliminados setTimeout anidados y race conditions
+   * Ahora espera correctamente a que todas las operaciones asíncronas terminen
    */
   onSubmit(): void {
     if (!this.loginForm.valid) {
@@ -111,50 +114,56 @@ export class LoginComponent {
     this.startLoading();
 
     this.authService.login(this.loginForm.value).subscribe({
-      next: (response: any) => {
-        if (response) {
-          // Esperar a que authSave() complete (usa requestAnimationFrame)
-          setTimeout(() => {
-            const token = this.authService.getJwtToken();
-            const userName = this.authService.userFullName();
+      next: (response) => {
+        // ✅ Si llegamos aquí, TODO está listo:
+        // - Token guardado en localStorage
+        // - Rutas cargadas desde el servidor
+        // - Navigation service inicializado
+        // - Global data cargada
 
-            if (token) {
-              this.stopLoading();
+        this.stopLoading();
 
-              // Mostrar mensaje de éxito
-              this.messageService.add({
-                severity: 'success',
-                summary: '¡Bienvenido!',
-                detail: userName ? `Hola ${userName}, inicio de sesión exitoso` : 'Inicio de sesión exitoso',
-                life: 2000
-              });
+        const userName = this.authService.userFullName();
 
-              // Navegar después de mostrar el toast
-              setTimeout(() => {
-                this.router.navigate(['/home']);
-              }, 1000);
+        // Mostrar mensaje de éxito
+        this.messageService.add({
+          severity: 'success',
+          summary: '¡Bienvenido!',
+          detail: userName ? `Hola ${userName}, inicio de sesión exitoso` : 'Inicio de sesión exitoso',
+          life: 2000
+        });
+
+        // Navegar inmediatamente (sin setTimeout)
+        // El guard ya tiene todo lo necesario para validar
+        this.router.navigate(['/home']).then(
+          (success) => {
+            if (success) {
+              console.log('✅ Navegación exitosa a /home');
             } else {
-              this.stopLoading();
+              console.error('⚠️ La navegación a /home fue cancelada o falló');
               this.messageService.add({
-                severity: 'error',
-                summary: 'Error de autenticación',
-                detail: 'No se pudo guardar la sesión. Por favor, intenta nuevamente.',
+                severity: 'warn',
+                summary: 'Problema de navegación',
+                detail: 'No se pudo acceder a la página de inicio. Intenta recargar la página.',
                 life: 5000
               });
             }
-          }, 500);
-        } else {
-          this.stopLoading();
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error del servidor',
-            detail: 'El servidor no respondió correctamente. Por favor, intenta nuevamente.',
-            life: 5000
-          });
-        }
+          },
+          (error) => {
+            console.error('❌ Error en navegación:', error);
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error de navegación',
+              detail: 'Hubo un problema al cargar la página de inicio.',
+              life: 5000
+            });
+          }
+        );
       },
       error: (error: any) => {
         this.stopLoading();
+
+        console.error('❌ Error en login:', error);
 
         // Manejo de errores específicos
         if (error.status === 401) {

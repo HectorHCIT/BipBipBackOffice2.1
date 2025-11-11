@@ -178,7 +178,7 @@ export class CouponsRedeemedComponent implements OnInit {
         const cityCount = cityIds.length;
         const filename = `cupones-canjeados_${dateFromStr}_${dateToStr}_${cityCount}ciudades`;
 
-        // Descargar usando el servicio centralizado (Excel .xls formato antiguo)
+        // Descargar usando el servicio centralizado (Excel .xlsx formato antiguo)
         this.downloadService.download(base64, ReportFormat.Excel, filename);
 
         // Mostrar mensaje de éxito

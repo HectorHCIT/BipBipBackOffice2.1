@@ -1,0 +1,257 @@
+<div class="dashboard-overview">
+  <!-- Filtros -->
+  <div class="filters-section mb-4">
+    <form [formGroup]="filtersForm" class="flex gap-4 items-end">
+      <!-- Select de Ciudad -->
+      <div class="filter-item flex-1">
+        <label for="city-select" class="block mb-2 font-semibold">Ciudad</label>
+        <p-select
+          inputId="city-select"
+          formControlName="selectedCity"
+          [options]="cities()"
+          optionLabel="name"
+          placeholder="Seleccionar ciudad"
+          class="w-full"
+        />
+      </div>
+
+      <!-- Filtro de Fecha -->
+      <div class="filter-item flex-1">
+        <label for="date-filter" class="block mb-2 font-semibold">Filtro Fecha</label>
+        <p-datepicker
+          inputId="date-filter"
+          formControlName="dateRange"
+          selectionMode="range"
+          [showIcon]="true"
+          iconDisplay="input"
+          placeholder="Seleccionar fechas"
+          class="w-full"
+        />
+      </div>
+
+      <!-- Botón Aplicar Filtros -->
+      <div class="filter-item">
+        <p-button
+          label="Aplicar Filtros"
+          icon="pi pi-filter"
+          (click)="applyFilters()"
+          [loading]="isLoading()"
+        />
+      </div>
+    </form>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpis-section mb-4">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      @for (kpi of kpis(); track kpi.label) {
+        <p-card styleClass="kpi-card">
+          <div class="flex justify-between items-center">
+            <div>
+              <p class="text-sm text-gray-500 mb-1">{{ kpi.label }}</p>
+              <p class="text-3xl font-bold">{{ formatNumber(kpi.value) }}</p>
+            </div>
+            @if (kpi.icon) {
+              <div class="kpi-icon">
+                <i [class]="kpi.icon + ' text-4xl text-primary-500'"></i>
+              </div>
+            }
+          </div>
+        </p-card>
+      }
+    </div>
+  </div>
+
+  <!-- Tabla y Gráfico -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <!-- Tabla de Órdenes por Método de Pago -->
+    <p-card>
+      <ng-template pTemplate="header">
+        <div class="flex justify-between items-center p-4">
+          <h3 class="text-lg font-semibold m-0">Órdenes Por Método De Pago</h3>
+          <button
+            pButton
+            icon="pi pi-ellipsis-v"
+            class="p-button-text p-button-rounded"
+          ></button>
+        </div>
+      </ng-template>
+
+      @if (dashboardData()) {
+        <p-table
+          [value]="dashboardData()!.ordersByPaymentMethod"
+          [tableStyle]="{ 'min-width': '100%' }"
+          [paginator]="dashboardData()!.ordersByPaymentMethod.length > 6"
+          [rows]="6"
+          [rowsPerPageOptions]="[6, 12, 24]"
+          styleClass="payment-methods-table"
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              <th class="font-semibold">Método de pago</th>
+              <th class="text-right font-semibold">Total de pedidos</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-item let-rowIndex="rowIndex">
+            <tr class="table-row-hover">
+              <td>
+                <div class="flex items-center gap-2">
+                  <span >{{ item.method }}</span>
+                </div>
+              </td>
+              <td class="text-right font-semibold">{{ formatNumber(item.total) }}</td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="footer">
+            <tr>
+              <td class="font-bold text-primary-600 dark:text-primary-400">Total</td>
+              <td class="text-right font-bold text-primary-600 dark:text-primary-400">
+                {{ formatNumber(dashboardData()!.totalOrders) }}
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      }
+    </p-card>
+
+    <!-- Gráfico de Órdenes por Canal -->
+    <p-card>
+      <ng-template pTemplate="header">
+        <div class="flex justify-between items-center p-4">
+          <h3 class="text-lg font-semibold m-0">Órdenes Por Canal</h3>
+          <button
+            pButton
+            icon="pi pi-ellipsis-v"
+            class="p-button-text p-button-rounded"
+          ></button>
+        </div>
+      </ng-template>
+
+      @if (chartData()) {
+        <div class="chart-container">
+          <div class="chart-wrapper">
+            <p-chart
+              type="doughnut"
+              [data]="chartData()!"
+              [options]="chartOptions"
+              styleClass="chart-canvas"
+            />
+          </div>
+
+          <!-- Leyendas custom -->
+          <div class="chart-legends">
+            @for (legend of chartLegends(); track legend.label) {
+              <div class="legend-item">
+                <span class="legend-color" [style.background-color]="legend.color"></span>
+                <span class="legend-text">{{ legend.label }} ({{ legend.percentage }}%)</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </p-card>
+  </div>
+
+  <!-- Tablas de Órdenes por Marca y Ciudad -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-5">
+    <!-- Tabla de Órdenes por Marca -->
+    <p-card>
+      <ng-template pTemplate="header">
+        <div class="flex justify-between items-center p-4">
+          <h3 class="text-lg font-semibold m-0">Órdenes Por Marcas</h3>
+          <button
+            pButton
+            icon="pi pi-ellipsis-v"
+            class="p-button-text p-button-rounded"
+          ></button>
+        </div>
+      </ng-template>
+
+      @if (dashboardData()) {
+        <p-table
+          [value]="dashboardData()!.ordersByBrand"
+          [tableStyle]="{ 'min-width': '100%' }"
+          [paginator]="dashboardData()!.ordersByBrand.length > 6"
+          [rows]="6"
+          [rowsPerPageOptions]="[6, 12, 24]"
+          [showCurrentPageReport]="true"
+          currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} marcas"
+          styleClass="payment-methods-table"
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              <th class="font-semibold">Marca</th>
+              <th class="font-semibold">Logo</th>
+              <th class="text-right font-semibold">Total de pedidos</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-item>
+            <tr>
+              <td>{{ item.brandName }}</td>
+              <td>
+                @if (item.logo) {
+                  <img [src]="item.logo" [alt]="item.brandName" class="h-8 w-auto object-contain" />
+                }
+              </td>
+              <td class="text-right font-semibold">{{ formatNumber(item.total) }}</td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="footer">
+            <tr>
+              <td colspan="2" class="font-bold text-primary-600 dark:text-primary-400">Total</td>
+              <td class="text-right font-bold text-primary-600 dark:text-primary-400">
+                {{ formatNumber(getTotalByBrand()) }}
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      }
+    </p-card>
+
+    <!-- Tabla de Órdenes por Ciudad -->
+    <p-card>
+      <ng-template pTemplate="header">
+        <div class="flex justify-between items-center p-4">
+          <h3 class="text-lg font-semibold m-0">Órdenes Por Ciudad</h3>
+          <button
+            pButton
+            icon="pi pi-ellipsis-v"
+            class="p-button-text p-button-rounded"
+          ></button>
+        </div>
+      </ng-template>
+
+      @if (dashboardData()) {
+        <p-table
+          [value]="dashboardData()!.ordersByCity"
+          [tableStyle]="{ 'min-width': '100%' }"
+          [paginator]="dashboardData()!.ordersByCity.length > 6"
+          [rows]="6"
+          [rowsPerPageOptions]="[6, 12, 24]"
+          styleClass="payment-methods-table"
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              <th class="font-semibold">Ciudad</th>
+              <th class="text-right font-semibold">Total de pedidos</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-item>
+            <tr>
+              <td>{{ item.cityName }}</td>
+              <td class="text-right font-semibold">{{ formatNumber(item.total) }}</td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="footer">
+            <tr>
+              <td class="font-bold text-primary-600 dark:text-primary-400">Total</td>
+              <td class="text-right font-bold text-primary-600 dark:text-primary-400">
+                {{ formatNumber(getTotalByCity()) }}
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      }
+    </p-card>
+  </div>
+</div>

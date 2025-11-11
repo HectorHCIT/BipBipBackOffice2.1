@@ -2,7 +2,7 @@
  * Report Export Utilities
  *
  * Funciones standalone para convertir base64 a archivos y descargarlos.
- * Soporta PDF, Excel (.xls), y Excel (.xlsx)
+ * Soporta PDF, Excel (.xlsx), y Excel (.xlsx)
  *
  * IMPORTANTE: NO transformamos datos, solo manejamos descarga de archivos.
  */
@@ -24,19 +24,19 @@ export function downloadPDF(base64: string, filename: string): void {
 }
 
 /**
- * Convierte base64 string a Excel (.xls) y descarga el archivo
+ * Convierte base64 string a Excel (.xlsx) y descarga el archivo
  *
  * @param base64 - String base64
  * @param filename - Nombre del archivo sin extensión
  *
  * @example
  * downloadExcel(base64String, 'reporte-ventas-2024');
- * // Descarga: reporte-ventas-2024.xls
+ * // Descarga: reporte-ventas-2024.xlsx
  */
 export function downloadExcel(base64: string, filename: string): void {
   const cleaned = cleanBase64(base64);
   const blob = base64ToBlob(cleaned, 'application/vnd.ms-excel');
-  triggerDownload(blob, `${filename}.xls`);
+  triggerDownload(blob, `${filename}.xlsx`);
 }
 
 /**

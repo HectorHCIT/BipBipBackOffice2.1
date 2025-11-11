@@ -38,7 +38,7 @@ export function exportPDF(value: string, name: string): void {
 }
 
 /**
- * Convierte base64 a Blob y lo descarga como Excel (.xls)
+ * Convierte base64 a Blob y lo descarga como Excel (.xlsx)
  * Formato: Excel 97-2003
  *
  * @param value - String base64 (puede incluir prefijo data:)
@@ -59,7 +59,7 @@ export function exportExcel(value: string, name: string): void {
   const link = document.createElement('a');
 
   link.href = url;
-  link.download = `${name}.xls`;
+  link.download = `${name}.xlsx`;
   link.click();
 
   window.URL.revokeObjectURL(url);

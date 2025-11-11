@@ -35,7 +35,7 @@ export class ReportDownloadService {
         break;
 
       case ReportFormat.Excel:
-        // El API retorna formato .xls antiguo (Excel 97-2003)
+        // El API retorna formato .xlsx antiguo (Excel 97-2003)
         downloadExcel(base64, filename);
         break;
 

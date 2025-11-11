@@ -1,0 +1,92 @@
+<div class="container-fluid">
+  <!-- Breadcrumb -->
+  <p-breadcrumb
+    [model]="breadcrumbItems"
+    [home]="home"
+    styleClass="bg-transparent border-none p-0 mb-4"
+  />
+
+  <!-- Card Principal -->
+  <p-card>
+    <ng-template pTemplate="header">
+      <div class="px-4 pt-4">
+        <h2 class="text-2xl font-semibold m-0">Reporte de Control de Beneficios</h2>
+        <p class="text-surface-500 mt-2 mb-0">
+          Genera reportes de beneficios o puntos Bips en un rango de fechas
+        </p>
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="content">
+      <form [formGroup]="form" class="flex flex-col gap-4">
+        <!-- Tipo de Reporte -->
+        <div class="flex flex-col gap-2">
+          <label class="font-semibold">Tipo de Reporte</label>
+          <div class="flex gap-4">
+            <div class="flex items-center">
+              <p-radiobutton
+                name="reportType"
+                [value]="BenefitReportType.Benefits"
+                formControlName="reportType"
+                inputId="type-benefits"
+              />
+              <label for="type-benefits" class="ml-2 cursor-pointer">
+                Beneficios
+              </label>
+            </div>
+            <div class="flex items-center">
+              <p-radiobutton
+                name="reportType"
+                [value]="BenefitReportType.BipsPoints"
+                formControlName="reportType"
+                inputId="type-bips"
+              />
+              <label for="type-bips" class="ml-2 cursor-pointer">
+                Puntos Bips
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rango de Fechas -->
+        <div class="flex flex-col gap-2">
+          <label for="dateRange" class="font-semibold">
+            Rango de Fechas <span class="text-red-500">*</span>
+          </label>
+          <p-datepicker
+            inputId="dateRange"
+            formControlName="dateRange"
+            selectionMode="range"
+            [maxDate]="maxDate"
+            dateFormat="dd/mm/yy"
+            [showIcon]="true"
+            placeholder="Selecciona un rango de fechas"
+            styleClass="w-full"
+            [readonlyInput]="true"
+          />
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="flex gap-2 justify-end mt-4">
+          <p-button
+            label="Limpiar"
+            icon="pi pi-times"
+            severity="secondary"
+            [outlined]="true"
+            (onClick)="clearForm()"
+            [disabled]="isLoading()"
+          />
+          <p-button
+            label="Generar Reporte"
+            icon="pi pi-download"
+            (onClick)="generateReport()"
+            [loading]="isLoading()"
+          />
+        </div>
+      </form>
+    </ng-template>
+  </p-card>
+</div>
+
+<!-- Toast para notificaciones -->
+<p-toast />

@@ -1,0 +1,83 @@
+<div class="flex flex-col gap-4 p-4">
+  <!-- Header -->
+  <div class="flex flex-col gap-4">
+    <!-- Breadcrumb -->
+    <p-breadcrumb [model]="breadcrumbItems" [home]="home" />
+
+    <!-- Título -->
+    <div>
+      <h1 class="text-2xl font-bold">Reporte de Asignaciones y Re-Asignaciones</h1>
+      <p class="text-sm text-gray-600 mt-1">
+        Genera un reporte de todas las asignaciones y re-asignaciones de drivers en un período específico
+      </p>
+    </div>
+  </div>
+
+  <!-- Formulario -->
+  <p-card>
+    <form [formGroup]="form" (ngSubmit)="generateReport()">
+      <div class="flex flex-col gap-4">
+        <!-- Rango de Fechas -->
+        <div class="flex flex-col gap-2">
+          <label for="dateRange" class="font-semibold">
+            Rango de Fechas <span class="text-red-500">*</span>
+          </label>
+          <p-datepicker
+            id="dateRange"
+            formControlName="dateRange"
+            selectionMode="range"
+            [showIcon]="true"
+            [showButtonBar]="true"
+            dateFormat="dd/mm/yy"
+            placeholder="Seleccionar rango de fechas"
+            styleClass="w-full"
+            [maxDate]="maxDate"
+            [readonlyInput]="true"
+          />
+          @if (form.get('dateRange')?.invalid && form.get('dateRange')?.touched) {
+            <small class="text-red-500">El rango de fechas es obligatorio</small>
+          }
+        </div>
+
+        <!-- Botones -->
+        <div class="flex gap-3 justify-end">
+          <p-button
+            type="button"
+            label="Limpiar"
+            severity="secondary"
+            [outlined]="true"
+            icon="pi pi-times"
+            (onClick)="clearForm()"
+            [disabled]="isLoading()"
+          />
+          <p-button
+            type="submit"
+            label="Generar Reporte"
+            severity="primary"
+            icon="pi pi-download"
+            [loading]="isLoading()"
+            [disabled]="form.invalid"
+          />
+        </div>
+      </div>
+    </form>
+  </p-card>
+
+  <!-- Ayuda -->
+  <p-card>
+    <div class="flex gap-3">
+      <i class="pi pi-info-circle text-blue-500 text-xl"></i>
+      <div>
+        <h3 class="font-semibold mb-2">Información del Reporte</h3>
+        <ul class="text-sm text-gray-600 list-disc list-inside space-y-1">
+          <li>El reporte incluye todas las asignaciones y re-asignaciones de drivers en el período seleccionado</li>
+          <li>Se descargará un archivo Excel (.xlsx) con la información detallada</li>
+          <li>El reporte incluye: fecha, hora, driver, orden, tipo de operación y usuario que realizó la acción</li>
+        </ul>
+      </div>
+    </div>
+  </p-card>
+</div>
+
+<!-- Toast -->
+<p-toast />

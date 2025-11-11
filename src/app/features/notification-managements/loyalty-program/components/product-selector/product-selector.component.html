@@ -1,0 +1,249 @@
+<div class="flex flex-col gap-4">
+  <!-- Add Product Form -->
+  <p-card>
+    <ng-template pTemplate="header">
+      <div class="p-4">
+        <h3 class="text-lg font-semibold m-0">Agregar Producto</h3>
+      </div>
+    </ng-template>
+
+    <div [formGroup]="addProductForm()" class="flex flex-col gap-4">
+      <!-- Brand and Product Selection -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Brand -->
+        <div class="flex flex-col gap-2">
+          <label class="font-semibold text-sm">
+            Marca
+            <span class="text-red-500">*</span>
+          </label>
+          <p-select
+            formControlName="brand"
+            [options]="getBrandOptions()"
+            placeholder="Seleccionar marca"
+            optionLabel="label"
+            optionValue="value"
+          />
+        </div>
+
+        <!-- Product -->
+        <div class="flex flex-col gap-2">
+          <label class="font-semibold text-sm">
+            Producto
+            <span class="text-red-500">*</span>
+          </label>
+          <p-select
+            formControlName="productCode"
+            [options]="getProductOptions()"
+            placeholder="Seleccionar producto"
+            optionLabel="label"
+            optionValue="value"
+            [loading]="isLoadingProducts()"
+            (onChange)="onProductChange($event.value)"
+          />
+          @if (selectedBrandId() > 0 && !isLoadingProducts() && products().length === 0) {
+            <small class="text-color-secondary">No hay productos disponibles para esta marca</small>
+          }
+        </div>
+
+        <!-- Quantity -->
+        <div class="flex flex-col gap-2">
+          <label class="font-semibold text-sm">Cantidad</label>
+          <p-inputnumber
+            formControlName="quantity"
+            [min]="1"
+            [showButtons]="true"
+            placeholder="Cantidad"
+          />
+        </div>
+      </div>
+
+      <!-- Modifiers Section -->
+      @if (selectedProductId() && !isLoadingModifiers() && modifiers().length > 0) {
+        <div class="border-t border-surface pt-4">
+          <div class="flex items-center justify-between mb-3">
+            <h4 class="text-sm font-semibold m-0">Modificadores ({{ modifiers().length }} disponibles)</h4>
+            <p-button
+              label="Agregar Modificador"
+              icon="pi pi-plus"
+              size="small"
+              [text]="true"
+              (onClick)="onAddModifier()"
+            />
+          </div>
+
+          <div formArrayName="modifiersProducts" class="flex flex-col gap-3">
+            @for (modifier of modifiersArray.controls; track $index) {
+              <div [formGroupName]="$index" class="grid grid-cols-1 md:grid-cols-5 gap-3 p-3 border border-surface rounded">
+                <!-- Modifier -->
+                <div class="flex flex-col gap-2">
+                  <label class="font-semibold text-xs">Modificador</label>
+                  <p-select
+                    formControlName="modifierId"
+                    [options]="getModifierList()"
+                    placeholder="Seleccionar"
+                    optionLabel="label"
+                    optionValue="value"
+                    (onChange)="onModifierChange($event.value, $index)"
+                  />
+                </div>
+
+                <!-- Option -->
+                <div class="flex flex-col gap-2">
+                  <label class="font-semibold text-xs">Opción</label>
+                  <p-select
+                    formControlName="modifierCode"
+                    [options]="getModifierOptions($index)"
+                    placeholder="Seleccionar opción"
+                    optionLabel="label"
+                    optionValue="value"
+                    [disabled]="!modifier.get('modifierId')?.value"
+                  />
+                </div>
+
+                <!-- Quantity -->
+                <div class="flex flex-col gap-2">
+                  <label class="font-semibold text-xs">Cantidad</label>
+                  <p-inputnumber
+                    formControlName="quantity"
+                    [min]="1"
+                    [showButtons]="true"
+                  />
+                </div>
+
+                <!-- Active -->
+                <div class="flex flex-col gap-2">
+                  <label class="font-semibold text-xs">Estado</label>
+                  <p-togglebutton
+                    formControlName="modifierActive"
+                    onLabel="Activo"
+                    offLabel="Inactivo"
+                  />
+                </div>
+
+                <!-- Remove -->
+                <div class="flex items-end">
+                  <p-button
+                    icon="pi pi-trash"
+                    severity="danger"
+                    [text]="true"
+                    [rounded]="true"
+                    (onClick)="onRemoveModifier($index)"
+                  />
+                </div>
+              </div>
+            }
+
+            @if (modifiersArray.length === 0) {
+              <div class="text-center p-4 border border-dashed border-surface rounded">
+                <p class="text-sm text-color-secondary m-0">
+                  No hay modificadores agregados. Haz clic en "Agregar Modificador" para comenzar.
+                </p>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      @if (selectedProductId() && isLoadingModifiers()) {
+        <div class="text-center p-4">
+          <i class="pi pi-spin pi-spinner text-2xl text-primary"></i>
+          <p class="text-sm text-color-secondary mt-2">Cargando modificadores...</p>
+        </div>
+      }
+
+      <!-- Active Toggle and Add Button -->
+      <div class="flex items-center justify-between pt-3 border-t border-surface">
+        <div class="flex items-center gap-2">
+          <label class="font-semibold text-sm">Producto Activo:</label>
+          <p-togglebutton
+            formControlName="active"
+            onLabel="Sí"
+            offLabel="No"
+          />
+        </div>
+
+        <p-button
+          label="Agregar a la Lista"
+          icon="pi pi-plus"
+          (onClick)="onAddProduct()"
+          [disabled]="addProductForm().invalid"
+        />
+      </div>
+    </div>
+  </p-card>
+
+  <!-- Products Table -->
+  @if (productsArray.length > 0) {
+    <p-card>
+      <ng-template pTemplate="header">
+        <div class="p-4">
+          <h3 class="text-lg font-semibold m-0">
+            Productos Agregados ({{ productsArray.length }})
+          </h3>
+        </div>
+      </ng-template>
+
+      <p-table [value]="getTableData()" [tableStyle]="{ 'min-width': '50rem' }">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Marca</th>
+            <th>Producto</th>
+            <th>Cantidad</th>
+            <th>Estado</th>
+            <th>Modificadores</th>
+            <th class="text-center">Acciones</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-product>
+          <tr>
+            <td>{{ product.brand }}</td>
+            <td>{{ product.product }}</td>
+            <td>{{ product.quantity }}</td>
+            <td>
+              <p-tag
+                [value]="product.active ? 'Activo' : 'Inactivo'"
+                [severity]="product.active ? 'success' : 'secondary'"
+              />
+            </td>
+            <td>
+              @if (product.modifiersCount > 0) {
+                <div class="flex flex-col gap-1">
+                  @for (mod of product.modifiers; track $index) {
+                    <div class="text-sm">
+                      <span class="font-semibold">{{ mod.modifierName }}</span>
+                      <span class="text-color-secondary"> - {{ mod.modifierOptionName }}</span>
+                      <span class="text-color-secondary ml-2">(x{{ mod.quantity }})</span>
+                      @if (!mod.modifierActive) {
+                        <p-tag value="Inactivo" severity="secondary" [style]="{ 'font-size': '0.75rem' }" />
+                      }
+                    </div>
+                  }
+                </div>
+              } @else {
+                <span class="text-color-secondary text-sm">Sin modificadores</span>
+              }
+            </td>
+            <td class="text-center">
+              <p-button
+                icon="pi pi-trash"
+                severity="danger"
+                [text]="true"
+                [rounded]="true"
+                (onClick)="onRemoveProduct(product.index)"
+              />
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </p-card>
+  } @else {
+    <p-card>
+      <div class="text-center p-6">
+        <i class="pi pi-shopping-cart text-5xl text-color-secondary mb-3"></i>
+        <p class="text-color-secondary m-0">
+          No hay productos agregados. Usa el formulario de arriba para agregar productos.
+        </p>
+      </div>
+    </p-card>
+  }
+</div>

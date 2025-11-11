@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 
 // Components
 import { BrandCardComponent } from '../../components/brand-card/brand-card.component';
+import { DashboardOverviewComponent } from '../../components/dashboard-overview/dashboard-overview.component';
 
 import { AuthService } from '@core/services/auth.service';
 import { HomeService, HomeBrand } from '../../services/home.service';
@@ -15,7 +16,8 @@ import { HomeService, HomeBrand } from '../../services/home.service';
   selector: 'app-home',
   imports: [
     CommonModule,
-    BrandCardComponent
+    BrandCardComponent,
+    DashboardOverviewComponent
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   template: `
@@ -30,15 +32,8 @@ import { HomeService, HomeBrand } from '../../services/home.service';
         </p>
       </div>
 
-      <!-- Dashboard Embeddable -->
-      @if (dashboardToken()) {
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
-          <em-beddable
-            [token]="dashboardToken()"
-            [client-context]="getClientContext()">
-          </em-beddable>
-        </div>
-      }
+      <!-- Dashboard Overview Component -->
+      <app-dashboard-overview />
 
       <!-- Brand List -->
       @if (brandList().length > 0) {
@@ -61,7 +56,6 @@ export class HomeComponent implements OnInit {
 
   // Signals
   readonly brandList = signal<HomeBrand[]>([]);
-  readonly dashboardToken = signal<string | null>(null);
 
   // Computed values from AuthService
   readonly userName = this.authService.userName;
@@ -77,44 +71,6 @@ export class HomeComponent implements OnInit {
       error: (error) => {
         console.error('Error cargando marcas:', error);
       }
-    });
-
-    // Cargar token del dashboard
-    this.homeService.getDashboardToken().subscribe({
-      next: (tokenData) => {
-        if (tokenData) {
-          this.dashboardToken.set(tokenData.token);
-        }
-      },
-      error: (error) => {
-        console.error('Error cargando token de dashboard:', error);
-      }
-    });
-  }
-
-  /**
-   * Contexto del cliente para el dashboard de Embeddable.com
-   */
-  getClientContext(): string {
-    return JSON.stringify({
-      client: 'bipbip',
-      theme: {
-        colors: [
-          '#bde3fa',
-          '#3db4f0',
-          '#179ce0',
-          '#0a7cbf',
-          '#09639b',
-          '#0c5480',
-          '#10466a',
-          '#0b2c46',
-        ],
-        brand: {
-          primary: '#bde3fa',
-          secondary: '#09639b',
-          accent: '#0b2c46',
-        },
-      },
     });
   }
 

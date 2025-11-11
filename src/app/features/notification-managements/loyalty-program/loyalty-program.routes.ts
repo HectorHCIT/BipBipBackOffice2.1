@@ -13,19 +13,18 @@ export const LOYALTY_PROGRAM_ROUTES: Routes = [
         (m) => m.LoyaltyLevelsPageComponent
       ),
   },
-  // Uncomment when detail page is ready
-  // {
-  //   path: 'detail/:maxPoints',
-  //   loadComponent: () =>
-  //     import('./pages/level-detail-page/level-detail-page.component').then(
-  //       (m) => m.LevelDetailPageComponent
-  //     ),
-  // },
-  // {
-  //   path: 'detail/:minPoints/:maxPoints/:id',
-  //   loadComponent: () =>
-  //     import('./pages/level-detail-page/level-detail-page.component').then(
-  //       (m) => m.LevelDetailPageComponent
-  //     ),
-  // },
+  {
+    path: 'detail/:maxPoints',
+    loadComponent: () =>
+      import('./pages/level-detail-page/level-detail-page.component').then(
+        (m) => m.LevelDetailPageComponent
+      ),
+  },
+  {
+    path: 'detail/:minPoints/:maxPoints/:id',
+    loadComponent: () =>
+      import('./pages/level-detail-page/level-detail-page.component').then(
+        (m) => m.LevelDetailPageComponent
+      ),
+  },
 ];

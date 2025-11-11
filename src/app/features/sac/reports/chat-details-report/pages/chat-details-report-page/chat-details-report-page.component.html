@@ -1,0 +1,125 @@
+<div class="container-fluid">
+  <!-- Breadcrumb -->
+  <p-breadcrumb
+    [model]="breadcrumbItems"
+    [home]="home"
+    styleClass="bg-transparent border-none p-0 mb-4"
+  />
+
+  <!-- Card Principal -->
+  <p-card>
+    <ng-template pTemplate="header">
+      <div class="px-4 pt-4">
+        <h2 class="text-2xl font-semibold m-0">Reporte de Detalle de Chats</h2>
+        <p class="text-surface-500 mt-2 mb-0">
+          Genera reportes detallados de chats por agente o para todos los agentes
+        </p>
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="content">
+      <form [formGroup]="form" class="flex flex-col gap-4">
+        <!-- Rango de Fechas -->
+        <div class="flex flex-col gap-2">
+          <label for="dateRange" class="font-semibold">
+            Rango de Fechas <span class="text-red-500">*</span>
+          </label>
+          <p-datepicker
+            inputId="dateRange"
+            formControlName="dateRange"
+            selectionMode="range"
+            [maxDate]="maxDate"
+            dateFormat="dd/mm/yy"
+            [showIcon]="true"
+            placeholder="Selecciona un rango de fechas"
+            styleClass="w-full"
+            [readonlyInput]="true"
+          />
+        </div>
+
+        <!-- Buscar Agente -->
+        <div class="flex flex-col gap-2">
+          <label for="agentSearch" class="font-semibold">
+            Buscar Agente
+          </label>
+          <div class="relative">
+            <input
+              pInputText
+              id="agentSearch"
+              formControlName="agentSearch"
+              (input)="filterAgents($event)"
+              [disabled]="isInputDisabled()"
+              placeholder="Escribe el nombre del agente"
+              class="w-full"
+            />
+
+            <!-- Lista de sugerencias -->
+            @if (filteredAgents().length > 0) {
+              <div class="absolute z-10 w-full mt-1 bg-white border border-surface-200 rounded-md shadow-lg max-h-60 overflow-auto">
+                <ul class="p-0 m-0">
+                  @for (agent of filteredAgents(); track agent.agentName) {
+                    <li
+                      class="px-4 py-2 hover:bg-surface-100 cursor-pointer"
+                      (click)="selectAgent(agent)"
+                    >
+                      {{ agent.agentName }}
+                    </li>
+                  }
+                </ul>
+              </div>
+            }
+          </div>
+
+          <!-- Agente seleccionado -->
+          @if (selectedAgent() && !allAgentsChecked()) {
+            <div class="flex items-center gap-2 text-sm text-surface-600">
+              <i class="pi pi-check-circle text-green-500"></i>
+              <span>Agente seleccionado: <strong>{{ selectedAgent()?.agentName }}</strong></span>
+            </div>
+          }
+        </div>
+
+        <!-- Checkbox Todos los Agentes -->
+        <div class="flex items-center gap-2">
+          <p-checkbox
+            formControlName="allAgents"
+            [binary]="true"
+            inputId="allAgents"
+          />
+          <label for="allAgents" class="cursor-pointer font-semibold">
+            Todos los agentes
+          </label>
+        </div>
+
+        @if (allAgentsChecked()) {
+          <div class="flex items-center gap-2 text-sm text-blue-600 bg-blue-50 px-3 py-2 rounded">
+            <i class="pi pi-info-circle"></i>
+            <span>Se generará el reporte para todos los agentes</span>
+          </div>
+        }
+
+        <!-- Botones de Acción -->
+        <div class="flex gap-2 justify-end mt-4">
+          <p-button
+            label="Limpiar"
+            icon="pi pi-times"
+            severity="secondary"
+            [outlined]="true"
+            (onClick)="clearForm()"
+            [disabled]="isLoading()"
+          />
+          <p-button
+            label="Generar Reporte PDF"
+            icon="pi pi-file-pdf"
+            (onClick)="generateReport()"
+            [loading]="isLoading()"
+            [disabled]="!isButtonEnabled()"
+          />
+        </div>
+      </form>
+    </ng-template>
+  </p-card>
+</div>
+
+<!-- Toast para notificaciones -->
+<p-toast />

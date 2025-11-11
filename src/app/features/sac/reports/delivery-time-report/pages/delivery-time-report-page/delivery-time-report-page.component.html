@@ -1,0 +1,94 @@
+<div class="container-fluid">
+  <!-- Breadcrumb -->
+  <p-breadcrumb
+    [model]="breadcrumbItems"
+    [home]="home"
+    styleClass="bg-transparent border-none p-0 mb-4"
+  />
+
+  <!-- Card Principal -->
+  <p-card>
+    <ng-template pTemplate="header">
+      <div class="px-4 pt-4">
+        <h2 class="text-2xl font-semibold m-0">Reporte de Tiempo de Entrega</h2>
+        <p class="text-surface-500 mt-2 mb-0">
+          Genera reportes de análisis de tiempo de entrega
+        </p>
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="content">
+      <form [formGroup]="form" class="flex flex-col gap-4">
+        <!-- Rango de Fechas -->
+        <div class="flex flex-col gap-2">
+          <label for="dateRange" class="font-semibold">
+            Rango de Fechas <span class="text-red-500">*</span>
+          </label>
+          <p-datepicker
+            inputId="dateRange"
+            formControlName="dateRange"
+            selectionMode="range"
+            [maxDate]="maxDate"
+            dateFormat="dd/mm/yy"
+            [showIcon]="true"
+            placeholder="Selecciona un rango de fechas"
+            styleClass="w-full"
+            [readonlyInput]="true"
+          />
+        </div>
+
+        <!-- Formato de Archivo -->
+        <div class="flex flex-col gap-2">
+          <label class="font-semibold">
+            Formato <span class="text-red-500">*</span>
+          </label>
+          <div class="flex gap-4">
+            <div class="flex items-center">
+              <p-radiobutton
+                name="format"
+                [value]="FileFormat.PDF"
+                formControlName="format"
+                inputId="format-pdf"
+              />
+              <label for="format-pdf" class="ml-2 cursor-pointer">
+                PDF
+              </label>
+            </div>
+            <div class="flex items-center">
+              <p-radiobutton
+                name="format"
+                [value]="FileFormat.Excel"
+                formControlName="format"
+                inputId="format-excel"
+              />
+              <label for="format-excel" class="ml-2 cursor-pointer">
+                Excel
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="flex gap-2 justify-end mt-4">
+          <p-button
+            label="Limpiar"
+            icon="pi pi-times"
+            severity="secondary"
+            [outlined]="true"
+            (onClick)="clearForm()"
+            [disabled]="isLoading()"
+          />
+          <p-button
+            label="Generar Reporte"
+            icon="pi pi-download"
+            (onClick)="generateReport()"
+            [loading]="isLoading()"
+          />
+        </div>
+      </form>
+    </ng-template>
+  </p-card>
+</div>
+
+<!-- Toast para notificaciones -->
+<p-toast />

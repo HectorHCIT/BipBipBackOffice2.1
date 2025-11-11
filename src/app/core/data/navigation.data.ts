@@ -211,7 +211,7 @@ export const navigationData: NavigationItem[] = [
           },
           {
             id: 276,
-            title: 'Reporte Analisis Tiempo Entrega',
+            title: 'Reporte Tiempo Entrega',
             link: '/sac/reportes/reporte-tiempo-entrega',
           },
         ],

@@ -21,12 +21,7 @@ export const routes: Routes = [
       },
       {
         path: 'home',
-        loadComponent: () => import('./features/home/pages/home/home.component').then(m => m.HomeComponent)
-      },
-      {
-        path: 'dashboard',
-        redirectTo: 'home',
-        pathMatch: 'full'
+        loadChildren: () => import('./features/home/home.routes').then(m => m.HOME_ROUTES)
       },
       // Mantenimiento (Maintenance)
       {
