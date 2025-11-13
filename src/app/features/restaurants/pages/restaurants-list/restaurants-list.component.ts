@@ -21,6 +21,7 @@ import { PaginatorModule } from 'primeng/paginator';
 import { ToastModule } from 'primeng/toast';
 import { PopoverModule } from 'primeng/popover';
 import { MessageService } from 'primeng/api';
+import { DividerModule } from 'primeng/divider';
 
 import { RestaurantService } from '../../services/restaurant.service';
 import { RestaurantFiltersComponent } from '../../components/restaurant-filters/restaurant-filters.component';
@@ -41,6 +42,7 @@ import type { RestaurantFilters } from '../../models/restaurant.model';
     PaginatorModule,
     ToastModule,
     PopoverModule,
+    DividerModule,
     RestaurantFiltersComponent
   ],
   templateUrl: './restaurants-list.component.html',

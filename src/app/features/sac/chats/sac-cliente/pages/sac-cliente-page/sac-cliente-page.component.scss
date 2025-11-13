@@ -1,0 +1,47 @@
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.sac-cliente-page {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+// Breadcrumb sin fondo
+::ng-deep .p-breadcrumb {
+  background-color: transparent;
+  border: none;
+  padding: 0;
+}
+
+// Contenido principal: 2 columnas iguales con grid
+.page-content {
+  flex: 1;
+  display: grid;
+  gap: 0;
+  overflow: hidden;
+  grid-template-columns: 380px 1fr;
+  height: calc(100vh - 80px);
+
+  // Responsive
+  @media (max-width: 1440px) {
+    grid-template-columns: 350px 1fr;
+  }
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 320px 1fr;
+  }
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+
+    // En mobile, ocultar la primera columna si hay chat seleccionado
+    > div:first-child {
+      display: none;
+    }
+  }
+}

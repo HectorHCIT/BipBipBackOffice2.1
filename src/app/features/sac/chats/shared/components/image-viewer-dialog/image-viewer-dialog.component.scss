@@ -1,0 +1,123 @@
+.image-viewer {
+  display: flex;
+  flex-direction: column;
+  height: 80vh;
+  min-height: 400px;
+  background: var(--surface-0);
+
+  // Controles superiores
+  &__controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    background: var(--surface-50);
+    border-bottom: 1px solid var(--surface-border);
+    flex-shrink: 0;
+  }
+
+  &__zoom-info {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-color);
+    min-width: 60px;
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  &__divider {
+    width: 1px;
+    height: 24px;
+    background: var(--surface-border);
+    margin: 0 0.5rem;
+  }
+
+  // Contenedor de la imagen
+  &__container {
+    flex: 1;
+    overflow: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface-100);
+    position: relative;
+    user-select: none;
+
+    // Scrollbar personalizado
+    &::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: var(--surface-200);
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: var(--surface-400);
+      border-radius: 4px;
+
+      &:hover {
+        background: var(--surface-500);
+      }
+    }
+  }
+
+  &__image {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    transition: transform 0.2s ease;
+    transform-origin: center center;
+    pointer-events: none;
+  }
+
+  // Ayuda de atajos
+  &__help {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    padding: 0.75rem;
+    background: var(--surface-50);
+    border-top: 1px solid var(--surface-border);
+    flex-shrink: 0;
+  }
+
+  &__help-item {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    color: var(--text-color-secondary);
+
+    i {
+      font-size: 0.875rem;
+      color: var(--primary-color);
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .image-viewer {
+    &__help {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    &__controls {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    &__zoom-info {
+      width: 100%;
+      text-align: center;
+    }
+  }
+}

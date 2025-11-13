@@ -1,0 +1,9 @@
+.alert-preview-box {
+  transition: all 0.3s ease;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  }
+}

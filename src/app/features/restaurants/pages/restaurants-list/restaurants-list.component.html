@@ -136,14 +136,30 @@
               <p-button
                 label="Ver Detalles"
                 icon="pi pi-eye"
-                variant="outlined"
+                variant="text"
                 (click)="onViewRestaurantWithClose(restaurant.restId, popover)"
               ></p-button>
               <p-button
                 label="Editar"
                 icon="pi pi-pencil"
                 severity="info"
-                variant="outlined"
+                variant="text"
+                (click)="onEditRestaurant(restaurant.restId, popover)"
+              ></p-button>
+              <p-divider />
+               <p-button
+                label="Desactivar Domicilio"
+                icon="pi pi-delete-left"
+                severity="warn"
+                variant="text"
+                (click)="onEditRestaurant(restaurant.restId, popover)"
+              ></p-button>
+               <p-button
+                label="Desactivar General"
+
+                icon="pi pi-trash"
+                severity="danger"
+                variant="text"
                 (click)="onEditRestaurant(restaurant.restId, popover)"
               ></p-button>
             </div>

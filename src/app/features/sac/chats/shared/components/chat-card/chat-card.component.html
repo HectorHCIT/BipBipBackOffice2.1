@@ -1,0 +1,100 @@
+<div
+  [class]="getCardClasses()"
+  (click)="onCardClick()"
+>
+  <div class="chat-card__content">
+    <!-- Avatares superpuestos (cliente y agente) -->
+    <div class="chat-card__avatars">
+      <div class="avatar-circle avatar-circle--customer" [style.backgroundColor]="getAvatarColor()">
+        <span class="avatar-initial">{{ getInitial() }}</span>
+      </div>
+      @if (data.agentName) {
+        <div class="avatar-circle avatar-circle--agent" [style.backgroundColor]="getAgentAvatarColor()">
+          <span class="avatar-initial">{{ getAgentInitial() }}</span>
+        </div>
+      }
+    </div>
+
+    <!-- Información del chat en 3 filas -->
+    <div class="chat-card__info">
+      <!-- Fila 1: Cliente y Agente -->
+      <div class="chat-card__row">
+        <div class="info-group">
+          <i class="pi pi-user"></i>
+          <span class="text text--medium">{{ data.customerName }}</span>
+        </div>
+
+        @if (data.agentName) {
+          <div class="separator"></div>
+          <div class="info-group">
+            <i class="pi pi-id-card"></i>
+            <span class="text text--medium">{{ data.agentName }}</span>
+          </div>
+        }
+      </div>
+
+      <!-- Fila 2: Orden y Tiempo transcurrido -->
+      <div class="chat-card__row">
+        @if (data.orderNumber) {
+          <div class="info-group">
+            <i class="pi pi-shopping-bag"></i>
+            <span class="text">Orden N°: {{ data.orderNumber }}</span>
+          </div>
+        }
+
+        @if (data.orderNumber) {
+          <div class="separator"></div>
+        }
+
+        <div class="info-group">
+          <i class="pi pi-clock"></i>
+          <span class="text">T. Transcurrido: {{ data.createdAt | tiempoReal }}</span>
+        </div>
+      </div>
+
+      <!-- Fila 3: Reportes (o mensajes no leídos) y Ubicación -->
+      <div class="chat-card__row">
+        <div class="info-group">
+          <i class="pi pi-info-circle"></i>
+          <span class="text">{{ data.unreadCount }} {{ data.unreadCount === 1 ? 'Mensaje no leído' : 'Mensajes no leídos' }}</span>
+        </div>
+
+        @if (data.location) {
+          <div class="separator"></div>
+          <div class="info-group info-group--location">
+            <i class="pi pi-globe"></i>
+            <span class="text">{{ getLocationText() }}</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Menú de opciones -->
+    <div class="chat-card__menu" (click)="$event.stopPropagation()">
+      @if (showTakeButton) {
+        <p-button
+          label="Tomar"
+          icon="pi pi-check"
+          size="small"
+          severity="success"
+          (onClick)="onTakeClick($event)"
+        />
+      } @else if (showMenu) {
+        <p-button
+          icon="pi pi-ellipsis-v"
+          [rounded]="true"
+          [text]="true"
+          severity="secondary"
+          size="small"
+          (onClick)="menu.toggle($event)"
+        />
+        <p-menu
+          #menu
+          [model]="menuItems"
+          [popup]="true"
+          appendTo="body"
+        />
+      }
+    </div>
+  </div>
+</div>

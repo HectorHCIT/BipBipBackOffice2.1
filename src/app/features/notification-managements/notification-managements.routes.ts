@@ -10,6 +10,8 @@ import { Routes } from '@angular/router';
  * - Payment Methods (Métodos de Pago) ✅
  * - Target Audience (Público Objetivo) ✅
  * - Loyalty Program (Programa de Lealtad) ✅
+ * - Personalized Alerts (Alertas Personalizadas) ✅
+ * - App Link (Enlaces Dinámicos) ✅
  */
 export const NOTIFICATION_MANAGEMENTS_ROUTES: Routes = [
   {
@@ -31,5 +33,15 @@ export const NOTIFICATION_MANAGEMENTS_ROUTES: Routes = [
     path: 'loyalty-program',
     loadChildren: () => import('./loyalty-program/loyalty-program.routes').then(m => m.LOYALTY_PROGRAM_ROUTES),
     title: 'Programa de Lealtad'
+  },
+  {
+    path: 'custom-alerts',
+    loadChildren: () => import('./personalized-alerts/personalized-alerts.routes').then(m => m.PERSONALIZED_ALERTS_ROUTES),
+    title: 'Alertas Personalizadas'
+  },
+  {
+    path: 'app-link',
+    loadChildren: () => import('./app-link/app-link.routes').then(m => m.APP_LINK_ROUTES),
+    title: 'App Link'
   }
 ];

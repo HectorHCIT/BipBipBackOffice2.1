@@ -1,0 +1,94 @@
+<div class="image-viewer">
+  <!-- Controles superiores -->
+  <div class="image-viewer__controls">
+    <div class="image-viewer__zoom-info">
+      {{ zoomPercentage() }}%
+    </div>
+
+    <div class="image-viewer__actions">
+      <p-button
+        icon="pi pi-search-minus"
+        [rounded]="true"
+        [text]="true"
+        severity="secondary"
+        (onClick)="zoomOut()"
+        [disabled]="!canZoomOut()"
+        [title]="'Alejar (-)'"
+      />
+
+      <p-button
+        icon="pi pi-refresh"
+        [rounded]="true"
+        [text]="true"
+        severity="secondary"
+        (onClick)="resetZoom()"
+        [title]="'Resetear zoom (0)'"
+      />
+
+      <p-button
+        icon="pi pi-search-plus"
+        [rounded]="true"
+        [text]="true"
+        severity="secondary"
+        (onClick)="zoomIn()"
+        [disabled]="!canZoomIn()"
+        [title]="'Acercar (+)'"
+      />
+
+      <div class="image-viewer__divider"></div>
+
+      <p-button
+        icon="pi pi-download"
+        [rounded]="true"
+        [text]="true"
+        severity="secondary"
+        (onClick)="downloadImage()"
+        [title]="'Descargar imagen'"
+      />
+
+      <p-button
+        icon="pi pi-times"
+        [rounded]="true"
+        [text]="true"
+        severity="secondary"
+        (onClick)="close()"
+        [title]="'Cerrar (Escape)'"
+      />
+    </div>
+  </div>
+
+  <!-- Contenedor de la imagen -->
+  <div
+    #imageContainer
+    class="image-viewer__container"
+    (wheel)="onWheel($event)"
+    (mousedown)="onMouseDown($event)"
+    (mousemove)="onMouseMove($event)"
+    (mouseup)="onMouseUp()"
+    (mouseleave)="onMouseUp()"
+    (dblclick)="onDoubleClick()"
+    [style.cursor]="zoomLevel() > 1 ? 'grab' : 'default'"
+  >
+    <img
+      #imageElement
+      [src]="imageUrl()"
+      alt="Vista previa"
+      class="image-viewer__image"
+      [style.transform]="'scale(' + zoomLevel() + ')'"
+      draggable="false"
+    />
+  </div>
+
+  <!-- Ayuda de atajos -->
+  <div class="image-viewer__help">
+    <span class="image-viewer__help-item">
+      <i class="pi pi-plus"></i> / <i class="pi pi-minus"></i> Zoom
+    </span>
+    <span class="image-viewer__help-item">
+      <i class="pi pi-sync"></i> Doble clic para resetear
+    </span>
+    <span class="image-viewer__help-item">
+      <i class="pi pi-arrows-alt"></i> Arrastra para mover
+    </span>
+  </div>
+</div>

@@ -17,7 +17,8 @@
       "Bash(xcopy:*)",
       "Bash(2)",
       "Bash(npm run build:*)",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash(npm uninstall:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

@@ -2,6 +2,12 @@ import { Routes } from '@angular/router';
 
 export const SAC_ROUTES: Routes = [
   {
+    path: 'chats',
+    loadChildren: () =>
+      import('./chats/chats.routes').then((m) => m.CHATS_ROUTES),
+    title: 'SAC - Chats'
+  },
+  {
     path: 'ocurrences',
     loadChildren: () =>
       import('./occurrences/occurrences.routes').then((m) => m.OCCURRENCES_ROUTES),

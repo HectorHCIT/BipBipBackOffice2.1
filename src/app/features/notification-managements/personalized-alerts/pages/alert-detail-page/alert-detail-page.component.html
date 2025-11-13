@@ -1,0 +1,97 @@
+<div class="grid">
+  <div class="col-12">
+    <p-card>
+      <ng-template pTemplate="header">
+        <div class="p-4">
+          <h2 class="text-2xl font-bold m-0">
+            {{ isEditMode() ? 'Editar Alerta' : 'Nueva Alerta' }}
+          </h2>
+        </div>
+      </ng-template>
+
+      <form [formGroup]="alertForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
+        <!-- Code -->
+        <div class="flex flex-col gap-2">
+          <label class="font-semibold text-sm">Código <span class="text-red-500">*</span></label>
+          <input type="text" pInputText formControlName="code" placeholder="RAIN" [disabled]="isEditMode()" />
+          <small class="text-color-secondary">Mayúsculas y guiones bajos solamente</small>
+        </div>
+
+        <!-- Icon Selector -->
+        <div class="flex flex-col gap-2">
+          <label class="font-semibold text-sm">Icono <span class="text-red-500">*</span></label>
+          <p-select formControlName="codePointIcon" [options]="iconOptions" placeholder="Seleccionar icono" optionLabel="value" optionValue="id">
+            <ng-template pTemplate="selectedItem" let-option>
+              @if (option) {
+                <div class="flex items-center gap-2">
+                  <img [src]="option.image" [alt]="option.value" class="w-6 h-6" />
+                  <span>{{ option.value }}</span>
+                </div>
+              }
+            </ng-template>
+            <ng-template pTemplate="item" let-option>
+              <div class="flex items-center gap-2">
+                <img [src]="option.image" [alt]="option.value" class="w-6 h-6" />
+                <span>{{ option.value }}</span>
+              </div>
+            </ng-template>
+          </p-select>
+        </div>
+
+        <!-- Title -->
+        <div class="flex flex-col gap-2">
+          <label class="font-semibold text-sm">Título <span class="text-red-500">*</span></label>
+          <input type="text" pInputText formControlName="title" placeholder="Título de la alerta" />
+        </div>
+
+        <!-- Subtitle -->
+        <div class="flex flex-col gap-2">
+          <label class="font-semibold text-sm">Subtítulo <span class="text-red-500">*</span></label>
+          <textarea pInputText formControlName="subtitle" rows="3" placeholder="Descripción de la alerta"></textarea>
+        </div>
+
+        <!-- Color Presets -->
+        <div class="flex flex-col gap-2">
+          <label class="font-semibold text-sm">Combinaciones de Colores</label>
+          <div class="flex flex-wrap gap-2">
+            @for (preset of colorPresets; track preset.name) {
+              <button type="button" class="px-3 py-2 rounded border border-surface cursor-pointer hover:shadow" (click)="applyColorPreset(preset)" [style.background-color]="'#' + preset.backgroundColor" [style.color]="'#' + preset.textColor">
+                {{ preset.name }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Colors -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="flex flex-col gap-2">
+            <label class="font-semibold text-sm">Color de Texto <span class="text-red-500">*</span></label>
+            <div class="flex items-center gap-2">
+              <p-colorPicker formControlName="textColor" />
+              <input type="text" pInputText formControlName="textColor" placeholder="FFFFFF" class="flex-1" />
+            </div>
+          </div>
+          <div class="flex flex-col gap-2">
+            <label class="font-semibold text-sm">Color de Fondo <span class="text-red-500">*</span></label>
+            <div class="flex items-center gap-2">
+              <p-colorPicker formControlName="backgroundColor" />
+              <input type="text" pInputText formControlName="backgroundColor" placeholder="3B82F6" class="flex-1" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex gap-2 justify-end mt-4">
+          <p-button label="Cancelar" severity="secondary" [outlined]="true" (onClick)="onCancel()" type="button" />
+          <p-button [label]="isEditMode() ? 'Actualizar' : 'Crear'" icon="pi pi-check" type="submit" [disabled]="alertForm.invalid" [loading]="isLoading()" />
+        </div>
+      </form>
+    </p-card>
+  </div>
+
+  <div class="col-12">
+    <app-alert-preview [icon]="alertForm.get('codePointIcon')?.value || 'info'" [textColor]="alertForm.get('textColor')?.value || 'FFFFFF'" [backgroundColor]="alertForm.get('backgroundColor')?.value || '3B82F6'" [title]="alertForm.get('title')?.value || 'Título de la alerta'" [subtitle]="alertForm.get('subtitle')?.value || 'Subtítulo o descripción'" />
+  </div>
+</div>
+
+<p-toast />

@@ -1,0 +1,182 @@
+<div class="w-full flex justify-center items-center ">
+  <div class="w-full flex justify-center items-center ">
+    <p-card class="w-full flex justify-center items-center ">
+      <ng-template pTemplate="header">
+        <div class="flex justify-between items-center p-4">
+          <h2 class="text-2xl font-bold m-0">App Links</h2>
+          <p-button
+            label="Nuevo App Link"
+            icon="pi pi-plus"
+            (onClick)="onCreateAppLink()"
+          />
+        </div>
+      </ng-template>
+
+      <!-- Filters -->
+      <div class="flex flex-col md:flex-row gap-4 mb-4">
+        <!-- Search -->
+        <span class="p-input-icon-left flex-1">
+          <i class="pi pi-search"></i>
+          <input
+            type="text"
+            pInputText
+            placeholder="Buscar por título o producto..."
+            class="w-full"
+            [value]="searchTerm()"
+            (input)="onSearch($event)"
+          />
+        </span>
+
+        <!-- Status Filter -->
+        <p-select
+          [options]="statusFilterOptions"
+          [(ngModel)]="statusFilter"
+          (onChange)="onStatusFilterChange()"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Estado"
+          class="w-full md:w-auto"
+        />
+      </div>
+
+      <!-- Table -->
+      <p-table
+        [value]="appLinks()"
+        [loading]="isLoading()"
+        [lazy]="true"
+        [paginator]="true"
+        [rows]="pageSize()"
+        [totalRecords]="pagination().totalCount"
+        [rowsPerPageOptions]="[5, 10, 15, 20]"
+        (onPage)="onPageChange($event)"
+        [tableStyle]="{ 'min-width': '60rem' }"
+        styleClass="p-datatable-sm"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Preview</th>
+            <th>Campaña</th>
+            <th>Título</th>
+            <th>Producto</th>
+            <th>Marca</th>
+            <th>Estado</th>
+            <th>Fecha</th>
+            <th style="width: 200px">Acciones</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-appLink>
+          <tr>
+            <!-- Preview -->
+            <td>
+              <div class="flex items-center gap-3">
+                <img
+                  [src]="appLink.imageUrl"
+                  [alt]="appLink.title"
+                  class="w-16 h-16 object-cover rounded"
+                />
+              </div>
+            </td>
+
+            <!-- Campaign Name -->
+            <td>
+              <code class="bg-surface-100 dark:bg-surface-800 px-2 py-1 rounded text-sm">{{
+                appLink.campaignName || 'N/A'
+              }}</code>
+            </td>
+
+            <!-- Title -->
+            <td>
+              <div class="max-w-xs">
+                <p class="font-semibold m-0 truncate">{{ appLink.title }}</p>
+                <p class="text-sm text-color-secondary m-0 truncate">
+                  {{ appLink.description }}
+                </p>
+              </div>
+            </td>
+
+            <!-- Product -->
+            <td>
+              @if (appLink.productName) {
+                <div>
+                  <p class="m-0">{{ appLink.productName }}</p>
+                  <p class="text-sm text-color-secondary m-0">
+                    {{ appLink.productCode }}
+                  </p>
+                </div>
+              } @else {
+                <span class="text-color-secondary">-</span>
+              }
+            </td>
+
+            <!-- Brand -->
+            <td>
+              <div class="flex items-center gap-2">
+                @if (appLink.urlBrandLogo) {
+                  <img
+                    [src]="appLink.urlBrandLogo"
+                    [alt]="appLink.brandName || ''"
+                    class="w-8 h-8 object-contain"
+                  />
+                }
+                <span>{{ appLink.brandName || 'N/A' }}</span>
+              </div>
+            </td>
+
+            <!-- Status -->
+            <td>
+              <p-toggleswitch
+                [(ngModel)]="appLink.isActive"
+                (onChange)="onToggleStatus(appLink, appLink.isActive)"
+              />
+            </td>
+
+            <!-- Date -->
+            <td>
+              <span class="text-sm">{{ formatDate(appLink.createdAt) }}</span>
+            </td>
+
+            <!-- Actions -->
+            <td>
+              <div class="flex gap-2">
+                <p-button
+                  icon="pi pi-pencil"
+                  severity="secondary"
+                  [text]="true"
+                  [rounded]="true"
+                  (onClick)="onEditAppLink(appLink)"
+                  pTooltip="Editar"
+                />
+                <p-button
+                  icon="pi pi-copy"
+                  severity="info"
+                  [text]="true"
+                  [rounded]="true"
+                  (onClick)="onCopyDeepLink(appLink)"
+                  pTooltip="Copiar enlace"
+                />
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="8" class="text-center p-4">
+              <p class="text-color-secondary m-0">
+                @if (searchTerm()) {
+                  No se encontraron app links que coincidan con "{{ searchTerm() }}"
+                } @else {
+                  No hay app links creados
+                }
+              </p>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </p-card>
+  </div>
+</div>
+
+<p-toast />
+<p-confirmDialog />

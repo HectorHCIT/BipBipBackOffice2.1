@@ -1,0 +1,87 @@
+<div class="w-full bg-surface-0 border-b border-surface-border">
+  <div class="flex items-center gap-2 px-4 py-2">
+    <!-- Avatares superpuestos (cliente y agente) -->
+    <div class="flex-shrink-0 grid grid-cols-1 grid-rows-1 leading-[0] relative" style="width: 35.29px; height: 38.41px;">
+      <div
+        class="rounded-full col-start-1 row-start-1 w-6 h-6 ml-0 mt-0"
+        [style.backgroundColor]="getAvatarColor()"
+      >
+      </div>
+      @if (data.agentName) {
+        <div
+          class="rounded-full col-start-1 row-start-1 w-6 h-6"
+          style="margin-left: 11.29px; margin-top: 14.41px;"
+          [style.backgroundColor]="getAgentAvatarColor()"
+        >
+        </div>
+      }
+    </div>
+
+    <!-- Información del chat -->
+    <div class="flex-1 min-w-0 flex flex-col gap-1 py-2">
+      <!-- Fila 1: Cliente y Agente -->
+      <div class="flex items-center gap-4">
+        <div class="flex items-center gap-2 flex-shrink-0">
+          <i class="pi pi-user text-base"></i>
+          <p class="text-sm font-medium whitespace-nowrap">{{ data.customerName }}</p>
+        </div>
+
+        @if (data.agentName) {
+          <!-- Separador vertical -->
+          <div class="h-0 w-[21px] flex items-center justify-center">
+            <div class="h-[1px] w-[21px] bg-surface-border rotate-90"></div>
+          </div>
+
+          <div class="flex items-center gap-2 flex-shrink-0">
+            @if (data.chatType === 'order') {
+              <i class="pi pi-send text-base"></i>
+            } @else {
+              <i class="pi pi-headphones text-base"></i>
+            }
+            <p class="text-sm font-medium whitespace-nowrap">{{ data.agentName }}</p>
+          </div>
+        }
+      </div>
+
+      <!-- Fila 2: Orden y Tiempo transcurrido -->
+      <div class="flex items-center gap-2">
+        @if (data.orderNumber) {
+          <div class="flex items-center gap-2.5">
+            <p class="text-xs whitespace-nowrap">Orden N°: {{ data.orderNumber }}</p>
+          </div>
+
+          <!-- Separador vertical -->
+          <div class="h-0 w-[21px] flex items-center justify-center">
+            <div class="h-[1px] w-[21px] bg-surface-border rotate-90"></div>
+          </div>
+        }
+
+        <div class="flex items-center gap-2.5">
+          <p class="text-xs whitespace-nowrap">T. Transcurrido: {{ data.createdAt | tiempoReal }}</p>
+        </div>
+      </div>
+
+      <!-- Fila 3: Ubicación (si existe) -->
+      @if (getLocationText()) {
+        <div class="flex items-center gap-2 w-full">
+          <div class="flex items-center gap-2 flex-1 min-w-0">
+            <p class="text-xs truncate">{{ getLocationText() }}</p>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Botón cerrar (X) -->
+    @if (showCloseButton) {
+      <div class="flex-shrink-0">
+        <p-button
+          icon="pi pi-times"
+          [rounded]="true"
+          [text]="true"
+          severity="secondary"
+          (onClick)="onCloseClick()"
+        />
+      </div>
+    }
+  </div>
+</div>

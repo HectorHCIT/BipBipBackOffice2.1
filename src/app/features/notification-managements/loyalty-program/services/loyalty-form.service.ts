@@ -92,6 +92,86 @@ export class LoyaltyFormService {
       iconLevel: level.iconLevel,
       hexavalue: level.hexavalue || '#000000',
     });
+
+    // Map benefits
+    this.mapBenefitsToForm(level.loyaltyItemsWalletList, form);
+  }
+
+  /**
+   * Map benefits from API to form
+   */
+  private mapBenefitsToForm(benefits: any[], form: FormGroup): void {
+    const benefitsArray = this.getBenefitsArray(form);
+    benefitsArray.clear();
+
+    benefits.forEach(benefit => {
+      const benefitGroup = this.fb.nonNullable.group({
+        type: [benefit.itemCode],
+        nameBenefit: [benefit.loyaltyNameWallet],
+        descriptionBenefit: [benefit.loyaltyDescriptionWallet],
+        priceDiscount: [this.mapDiscountValue(benefit)],
+        active: [true], // API doesn't return benefit active status, default to true
+        benefitIcon: [benefit.iconBenefit || ''],
+        itemCode: [benefit.idLoyaltyItemWallet],
+        isProduct: [benefit.isProduct],
+        productsBenefits: this.fb.array([]),
+      });
+
+      // Map products if benefit has them
+      if (benefit.loyaltyItemProducto && benefit.loyaltyItemProducto.length > 0) {
+        const productsArray = benefitGroup.get('productsBenefits') as FormArray;
+
+        benefit.loyaltyItemProducto.forEach((product: any) => {
+          const productGroup = this.fb.nonNullable.group({
+            codItemProduct: [product.codItemProduct || 0],
+            brand: [product.brandId],
+            productCode: [product.productCode],
+            quantity: [product.quantity || 1],
+            active: [product.active],
+            levelcatLimit: [0],
+            modifiersProducts: this.fb.array([]),
+          });
+
+          // Map modifiers if product has them
+          if (product.loyaltyItemModifiers && product.loyaltyItemModifiers.length > 0) {
+            const modifiersArray = productGroup.get('modifiersProducts') as FormArray;
+
+            product.loyaltyItemModifiers.forEach((modifier: any) => {
+              const modifierGroup = this.fb.nonNullable.group({
+                codLoyaltyItemModifier: [modifier.codLoyaltyItemModifier],
+                codItemProduct: [modifier.codItemProduct],
+                modifierId: [modifier.modifierId],
+                modifierCode: [modifier.modifierCode],
+                quantity: [modifier.quantity],
+                modifierActive: [modifier.active],
+              });
+              modifiersArray.push(modifierGroup);
+            });
+          }
+
+          productsArray.push(productGroup);
+        });
+      }
+
+      benefitsArray.push(benefitGroup);
+    });
+  }
+
+  /**
+   * Map discount value from API format
+   * DP (percentage) comes as decimal (0.2 = 20%), needs to be converted to percentage
+   * DF (fixed) comes as is
+   */
+  private mapDiscountValue(benefit: any): number {
+    if (!benefit.discountValue) return 0;
+
+    // If it's percentage discount, convert from decimal to percentage
+    if (benefit.itemCode === 'DP') {
+      return benefit.discountValue * 100;
+    }
+
+    // Fixed discount, return as is
+    return benefit.discountValue;
   }
 
   /**
@@ -266,44 +346,50 @@ export class LoyaltyFormService {
   }
 
   /**
-   * Transform form data to API format
+   * Transform form data to API format for PUT request
    */
   transformFormToApiFormat(formValues: any, levelId: number): any {
     const loyaltyItemWallet = formValues.benefitsList.map((benefit: any) => {
-      // Convert percentage to decimal
+      // Calculate discount value for API
+      let discountValue = null;
       if (benefit.type === 'DP' && benefit.priceDiscount) {
-        benefit.priceDiscount = benefit.priceDiscount / 100;
+        // Convert percentage to decimal (20 -> 0.2)
+        discountValue = benefit.priceDiscount / 100;
+      } else if (benefit.type === 'DF' && benefit.priceDiscount) {
+        // Fixed discount, send as is
+        discountValue = benefit.priceDiscount;
       }
 
       const products = benefit.productsBenefits.map((product: any) => ({
-        codItemProduct: product.itemCode || 0,
+        productId: product.codItemProduct || 0,
         brandId: product.brand,
         active: product.active,
         productCode: product.productCode,
+        quantity: product.quantity || 1,
         loyaltyItemModifiers: product.modifiersProducts.map((modifier: any) => ({
-          codLoyaltyItemModifier: modifier.codLoyaltyItemModifier || 0,
-          codItemProduct: modifier.codItemProduct || 0,
           quantity: modifier.quantity || 1,
           active: modifier.modifierActive,
           publish: modifier.modifierActive,
-          modifierId: modifier.modifierId,
           modifierCode: modifier.modifierCode
         }))
       }));
 
       return {
-        idLoyaltyItemWallet: benefit.itemCode || 0,
-        codLoyaltyLevel: levelId,
         loyaltyNameWallet: benefit.nameBenefit,
         loyaltyDescriptionWallet: benefit.descriptionBenefit,
-        benefitType: benefit.type,
-        iconBenefit: benefit.benefitIcon,
+        itemCount: benefit.type === 'EG' ? 0 : 1,
+        itemValue: 0,
+        isProduct: benefit.isProduct,
+        active: benefit.active,
+        publish: true,
+        itemCode: benefit.type,
+        discountValue: discountValue,
+        itemIcon: benefit.benefitIcon || '',
         loyaltyItemProducto: products
       };
     });
 
     return {
-      idLoyaltyInfo: 1, // This might need to be dynamic
       loyaltyLevelName: formValues.levelName,
       minPointsLevel: formValues.requieredPts,
       maxPointsLevel: formValues.maxPts,
@@ -313,7 +399,9 @@ export class LoyaltyFormService {
       isPublish: formValues.isPublish,
       hexavalue: formValues.hexavalue || '#000000',
       messageLevel: formValues.levelDesc,
-      loyaltyItemsWalletList: loyaltyItemWallet
+      convertFactor: formValues.convertFactor || 0,
+      factorValue: 0,
+      loyaltyItemWallet: loyaltyItemWallet
     };
   }
 }

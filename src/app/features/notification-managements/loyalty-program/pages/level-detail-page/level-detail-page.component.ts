@@ -1,6 +1,7 @@
 import {
   Component,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   inject,
   OnInit,
   signal,
@@ -22,7 +23,9 @@ import { MenuItem, MessageService } from 'primeng/api';
 
 import { LoyaltyService, LoyaltyFormService } from '../../services';
 import { Brand, BenefitCode, BenefitType } from '../../models';
-import { ProductSelectorComponent } from '../../components';
+import { BenefitSelectorComponent } from '../../components';
+import { TableModule } from 'primeng/table';
+import { TagModule } from 'primeng/tag';
 
 @Component({
   selector: 'app-level-detail-page',
@@ -38,7 +41,9 @@ import { ProductSelectorComponent } from '../../components';
     BreadcrumbModule,
     ToastModule,
     DividerModule,
-    ProductSelectorComponent
+    TableModule,
+    TagModule,
+    BenefitSelectorComponent
   ],
   providers: [MessageService],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -51,6 +56,7 @@ export class LevelDetailPageComponent implements OnInit {
   private readonly messageService = inject(MessageService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   // Breadcrumb
   readonly breadcrumbItems: MenuItem[] = [
@@ -75,15 +81,6 @@ export class LevelDetailPageComponent implements OnInit {
   readonly pageTitle = computed(() =>
     this.isEditMode() ? 'Editar Nivel de Lealtad' : 'Crear Nivel de Lealtad'
   );
-
-  // Benefit type options for dropdown
-  readonly benefitTypeOptions = [
-    { label: 'Envío Gratis', value: 'EG' },
-    { label: 'Aperitivo Gratis', value: 'AG' },
-    { label: 'Postres Gratis', value: 'PG' },
-    { label: 'Descuento Fijo', value: 'DF' },
-    { label: 'Descuento Porcentual', value: 'DP' }
-  ];
 
   ngOnInit(): void {
     this.loadInitialData();
@@ -176,38 +173,91 @@ export class LevelDetailPageComponent implements OnInit {
   }
 
   /**
-   * Add benefit to form
-   */
-  onAddBenefit(): void {
-    this.formService.addBenefit(this.form());
-  }
-
-  /**
    * Remove benefit from form
    */
   onRemoveBenefit(index: number): void {
     this.formService.removeBenefit(this.form(), index);
+    // Force change detection to update the table
+    this.cdr.markForCheck();
   }
 
   /**
-   * Check if benefit type requires product selection
+   * Get table data for benefits
    */
-  shouldShowProducts(index: number): boolean {
-    return this.formService.shouldShowProducts(this.form(), index);
+  getBenefitsTableData(): any[] {
+    return this.benefitsArray.controls.map((control, index) => {
+      const value = control.value;
+      const productsArray = control.get('productsBenefits') as FormArray;
+
+      // Extract ALL products details if exists
+      let productDetails: any[] = [];
+      if (productsArray && productsArray.length > 0) {
+        productDetails = productsArray.controls.map((productControl, prodIndex) => {
+          const product = productControl.value;
+          const modifiersArray = productControl.get('modifiersProducts') as FormArray;
+
+          // Get brand name
+          const brand = this.brands().find(b => b.idBrand === product.brand);
+
+          return {
+            productIndex: prodIndex,
+            brandName: brand?.nameBrand || 'N/A',
+            productCode: product.productCode,
+            quantity: product.quantity,
+            active: product.active,
+            modifiers: modifiersArray ? modifiersArray.controls.map(mod => {
+              const modValue = mod.value;
+              return {
+                modifierId: modValue.modifierId,
+                modifierCode: modValue.modifierCode,
+                quantity: modValue.quantity,
+                active: modValue.modifierActive
+              };
+            }) : []
+          };
+        });
+      }
+
+      return {
+        index,
+        type: value.type,
+        typeLabel: this.getBenefitTypeLabel(value.type),
+        name: value.nameBenefit,
+        description: value.descriptionBenefit,
+        discount: value.priceDiscount || 0,
+        productCount: productsArray?.length || 0,
+        active: value.active,
+        productDetails
+      };
+    });
   }
 
   /**
-   * Check if benefit type requires discount input
+   * Get benefit type label
    */
-  shouldShowDiscount(index: number): boolean {
-    return this.formService.shouldShowDiscount(this.form(), index);
+  getBenefitTypeLabel(code: string): string {
+    const labels: Record<string, string> = {
+      'EG': 'Envío Gratis',
+      'AG': 'Aperitivo Gratis',
+      'PG': 'Postres Gratis',
+      'DF': 'Descuento Fijo',
+      'DP': 'Descuento %',
+    };
+    return labels[code] || code;
   }
 
   /**
-   * Get benefit title
+   * Get severity color for benefit type tag
    */
-  getBenefitTitle(code: keyof typeof BenefitType): string {
-    return this.formService.getBenefitTitle(code);
+  getBenefitSeverity(code: string): 'success' | 'info' | 'warn' | 'danger' | 'secondary' {
+    const severities: Record<string, 'success' | 'info' | 'warn' | 'danger' | 'secondary'> = {
+      'EG': 'success',
+      'AG': 'info',
+      'PG': 'warn',
+      'DF': 'danger',
+      'DP': 'secondary',
+    };
+    return severities[code] || 'secondary';
   }
 
   /**

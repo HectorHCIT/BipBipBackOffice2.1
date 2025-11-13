@@ -1,0 +1,137 @@
+<div class="sac-cliente-page">
+  <!-- Breadcrumb -->
+  <div class="px-6 py-4 ">
+    <p-breadcrumb
+      [model]="breadcrumbItems"
+      [home]="home"
+    />
+  </div>
+
+  <!-- Layout principal: 2 columnas -->
+  <div class="page-content border-[1px] border-gray-400 rounded-lg ">
+    <!-- ============================================ -->
+    <!-- COLUMNA 1: Lista de chats con búsqueda -->
+    <!-- ============================================ -->
+    <div class="flex flex-col h-full border-r-[1px] border-gray-400">
+      <!-- Input de búsqueda fijo arriba -->
+      <div class="flex flex-col gap-3 p-4 border-b-[1px] border-gray-400 flex-shrink-0">
+        <p-iconfield iconPosition="left">
+          <p-inputicon styleClass="pi pi-search" />
+          <input
+            pInputText
+            type="text"
+            placeholder="Buscar chat..."
+            [(ngModel)]="searchTerm"
+            (ngModelChange)="searchTerm.set($event)"
+            class="w-full"
+          />
+        </p-iconfield>
+      </div>
+
+      <!-- Lista scrolleable de chats -->
+      <div class="flex-1 overflow-y-auto">
+        <!-- Chats pendientes -->
+        @if (unassignedChats().length > 0) {
+          <div class="border-b-[1px] border-gray-400">
+            <!-- Header de sección -->
+            <div class="flex items-center gap-2 px-4 py-3 border-b border-gray-400 sticky top-0 z-10 backdrop-blur-sm bg-surface-0/80">
+              <i class="pi pi-inbox text-lg text-orange-500"></i>
+              <h4 class="text-sm font-semibold">
+                Pendientes ({{ unassignedChats().length }})
+              </h4>
+            </div>
+
+            <!-- Cards de chats pendientes -->
+            @for (chat of unassignedChats(); track trackByChatId($index, chat)) {
+              <app-chat-card
+                [data]="getChatCardData(chat)"
+                [isSelected]="getChatCardData(chat).isSelected"
+                [showMenu]="false"
+                [showTakeButton]="true"
+                (cardClick)="onChatSelect($event)"
+                (takeChat)="onTakeUnassignedChat($event)"
+              />
+            }
+          </div>
+        }
+
+        <!-- Mis chats -->
+        <div>
+          <!-- Header de sección -->
+          <div class="flex items-center gap-2 px-4 py-3 border-b border-gray-400 sticky top-0 z-10 backdrop-blur-sm bg-surface-0/80">
+            <i class="pi pi-comments text-lg text-blue-500"></i>
+            <h4 class="text-sm font-semibold">
+              Mis Chats ({{ filteredChats().length }})
+            </h4>
+          </div>
+
+          <!-- Cards de mis chats -->
+          @if (filteredChats().length === 0) {
+            <div class="flex flex-col items-center justify-center py-12 text-gray-400">
+              <i class="pi pi-inbox text-5xl mb-3"></i>
+              <p class="text-sm">No hay chats asignados</p>
+            </div>
+          } @else {
+            @for (chat of filteredChats(); track trackByChatId($index, chat)) {
+              <app-chat-card
+                [data]="getChatCardData(chat)"
+                [isSelected]="getChatCardData(chat).isSelected"
+                (cardClick)="onChatSelect($event)"
+                (finalizarChat)="onFinalizeChat($event)"
+              />
+            }
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- COLUMNA 2: Chat activo (Header + Body + Input) -->
+    <!-- ============================================ -->
+    <div class="flex flex-col h-full">
+      @if (selectedChat(); as chat) {
+        <!-- Header del chat - fijo arriba -->
+        <app-chat-header
+          [data]="selectedChatCardData()!"
+          [showCloseButton]="true"
+          (closeChat)="onCloseChat()"
+        />
+
+        <!-- Body de mensajes - scrolleable -->
+        <div class="flex-1 overflow-hidden">
+          <app-chat-body
+            [messageBlocks]="messageBlocks()"
+            [chatInfo]="chatInfo()"
+            [loading]="false"
+            [autoScroll]="true"
+            (imageClick)="onImageClick($event)"
+          />
+        </div>
+
+        <!-- Input de mensaje - fijo abajo -->
+        <div class="border-t-2 border-gray-400 p-4 flex-shrink-0">
+          <app-chat-input
+            #chatInput
+            [chatId]="selectedChatId()!"
+            [disabled]="false"
+            [showFileAttach]="true"
+            [showPredefinedResponses]="true"
+            [isAdmin]="isAdmin()"
+            (sendMessage)="onSendMessage($event)"
+            (openPredefinedResponses)="onOpenPredefinedResponses()"
+          />
+        </div>
+      } @else {
+        <!-- Estado vacío cuando no hay chat seleccionado -->
+        <div class="flex flex-col items-center justify-center h-full text-gray-400">
+          <i class="pi pi-comment text-6xl mb-4 opacity-30"></i>
+          <h3 class="text-xl font-semibold mb-2 text-gray-600">Selecciona un chat</h3>
+          <p class="text-sm text-gray-500">Elige un chat de la lista para empezar a conversar</p>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Toast para notificaciones -->
+  <p-toast position="top-right" />
+</div>

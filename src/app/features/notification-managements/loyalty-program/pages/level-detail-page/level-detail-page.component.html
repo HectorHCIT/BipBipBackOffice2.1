@@ -108,18 +108,19 @@
 
     <p-divider />
 
-    <!-- Benefits Section -->
+    <!-- Benefit Selector Form -->
+    <app-benefit-selector
+      [parentForm]="form()"
+      [brands]="brands()"
+    />
+
+    <p-divider />
+
+    <!-- Benefits Table -->
     <p-card>
       <ng-template pTemplate="header">
-        <div class="p-4 flex items-center justify-between">
-          <h2 class="text-xl font-semibold m-0">Beneficios</h2>
-          <p-button
-            label="Agregar Beneficio"
-            icon="pi pi-plus"
-            (onClick)="onAddBenefit()"
-            [outlined]="true"
-            size="small"
-          />
+        <div class="p-4">
+          <h2 class="text-xl font-semibold m-0">Beneficios Agregados ({{ benefitsArray.length }})</h2>
         </div>
       </ng-template>
 
@@ -127,94 +128,109 @@
         <div class="text-center p-8">
           <i class="pi pi-gift text-4xl text-color-secondary mb-3"></i>
           <p class="text-color-secondary m-0">
-            No hay beneficios agregados. Haz clic en "Agregar Beneficio" para comenzar.
+            No hay beneficios agregados. Usa el formulario de arriba para agregar beneficios.
           </p>
         </div>
-      }
-
-      <!-- Benefits List -->
-      <div class="flex flex-col gap-4" formArrayName="benefitsList">
-        @for (benefit of benefitsArray.controls; track $index) {
-          <div [formGroupName]="$index" class="p-4 border border-surface rounded-lg">
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="text-lg font-semibold m-0">Beneficio {{ $index + 1 }}</h3>
-              <p-button
-                icon="pi pi-trash"
-                [rounded]="true"
-                [text]="true"
-                severity="danger"
-                (onClick)="onRemoveBenefit($index)"
-                size="small"
-              />
-            </div>
-
-            <div class="flex flex-col gap-4">
-              <!-- Benefit Type -->
-              <div class="flex flex-col gap-2">
-                <label class="font-semibold">
-                  Tipo de Beneficio
-                  <span class="text-red-500">*</span>
-                </label>
-                <p-select
-                  formControlName="type"
-                  [options]="benefitTypeOptions"
-                  placeholder="Selecciona el tipo"
-                  optionLabel="label"
-                  optionValue="value"
+      } @else {
+        <p-table [value]="getBenefitsTableData()" [tableStyle]="{ 'min-width': '60rem' }">
+          <ng-template pTemplate="header">
+            <tr>
+              <th style="width: 80px">Tipo</th>
+              <th>Nombre</th>
+              <th>Descripción</th>
+              <th style="width: 120px">Descuento</th>
+              <th style="width: 150px">Producto</th>
+              <th style="width: 100px">Estado</th>
+              <th style="width: 100px" class="text-center">Acciones</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-benefit>
+            <tr>
+              <td>
+                <p-tag
+                  [value]="benefit.typeLabel"
+                  [severity]="getBenefitSeverity(benefit.type)"
                 />
-              </div>
-
-              <!-- Benefit Name -->
-              <div class="flex flex-col gap-2">
-                <label class="font-semibold">
-                  Nombre del Beneficio
-                  <span class="text-red-500">*</span>
-                </label>
-                <input
-                  pInputText
-                  formControlName="nameBenefit"
-                  placeholder="Ej: Envío gratis en tu pedido"
-                />
-              </div>
-
-              <!-- Benefit Description -->
-              <div class="flex flex-col gap-2">
-                <label class="font-semibold">Descripción</label>
-                <input
-                  pInputText
-                  formControlName="descriptionBenefit"
-                  placeholder="Descripción detallada"
-                />
-              </div>
-
-              <!-- Discount Fields (only for DF/DP) -->
-              @if (shouldShowDiscount($index)) {
-                <div class="flex flex-col gap-2">
-                  <label class="font-semibold">
-                    Valor del Descuento
-                    <span class="text-red-500">*</span>
-                  </label>
-                  <p-inputnumber
-                    formControlName="priceDiscount"
-                    [suffix]="benefit.get('type')?.value === 'DP' ? ' %' : ''"
-                    [prefix]="benefit.get('type')?.value === 'DF' ? '$ ' : ''"
-                    placeholder="Ingresa el valor"
-                  />
+              </td>
+              <td>{{ benefit.name }}</td>
+              <td>
+                <div class="max-w-xs overflow-hidden text-ellipsis">
+                  {{ benefit.description }}
                 </div>
-              }
-
-              <!-- Product Selection Section (for PG/AG) -->
-              @if (shouldShowProducts($index)) {
-                <app-product-selector
-                  [benefitIndex]="$index"
-                  [parentForm]="form()"
-                  [brands]="brands()"
+              </td>
+              <td>
+                @if (benefit.discount > 0) {
+                  <span class="font-semibold">
+                    {{ benefit.type === 'DF' ? ('$' + benefit.discount) : (benefit.discount + '%') }}
+                  </span>
+                } @else {
+                  <span class="text-color-secondary">-</span>
+                }
+              </td>
+              <td>
+                @if (benefit.productDetails && benefit.productDetails.length > 0) {
+                  <div class="flex flex-col gap-2">
+                    @for (product of benefit.productDetails; track product.productIndex) {
+                      <div class="p-2 border border-surface rounded bg-surface-50 dark:bg-surface-900">
+                        <div class="flex flex-col gap-1">
+                          <div class="flex items-center gap-2">
+                            <i class="pi pi-box text-xs text-primary"></i>
+                            <span class="text-xs font-semibold">{{ product.productCode }}</span>
+                            @if (!product.active) {
+                              <p-tag value="Inactivo" severity="secondary" styleClass="text-xs py-0 px-1" />
+                            }
+                          </div>
+                          <div class="flex items-center gap-2 text-xs text-color-secondary">
+                            <i class="pi pi-building"></i>
+                            <span>{{ product.brandName }}</span>
+                          </div>
+                          <div class="flex items-center gap-2 text-xs text-color-secondary">
+                            <i class="pi pi-hashtag"></i>
+                            <span>Cant: {{ product.quantity }}</span>
+                          </div>
+                          @if (product.modifiers.length > 0) {
+                            <p-divider styleClass="my-1" />
+                            <div class="flex flex-col gap-1">
+                              <span class="text-xs font-semibold text-color-secondary">Modificadores:</span>
+                              @for (modifier of product.modifiers; track $index) {
+                                <div class="flex items-center gap-2 text-xs pl-2">
+                                  <i class="pi pi-circle-fill" [style.font-size]="'4px'"></i>
+                                  <span>{{ modifier.modifierCode }} (x{{ modifier.quantity }})</span>
+                                  @if (modifier.active) {
+                                    <p-tag value="Activo" severity="success" styleClass="text-xs py-0 px-1" />
+                                  }
+                                </div>
+                              }
+                            </div>
+                          }
+                        </div>
+                      </div>
+                    }
+                  </div>
+                } @else {
+                  <span class="text-color-secondary">-</span>
+                }
+              </td>
+              <td>
+                <p-tag
+                  [value]="benefit.active ? 'Activo' : 'Inactivo'"
+                  [severity]="benefit.active ? 'success' : 'secondary'"
                 />
-              }
-            </div>
-          </div>
-        }
-      </div>
+              </td>
+              <td class="text-center">
+                <p-button
+                  icon="pi pi-trash"
+                  severity="danger"
+                  [text]="true"
+                  [rounded]="true"
+                  (onClick)="onRemoveBenefit(benefit.index)"
+                  size="small"
+                />
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      }
     </p-card>
 
     <!-- Footer Actions -->

@@ -1,0 +1,32 @@
+<p-card>
+  <ng-template pTemplate="header">
+    <div class="p-4">
+      <h4 class="text-md font-semibold m-0">Vista Previa</h4>
+    </div>
+  </ng-template>
+
+  <div class="flex justify-center p-4">
+    <div
+      class="alert-preview-box rounded-lg p-4 shadow-md max-w-md w-full"
+      [style.background-color]="backgroundColorStyle()"
+      [style.color]="textColorStyle()"
+    >
+      <div class="flex items-start gap-3">
+        <!-- Icon -->
+        <div class="flex-shrink-0">
+          <img [src]="displayIconImage()" alt="Icon" class="w-8 h-8" />
+        </div>
+
+        <!-- Content -->
+        <div class="flex-1">
+          <h5 class="font-bold text-lg m-0 mb-1">
+            {{ displayTitle() }}
+          </h5>
+          <p class="m-0 text-sm opacity-90">
+            {{ displaySubtitle() }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</p-card>

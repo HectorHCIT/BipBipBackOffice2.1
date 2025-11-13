@@ -1,0 +1,127 @@
+<div class="chat-body">
+  <div
+    #scrollContainer
+    class="chat-body__scroll"
+    (scroll)="onScroll()"
+  >
+    @for (block of messageBlocks; track trackByBlock($index, block)) {
+    <!-- Separador de día -->
+    <div class="w-full h-10 flex justify-center items-center py-4">
+      <p-tag severity="info" [value]="block.date" />
+    </div>
+
+    <!-- Mensajes del día -->
+    <div class="flex flex-col gap-2 px-4 pb-4">
+      @for (message of block.messages; track trackByMessage($index, message)) { @if
+      (message.isFromCustomer) {
+      <!-- Mensaje del cliente (izquierda) -->
+      <div class="w-full flex justify-start my-2">
+        <div class="flex items-start gap-2 max-w-[70%]">
+          <!-- Avatar -->
+          <span
+            class="chat-body__avatar"
+            [style.backgroundColor]="getAvatarColor()"
+          >
+            {{ getInitial(chatInfo.emisor) }}
+          </span>
+
+          <!-- Burbuja del mensaje -->
+          <div class="chat-body__bubble chat-body__bubble--customer">
+            <p class="chat-body__username">
+              {{ getUserName(true) }}
+            </p>
+
+            @if (message.imageUrl) {
+            <img
+              [src]="message.imageUrl"
+              alt="Imagen adjunta"
+              class="chat-body__image"
+              (click)="onImageClick(message.imageUrl!)"
+              loading="lazy"
+            />
+            }
+
+            <p class="chat-body__message">{{ message.message }}</p>
+
+            <div class="chat-body__timestamp">
+              <span class="chat-body__time">{{ formatTime(message.timestamp) }}</span>
+              <i class="pi pi-check text-xs opacity-60"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      } @else {
+      <!-- Mensaje del agente (derecha) -->
+      <div class="w-full flex justify-end my-2">
+        <div class="flex items-start gap-2 max-w-[70%]">
+          <!-- Burbuja del mensaje -->
+          <div class="chat-body__bubble chat-body__bubble--agent">
+            <p class="chat-body__username">
+              {{ getUserName(false) }}
+            </p>
+
+            @if (message.imageUrl) {
+            <img
+              [src]="message.imageUrl"
+              alt="Imagen adjunta"
+              class="chat-body__image"
+              (click)="onImageClick(message.imageUrl!)"
+              loading="lazy"
+            />
+            }
+
+            <p class="chat-body__message">{{ message.message }}</p>
+
+            <div class="chat-body__timestamp">
+              <span class="chat-body__time">{{ formatTime(message.timestamp) }}</span>
+              <i class="pi pi-check text-xs opacity-60"></i>
+            </div>
+          </div>
+
+          <!-- Avatar -->
+          <span
+            class="chat-body__avatar"
+            [style.backgroundColor]="getAvatarColor()"
+          >
+            {{ getInitial(chatInfo.receptor) }}
+          </span>
+        </div>
+      </div>
+      } }
+    </div>
+    }
+
+    <!-- Indicador de carga -->
+    @if (loading) {
+    <div class="chat-body__loading">
+      <div class="flex gap-2">
+        <div class="chat-body__loading-dot"></div>
+        <div class="chat-body__loading-dot" style="animation-delay: 0.3s"></div>
+        <div class="chat-body__loading-dot" style="animation-delay: 0.6s"></div>
+      </div>
+    </div>
+    }
+  </div>
+
+  <!-- Botón flotante para scroll al fondo -->
+  @if (showScrollButton) {
+  <div class="chat-body__scroll-button">
+    <p-button
+      icon="pi pi-arrow-down"
+      [rounded]="true"
+      severity="danger"
+      (onClick)="scrollToBottomClick()"
+      [title]="'Ir al final del chat'"
+    />
+
+    <!-- Badge de mensajes no leídos -->
+    @if (unreadCount > 0) {
+    <p-badge
+      [value]="unreadCount > 9 ? '9+' : unreadCount.toString()"
+      severity="warn"
+      styleClass="absolute -top-1 -right-1"
+    />
+    }
+  </div>
+  }
+</div>

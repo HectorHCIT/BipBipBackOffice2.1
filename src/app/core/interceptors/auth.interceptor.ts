@@ -7,6 +7,15 @@ import { HttpInterceptorFn } from '@angular/common/http';
  * Excepto para rutas públicas como /Login
  */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
+  // Verificar si se debe omitir el interceptor (para llamadas externas como S3)
+  if (req.headers.has('Skip-Auth-Interceptor')) {
+    // Eliminar el header auxiliar y continuar sin agregar Authorization
+    const cleanReq = req.clone({
+      headers: req.headers.delete('Skip-Auth-Interceptor')
+    });
+    return next(cleanReq);
+  }
+
   // Rutas que NO necesitan token
   const publicRoutes = ['/Login', '/RefreshToken', '/Register'];
 

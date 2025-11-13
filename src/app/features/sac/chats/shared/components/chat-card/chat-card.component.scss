@@ -1,0 +1,176 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.chat-card {
+  width: 100%;
+  background-color: var(--surface-0);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--surface-border);
+  box-shadow: var(--card-shadow);
+  cursor: pointer;
+  margin-bottom: 0.5rem;
+  transition: all 0.2s ease;
+
+  &:hover {
+    box-shadow: var(--hover-shadow, 0 4px 6px rgba(0, 0, 0, 0.1));
+  }
+
+  // Estado seleccionado
+  &--selected {
+    border-color: var(--red-500);
+    background-color: var(--surface-0);
+  }
+
+  // Estado con mensajes no leídos
+  &--unread {
+    border-color: var(--blue-400);
+    background-color: var(--blue-50);
+  }
+
+  &__content {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    gap: 0.75rem;
+  }
+
+  // Avatares superpuestos (cliente y agente)
+  &__avatars {
+    position: relative;
+    flex-shrink: 0;
+    width: 3.5rem;
+    height: 2.5rem;
+    display: grid;
+    grid-template-columns: max-content;
+    grid-template-rows: max-content;
+
+    .avatar-circle {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+      &--customer {
+        grid-area: 1 / 1;
+        margin-left: 0;
+        margin-top: 0;
+      }
+
+      &--agent {
+        grid-area: 1 / 1;
+        margin-left: 0.7rem;
+        margin-top: 1.6rem;
+      }
+    }
+
+    .avatar-initial {
+      color: var(--gray-700);
+      font-weight: 700;
+      font-size: 1rem;
+    }
+  }
+
+  // Información del chat (3 filas)
+  &__info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    justify-content: center;
+  }
+
+  // Cada fila de información
+  &__row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    width: 100%;
+
+    // Primera fila tiene texto mediano (14px) e iconos de 16px
+    &:first-child {
+      .text {
+        font-size: 0.875rem;
+        font-weight: 500;
+      }
+
+      i {
+        font-size: 1rem;
+      }
+    }
+
+    // Segunda y tercera fila tienen texto normal (12px) e iconos de 14px
+    &:not(:first-child) {
+      .text {
+        font-size: 0.75rem;
+        font-weight: 400;
+      }
+
+      i {
+        font-size: 0.875rem;
+      }
+    }
+  }
+
+  // Separador vertical entre elementos
+  .separator {
+    width: 1px;
+    height: 1.3rem;
+    background-color: var(--surface-border);
+    flex-shrink: 0;
+  }
+
+  // Grupos de información (icono + texto)
+  .info-group {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    flex-shrink: 0;
+
+    i {
+      color: var(--text-color-secondary);
+      flex-shrink: 0;
+    }
+
+    &--location {
+      flex: 1;
+      min-width: 0;
+
+      .text {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+  }
+
+  .text {
+    color: var(--text-color);
+    white-space: nowrap;
+
+    &--medium {
+      font-weight: 500;
+    }
+  }
+
+  // Menú de opciones a la derecha
+  &__menu {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+// Helper classes
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

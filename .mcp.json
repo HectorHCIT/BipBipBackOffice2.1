@@ -17,7 +17,7 @@
     },
     "Figma Dev Mode MCP": {
       "type": "http",
-      "url": "http://127.0.0.1:3845/sse"
+      "url": "http://127.0.0.1:3845/mcp"
     },
     "primeng": {
       "comment": "OPCIÓN 1: Modo Producción (Requiere npm run build primero)",

@@ -1,0 +1,175 @@
+<p-card>
+  <ng-template pTemplate="header">
+    <div class="p-4">
+      <h3 class="text-lg font-semibold m-0">Agregar Beneficio</h3>
+    </div>
+  </ng-template>
+
+  <div [formGroup]="addBenefitForm()" class="flex flex-col gap-4">
+    <!-- Type, Name, Description -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <!-- Benefit Type -->
+      <div class="flex flex-col gap-2">
+        <label class="font-semibold text-sm">
+          Tipo de Beneficio
+          <span class="text-red-500">*</span>
+        </label>
+        <p-select
+          formControlName="type"
+          [options]="benefitTypeOptions"
+          placeholder="Seleccionar tipo"
+          optionLabel="label"
+          optionValue="value"
+        />
+      </div>
+
+      <!-- Benefit Name -->
+      <div class="flex flex-col gap-2">
+        <label class="font-semibold text-sm">
+          Nombre del Beneficio
+          <span class="text-red-500">*</span>
+        </label>
+        <input
+          type="text"
+          pInputText
+          formControlName="nameBenefit"
+          placeholder="Ej: Envío gratis en tu primer pedido"
+        />
+      </div>
+
+      <!-- Active Status -->
+      <div class="flex flex-col gap-2">
+        <label class="font-semibold text-sm">Estado</label>
+        <div class="flex items-center gap-2">
+          <p-toggleswitch formControlName="active" />
+          <span class="text-sm">{{ addBenefitForm().get('active')?.value ? 'Activo' : 'Inactivo' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Description -->
+    <div class="flex flex-col gap-2">
+      <label class="font-semibold text-sm">
+        Descripción
+        <span class="text-red-500">*</span>
+      </label>
+      <textarea
+        pInputText
+        formControlName="descriptionBenefit"
+        rows="3"
+        placeholder="Describe el beneficio..."
+      ></textarea>
+    </div>
+
+    <!-- Discount Field (conditional: DF/DP) -->
+    @if (shouldShowDiscount()) {
+      <p-divider />
+      <div class="flex flex-col gap-2">
+        <label class="font-semibold text-sm">
+          Descuento
+          <span class="text-red-500">*</span>
+        </label>
+        <p-inputnumber
+          formControlName="priceDiscount"
+          [min]="0"
+          [minFractionDigits]="2"
+          [maxFractionDigits]="2"
+          [showButtons]="true"
+          [placeholder]="addBenefitForm().get('type')?.value === 'DF' ? 'Monto en $' : 'Porcentaje %'"
+        />
+        @if (addBenefitForm().get('type')?.value === 'DF') {
+          <small class="text-color-secondary">Ingresa el monto fijo del descuento (ej: 10.00)</small>
+        } @else {
+          <small class="text-color-secondary">Ingresa el porcentaje de descuento (ej: 15)</small>
+        }
+      </div>
+    }
+
+    <!-- Product Selector (conditional: AG/PG) -->
+    @if (shouldShowProduct()) {
+      <p-divider />
+      <div class="flex flex-col gap-4">
+        <h4 class="text-md font-semibold m-0">Productos del Beneficio</h4>
+
+        <!-- Product Selector Form -->
+        <app-product-selector
+          [productForm]="productForm"
+          [brands]="brands"
+        />
+
+        <!-- Add Product Button -->
+        <div class="flex justify-end">
+          <p-button
+            label="Agregar Producto"
+            icon="pi pi-plus"
+            severity="secondary"
+            (onClick)="onAddProduct()"
+            [disabled]="!productForm.get('productCode')?.value"
+          />
+        </div>
+
+        <!-- Products Table -->
+        @if (tempProductsArray.length > 0) {
+          <div class="border border-surface rounded">
+            <p-table [value]="getTempProductsTableData()" [tableStyle]="{'min-width': '50rem'}">
+              <ng-template pTemplate="header">
+                <tr>
+                  <th>Marca</th>
+                  <th>Código</th>
+                  <th>Cantidad</th>
+                  <th>Modificadores</th>
+                  <th>Estado</th>
+                  <th style="width: 100px">Acciones</th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-product>
+                <tr>
+                  <td>{{ product.brandName }}</td>
+                  <td>{{ product.productCode }}</td>
+                  <td>{{ product.quantity }}</td>
+                  <td>
+                    @if (product.modifiersCount > 0) {
+                      <p-tag [value]="product.modifiersCount + ' modificador(es)'" severity="info" />
+                    } @else {
+                      <span class="text-color-secondary">Sin modificadores</span>
+                    }
+                  </td>
+                  <td>
+                    <p-tag
+                      [value]="product.active ? 'Activo' : 'Inactivo'"
+                      [severity]="product.active ? 'success' : 'secondary'"
+                    />
+                  </td>
+                  <td>
+                    <p-button
+                      icon="pi pi-trash"
+                      severity="danger"
+                      [text]="true"
+                      [rounded]="true"
+                      (onClick)="onRemoveProduct(product.index)"
+                    />
+                  </td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </div>
+        } @else {
+          <div class="p-4 border border-dashed border-surface rounded text-center">
+            <p class="text-color-secondary m-0">No hay productos agregados. Selecciona un producto y haz clic en "Agregar Producto".</p>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Add Button -->
+    <p-divider />
+    <div class="flex justify-end">
+      <p-button
+        label="Agregar Beneficio"
+        icon="pi pi-plus"
+        (onClick)="onAddBenefit()"
+        [disabled]="addBenefitForm().invalid"
+      />
+    </div>
+  </div>
+</p-card>

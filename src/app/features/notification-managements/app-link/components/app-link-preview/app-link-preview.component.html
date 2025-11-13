@@ -1,0 +1,44 @@
+<p-card>
+  <ng-template pTemplate="header">
+    <div class="p-4">
+      <h4 class="text-md font-semibold m-0">Vista Previa Móvil</h4>
+    </div>
+  </ng-template>
+
+  <div class="flex justify-center p-4">
+    <div class="mobile-preview-container">
+      <!-- Mobile Frame -->
+      <div class="mobile-frame">
+        <!-- Image -->
+        @if (displayImage()) {
+          <div class="preview-image-container">
+            <img
+              [src]="displayImage()"
+              [alt]="displayTitle()"
+              class="preview-image"
+            />
+            <!-- Badge -->
+            <div class="image-badge">
+              <p-tag
+                [value]="displayUseCustomImage() ? 'Imagen Personalizada' : 'Imagen de Producto'"
+                [severity]="displayUseCustomImage() ? 'info' : 'success'"
+                [rounded]="true"
+              />
+            </div>
+          </div>
+        } @else {
+          <div class="preview-image-placeholder">
+            <i class="pi pi-image text-4xl text-color-secondary"></i>
+            <p class="text-sm text-color-secondary m-0 mt-2">Sin imagen</p>
+          </div>
+        }
+
+        <!-- Content -->
+        <div class="preview-content">
+          <h3 class="preview-title">{{ displayTitle() }}</h3>
+          <p class="preview-description">{{ displayDescription() }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</p-card>

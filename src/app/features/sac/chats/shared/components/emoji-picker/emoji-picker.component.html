@@ -1,0 +1,95 @@
+<div class="emoji-picker">
+  <!-- Header con búsqueda -->
+  <div class="emoji-picker__header">
+    <input
+      type="text"
+      class="emoji-picker__search"
+      placeholder="Buscar emoji..."
+      [value]="searchTerm()"
+      (input)="onSearchChange($event)"
+    />
+  </div>
+
+  <!-- Categorías (tabs) -->
+  <div class="emoji-picker__categories">
+    @for (category of categories(); track category.id) {
+      <button
+        type="button"
+        class="emoji-picker__category-btn"
+        [class.emoji-picker__category-btn--active]="selectedCategoryId() === category.id"
+        (click)="selectCategory(category.id)"
+        [title]="category.categoria"
+      >
+        <i class="pi" [class]="getCategoryIcon(category.id)"></i>
+      </button>
+    }
+  </div>
+
+  <!-- Grid de emojis -->
+  <div class="emoji-picker__grid-container">
+    @if (searchTerm()) {
+      <!-- Resultados de búsqueda -->
+      <div class="emoji-picker__section">
+        <div class="emoji-picker__section-title">
+          Resultados de búsqueda ({{ filteredEmojis.length }})
+        </div>
+        <div class="emoji-picker__grid">
+          @for (emoji of filteredEmojis; track $index) {
+            <button
+              type="button"
+              class="emoji-picker__emoji"
+              (click)="selectEmoji(emoji.emoji)"
+              [title]="emoji.nombre"
+            >
+              {{ emoji.emoji }}
+            </button>
+          }
+          @empty {
+            <div class="emoji-picker__empty">
+              No se encontraron emojis
+            </div>
+          }
+        </div>
+      </div>
+    } @else {
+      <!-- Emojis recientes -->
+      @if (recentEmojis().length > 0) {
+        <div class="emoji-picker__section">
+          <div class="emoji-picker__section-title">Recientes</div>
+          <div class="emoji-picker__grid">
+            @for (emoji of recentEmojis(); track $index) {
+              <button
+                type="button"
+                class="emoji-picker__emoji"
+                (click)="selectEmoji(emoji)"
+              >
+                {{ emoji }}
+              </button>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Categoría seleccionada -->
+      @if (selectedCategory) {
+        <div class="emoji-picker__section">
+          <div class="emoji-picker__section-title">
+            {{ selectedCategory.categoria }}
+          </div>
+          <div class="emoji-picker__grid">
+            @for (emoji of selectedCategory.emojis; track $index) {
+              <button
+                type="button"
+                class="emoji-picker__emoji"
+                (click)="selectEmoji(emoji.emoji)"
+                [title]="emoji.nombre"
+              >
+                {{ emoji.emoji }}
+              </button>
+            }
+          </div>
+        </div>
+      }
+    }
+  </div>
+</div>
