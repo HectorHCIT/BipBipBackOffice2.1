@@ -27,7 +27,7 @@
   grid-template-columns: 380px 1fr;
   height: calc(100vh - 80px);
 
-  // Responsive
+  // Responsive - Breakpoints para diferentes tamaños de pantalla
   @media (max-width: 1440px) {
     grid-template-columns: 350px 1fr;
   }
@@ -36,12 +36,35 @@
     grid-template-columns: 320px 1fr;
   }
 
+  // Mobile: Una sola columna, estilo WhatsApp
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
 
-    // En mobile, ocultar la primera columna si hay chat seleccionado
-    > div:first-child {
-      display: none;
+    // Lista de chats ocupa todo el ancho en móvil
+    .mobile-chat-list {
+      width: 100%;
+      border-right: none !important;
     }
+
+    // Vista de chat ocupa todo el ancho en móvil
+    .mobile-chat-view {
+      width: 100%;
+    }
+
+    // Ocultar elementos según estado (estilo WhatsApp)
+    .mobile-hidden {
+      display: none !important;
+    }
+  }
+}
+
+// Breadcrumb: ocultar en pantallas muy pequeñas
+@media (max-width: 640px) {
+  .sac-cliente-page > div:first-child {
+    display: none;
+  }
+
+  .page-content {
+    height: 100vh;
   }
 }

@@ -92,7 +92,8 @@ export class ChatAdapterService {
   toCardData(
     chat: FirebaseChatDocument,
     unreadCount: number = 0,
-    isSelected: boolean = false
+    isSelected: boolean = false,
+    customerName?: string
   ): ChatCardData {
     const createdAt = this.timestampToDate(chat.createdAt);
     const assignedAt = chat.dateTimeAssigned
@@ -102,7 +103,7 @@ export class ChatAdapterService {
     return {
       id: chat.uid,
       customerId: chat.customerId,
-      customerName: `Cliente ${chat.customerId}`,  // Por defecto mostrar ID
+      customerName: customerName || `Cliente ${chat.customerId}`,  // Usar el nombre real si está disponible
       agentName: chat.userName || 'Sin asignar',
       chatType: getChatType(chat.uid),
       orderNumber: getChatType(chat.uid) === 'order'

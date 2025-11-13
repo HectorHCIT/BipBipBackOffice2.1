@@ -1,0 +1,6 @@
+// Sidebar responsive: oculto en mobile (≤768px)
+aside {
+  @media (max-width: 768px) {
+    display: none !important;
+  }
+}

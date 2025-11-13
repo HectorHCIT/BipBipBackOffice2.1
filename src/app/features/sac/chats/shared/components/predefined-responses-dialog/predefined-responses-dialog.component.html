@@ -1,0 +1,174 @@
+<div class="predefined-responses">
+  <!-- Header -->
+  <div class="predefined-responses__header">
+    <h3 class="predefined-responses__title">Respuestas automáticas</h3>
+
+    <div class="predefined-responses__actions">
+      @if (mode() === 'list') {
+        <p-button
+          label="Agregar respuesta"
+          icon="pi pi-plus"
+          (onClick)="toggleMode()"
+          [outlined]="true"
+          size="small"
+        />
+      }
+
+      <p-button
+        icon="pi pi-times"
+        [rounded]="true"
+        [text]="true"
+        severity="secondary"
+        (onClick)="close()"
+      />
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="predefined-responses__content">
+
+    <!-- MODO LISTA -->
+    @if (mode() === 'list') {
+      <div class="predefined-responses__list-mode">
+
+        <!-- Buscador -->
+        <div class="predefined-responses__search">
+          <p-iconfield>
+            <p-inputicon styleClass="pi pi-search" />
+            <input
+              pInputText
+              [(ngModel)]="searchTerm"
+              placeholder="Buscar por nombre o contenido..."
+              class="w-full"
+            />
+          </p-iconfield>
+        </div>
+
+        <!-- Loading -->
+        @if (isLoading()) {
+          <div class="predefined-responses__loading">
+            <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+            <p>Cargando respuestas...</p>
+          </div>
+        }
+
+        <!-- Lista de respuestas -->
+        @if (!isLoading()) {
+          @if (filteredResponses().length === 0) {
+            <div class="predefined-responses__empty">
+              <i class="pi pi-inbox"></i>
+              <p>{{ searchTerm() ? 'No se encontraron respuestas' : 'No hay respuestas automáticas creadas' }}</p>
+              @if (!searchTerm()) {
+                <p-button
+                  label="Crear primera respuesta"
+                  icon="pi pi-plus"
+                  (onClick)="toggleMode()"
+                  [outlined]="true"
+                />
+              }
+            </div>
+          } @else {
+            <p-dataView [value]="filteredResponses()" layout="list">
+              <ng-template let-response pTemplate="listItem">
+                <div
+                  class="predefined-responses__card"
+                  (click)="selectResponse(response)"
+                >
+                  <div class="predefined-responses__card-content">
+                    <h4 class="predefined-responses__card-title">
+                      {{ response.title }}
+                    </h4>
+                    <p class="predefined-responses__card-text">
+                      {{ response.response }}
+                    </p>
+                  </div>
+
+                  <button
+                    pButton
+                    icon="pi pi-ellipsis-v"
+                    class="p-button-text p-button-secondary p-button-rounded predefined-responses__card-menu-btn"
+                    (click)="$event.stopPropagation(); menu.toggle($event)"
+                  ></button>
+
+                  <p-menu
+                    #menu
+                    [model]="getMenuItems(response)"
+                    [popup]="true"
+                    appendTo="body"
+                  />
+                </div>
+              </ng-template>
+            </p-dataView>
+          }
+        }
+      </div>
+    }
+
+    <!-- MODO FORMULARIO -->
+    @if (mode() === 'form') {
+      <div class="predefined-responses__form-mode">
+        <form class="predefined-responses__form">
+
+          <!-- Título -->
+          <div class="predefined-responses__form-field">
+            <label class="predefined-responses__form-label">
+              Nombre de la respuesta <span class="text-red-500">*</span>
+            </label>
+            <input
+              pInputText
+              [(ngModel)]="formData().title"
+              name="title"
+              placeholder="Ej: Saludo inicial, Despedida, etc."
+              class="w-full"
+              maxlength="100"
+            />
+          </div>
+
+          <!-- Respuesta -->
+          <div class="predefined-responses__form-field">
+            <label class="predefined-responses__form-label">
+              Respuesta automática <span class="text-red-500">*</span>
+            </label>
+            <textarea
+              pInputTextarea
+              [(ngModel)]="formData().response"
+              name="response"
+              rows="10"
+              class="w-full"
+              maxlength="1000"
+              placeholder="Escribe aquí la respuesta que deseas guardar..."
+            ></textarea>
+            <small class="predefined-responses__form-counter">
+              {{ characterCount() }}/1000 caracteres
+            </small>
+          </div>
+
+          <!-- Acciones -->
+          <div class="predefined-responses__form-actions">
+            <p-button
+              label="Guardar"
+              icon="pi pi-check"
+              (onClick)="submit()"
+              [loading]="isSubmitting()"
+              [disabled]="!canSubmit()"
+            />
+            <p-button
+              label="Cancelar"
+              icon="pi pi-times"
+              (onClick)="cancelForm()"
+              severity="secondary"
+              [outlined]="true"
+              [disabled]="isSubmitting()"
+            />
+          </div>
+        </form>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Toast para notificaciones -->
+<p-toast />
+
+<!-- Confirm Dialog para eliminación -->
+<p-confirmDialog />

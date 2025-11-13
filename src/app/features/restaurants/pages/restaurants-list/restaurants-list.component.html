@@ -148,19 +148,18 @@
               ></p-button>
               <p-divider />
                <p-button
-                label="Desactivar Domicilio"
+                [label]="restaurant.publish ? 'Desactivar Domicilio' : 'Activar Domicilio'"
                 icon="pi pi-delete-left"
                 severity="warn"
                 variant="text"
-                (click)="onEditRestaurant(restaurant.restId, popover)"
+                (click)="onToggleDeliveryStatus(restaurant.restId, popover)"
               ></p-button>
                <p-button
-                label="Desactivar General"
-
+                [label]="isActiveDelivery(restaurant.active, restaurant.publish) ? 'Desactivar General' : 'Activar General'"
                 icon="pi pi-trash"
                 severity="danger"
                 variant="text"
-                (click)="onEditRestaurant(restaurant.restId, popover)"
+                (click)="onToggleStoreStatus(restaurant.restId, popover)"
               ></p-button>
             </div>
           </p-popover>

@@ -1,5 +1,5 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { Observable, tap, catchError, of } from 'rxjs';
+import { Observable, tap, catchError, of, map } from 'rxjs';
 import { DataService } from '@core/services/data.service';
 import { ImageUploadService } from '@shared/services/image-upload.service';
 import {
@@ -185,11 +185,18 @@ export class AppLinkService {
 
   /**
    * Get products by brand ID
+   * Maps productId to productCode for form compatibility
    */
   getProductsByBrand(brandId: number): Observable<ProductData[]> {
     return this.dataService
       .get$<ProductData[]>('Incentives/products', { brandId })
       .pipe(
+        map((products) =>
+          products.map((product) => ({
+            ...product,
+            productCode: product.productId, // Backend uses productId as the code
+          }))
+        ),
         catchError((error) => {
           console.error(`Error loading products for brand ${brandId}:`, error);
           return of([]);

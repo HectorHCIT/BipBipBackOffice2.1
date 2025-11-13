@@ -3,3 +3,7 @@
  */
 
 export * from './location.service';
+export * from './automatic-reply.service';
+export * from './customer.service';
+export * from './chat-history.service';
+export * from './push-notification.service';

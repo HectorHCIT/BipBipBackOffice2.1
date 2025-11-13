@@ -1,49 +1,53 @@
 import {
   Component,
-  Input,
   ChangeDetectionStrategy,
-  signal,
+  input,
+  computed,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
+import { ButtonModule } from 'primeng/button';
 
 /**
  * App Link Preview Component
  * Displays a mobile-style preview of how the app link will look
+ * Replicates the mobile app experience with header, content, and footer
  */
 @Component({
   selector: 'app-app-link-preview',
   standalone: true,
-  imports: [CommonModule, CardModule, TagModule],
+  imports: [CommonModule, CardModule, TagModule, ButtonModule],
   templateUrl: './app-link-preview.component.html',
   styleUrls: ['./app-link-preview.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppLinkPreviewComponent {
-  private readonly _image = signal('');
-  private readonly _title = signal('Título del enlace');
-  private readonly _description = signal('Descripción del enlace dinámico');
-  private readonly _useCustomImage = signal(false);
+  // Inputs
+  readonly image = input<string>('');
+  readonly title = input<string>('Título del enlace');
+  readonly description = input<string>('Descripción del enlace dinámico');
+  readonly useCustomImage = input<boolean>(false);
+  readonly brandName = input<string>('');
+  readonly pendingFields = input<number>(0);
 
-  @Input() set image(value: string) {
-    this._image.set(value);
-  }
+  // Computed
+  readonly currentTime = computed(() => {
+    const now = new Date();
+    return now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+  });
 
-  @Input() set title(value: string) {
-    this._title.set(value);
-  }
+  readonly imageType = computed(() =>
+    this.useCustomImage() ? 'Imagen personalizada' : 'Imagen del producto'
+  );
 
-  @Input() set description(value: string) {
-    this._description.set(value);
-  }
+  readonly imageTypeSeverity = computed(() =>
+    this.useCustomImage() ? 'info' : 'success'
+  );
 
-  @Input() set useCustomImage(value: boolean) {
-    this._useCustomImage.set(value);
-  }
-
-  readonly displayImage = this._image.asReadonly();
-  readonly displayTitle = this._title.asReadonly();
-  readonly displayDescription = this._description.asReadonly();
-  readonly displayUseCustomImage = this._useCustomImage.asReadonly();
+  readonly pendingMessage = computed(() => {
+    const count = this.pendingFields();
+    if (count === 0) return 'Formulario completo';
+    return `${count} campo${count > 1 ? 's' : ''} pendiente${count > 1 ? 's' : ''}`;
+  });
 }

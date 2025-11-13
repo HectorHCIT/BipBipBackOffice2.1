@@ -42,16 +42,16 @@ export interface CreateUpdateAppLinkRequest {
 
 /**
  * Product from catalog
+ * Note: productId from backend is actually the product code (string like "WOWBOXCLA")
  */
 export interface ProductData {
-  productId: number;
-  productCode: string;
+  productId: string;        // Actually the product code (e.g., "WOWBOXCLA")
   name: string;
   description: string;
-  price: number;
+  price: string;            // Comes as string from backend
   brand: string;
-  brandId: number;
   imageUrl: string;
+  productCode?: string;     // Added by service mapping productId → productCode
 }
 
 /**

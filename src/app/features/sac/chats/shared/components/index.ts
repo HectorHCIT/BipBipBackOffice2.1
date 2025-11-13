@@ -7,3 +7,4 @@ export * from './chat-body/chat-body.component';
 export * from './chat-body/chat-body.types';
 export * from './emoji-picker';
 export * from './image-viewer-dialog';
+export * from './predefined-responses-dialog';

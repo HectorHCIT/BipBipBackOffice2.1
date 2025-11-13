@@ -1,0 +1,177 @@
+<!-- 2-Column Layout: Form (left) | Preview (right) -->
+<div class="w-full min-h-[80vh] grid grid-cols-1 xl:grid-cols-2 gap-6">
+  <!-- Left Column: Form -->
+  <div class="flex flex-col gap-4">
+    <form [formGroup]="appLinkForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
+      <!-- Campaign Name -->
+      <div class="flex flex-col gap-2">
+        <label class="font-semibold text-sm">Nombre de Campaña <span class="text-red-500">*</span></label>
+        <p-iconfield iconPosition="left">
+          <p-inputicon styleClass="pi pi-tag" />
+          <input type="text" pInputText formControlName="campaignName" placeholder="ej: PROMO_VERANO_2025" class="w-full" />
+        </p-iconfield>
+        <small class="text-color-secondary">Identificador único de la campaña (max 100 caracteres)</small>
+      </div>
+
+      <!-- Brand & Channel in grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Brand -->
+        <div class="flex flex-col gap-2">
+          <label class="font-semibold text-sm">Marca <span class="text-red-500">*</span></label>
+          <p-select
+            formControlName="brandId"
+            [options]="brands()"
+            optionLabel="name"
+            optionValue="id"
+            placeholder="Seleccionar marca"
+            [filter]="true"
+            filterPlaceholder="Buscar marca..."
+            class="w-full"
+          />
+        </div>
+
+        <!-- Channel (Optional) -->
+        <div class="flex flex-col gap-2">
+          <label class="font-semibold text-sm">Canal</label>
+          <p-select
+            formControlName="channelId"
+            [options]="channels()"
+            optionLabel="description"
+            optionValue="id"
+            placeholder="Todos los canales"
+            [showClear]="true"
+            class="w-full"
+          />
+        </div>
+      </div>
+
+      <!-- City & Product in grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- City (Optional) -->
+        <div class="flex flex-col gap-2">
+          <label class="font-semibold text-sm">Ciudad</label>
+          <p-select
+            formControlName="cityId"
+            [options]="cities()"
+            optionLabel="name"
+            optionValue="id"
+            placeholder="Todas las ciudades"
+            [showClear]="true"
+            class="w-full"
+          />
+        </div>
+
+        <!-- Product -->
+        <div class="flex flex-col gap-2">
+          <label class="font-semibold text-sm">Producto <span class="text-red-500">*</span></label>
+          <p-select
+            formControlName="productCode"
+            [options]="products()"
+            optionLabel="name"
+            optionValue="productCode"
+            placeholder="Seleccionar producto"
+            [filter]="true"
+            filterPlaceholder="Buscar producto..."
+            [disabled]="!appLinkForm.get('brandId')?.value"
+            class="w-full"
+          >
+            <ng-template pTemplate="item" let-product>
+              <div class="flex items-center gap-2">
+                @if (product.imageUrl) {
+                  <img [src]="product.imageUrl" [alt]="product.name" class="w-10 h-10 object-cover rounded" />
+                }
+                <div>
+                  <div>{{ product.name }}</div>
+                  <small class="text-color-secondary">{{ product.productCode }}</small>
+                </div>
+              </div>
+            </ng-template>
+          </p-select>
+          @if (!appLinkForm.get('brandId')?.value) {
+            <small class="text-color-secondary">Primero selecciona una marca</small>
+          }
+        </div>
+      </div>
+
+      <!-- Custom Image Section -->
+      <div class="border border-surface-200 rounded-lg p-4">
+        <!-- Custom Image Toggle -->
+        <div class="flex items-center gap-2 mb-3">
+          <p-toggleswitch formControlName="useCustomImage" />
+          <label class="font-semibold text-sm cursor-pointer" (click)="appLinkForm.patchValue({ useCustomImage: !appLinkForm.get('useCustomImage')?.value })">
+            Usar imagen personalizada
+          </label>
+        </div>
+
+        <!-- Custom Image Upload -->
+        @if (appLinkForm.get('useCustomImage')?.value) {
+          <div class="flex flex-col gap-2">
+            <input
+              type="file"
+              accept="image/*"
+              (change)="onFileSelected($event)"
+              class="block w-full text-sm text-color-secondary
+                file:mr-4 file:py-2 file:px-4
+                file:rounded file:border-0
+                file:text-sm file:font-semibold
+                file:bg-primary file:text-primary-contrast
+                hover:file:bg-primary-emphasis cursor-pointer"
+            />
+            <small class="text-color-secondary">Máximo 5MB. Se optimizará automáticamente.</small>
+          </div>
+        }
+      </div>
+
+      <!-- Title -->
+      <div class="flex flex-col gap-2">
+        <label class="font-semibold text-sm">Título <span class="text-red-500">*</span></label>
+        <p-iconfield iconPosition="left">
+          <p-inputicon styleClass="pi pi-bookmark" />
+          <input type="text" pInputText formControlName="title" placeholder="Título del enlace" class="w-full" />
+        </p-iconfield>
+        <small class="text-color-secondary">Máximo 60 caracteres, sin caracteres especiales</small>
+      </div>
+
+      <!-- Description -->
+      <div class="flex flex-col gap-2">
+        <label class="font-semibold text-sm">Descripción <span class="text-red-500">*</span></label>
+        <textarea pInputText formControlName="description" rows="3" placeholder="Descripción del enlace" class="w-full"></textarea>
+        <small class="text-color-secondary">Máximo 200 caracteres</small>
+      </div>
+
+      <!-- Active Status -->
+      <div class="flex items-center gap-2">
+        <p-toggleswitch formControlName="isActive" />
+        <label class="font-semibold text-sm cursor-pointer" (click)="appLinkForm.patchValue({ isActive: !appLinkForm.get('isActive')?.value })">
+          Activo
+        </label>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex gap-2 justify-end mt-4">
+        <p-button label="Cancelar" severity="secondary" [outlined]="true" (onClick)="onCancel()" type="button" />
+        <p-button
+          [label]="appLink() ? 'Actualizar' : 'Crear'"
+          icon="pi pi-check"
+          type="submit"
+          [disabled]="appLinkForm.invalid"
+          [loading]="isLoading()"
+        />
+      </div>
+    </form>
+  </div>
+
+  <!-- Right Column: Preview -->
+  <div class="flex flex-col">
+    <app-app-link-preview
+      [image]="appLinkForm.get('imageUrl')?.value || ''"
+      [title]="appLinkForm.get('title')?.value || 'Título del enlace'"
+      [description]="appLinkForm.get('description')?.value || 'Descripción del enlace dinámico'"
+      [useCustomImage]="appLinkForm.get('useCustomImage')?.value || false"
+      [brandName]="selectedBrandName()"
+      [pendingFields]="pendingFieldsCount()"
+    />
+  </div>
+</div>
+
+<p-toast />

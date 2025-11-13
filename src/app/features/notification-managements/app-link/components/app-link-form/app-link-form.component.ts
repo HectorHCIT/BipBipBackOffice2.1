@@ -1,15 +1,18 @@
 import {
   Component,
   OnInit,
+  OnChanges,
+  SimpleChanges,
   inject,
   signal,
+  computed,
+  input,
+  output,
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, ActivatedRoute } from '@angular/router';
 import {
   FormBuilder,
-  FormGroup,
   ReactiveFormsModule,
   Validators,
   AbstractControl,
@@ -25,29 +28,14 @@ import { TextareaModule } from 'primeng/textarea';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { MessageService } from 'primeng/api';
-import { DataService } from '@core/services/data.service';
+import { GlobalDataService } from '@core/services/global-data.service';
+import { Brand, Channel, CityShort } from '@core/models/global-data.model';
 import { AppLinkService } from '../../services';
 import { AppLinkPreviewComponent } from '../../components';
-import { ProductData } from '../../models';
-
-interface Brand {
-  brandId: number;
-  name: string;
-  logoBrand: string;
-}
-
-interface Channel {
-  id: number;
-  name: string;
-}
-
-interface City {
-  id: number;
-  name: string;
-}
+import { ProductData, DynamicLinkProduct } from '../../models';
 
 @Component({
-  selector: 'app-app-link-detail-page',
+  selector: 'app-app-link-form',
   standalone: true,
   imports: [
     CommonModule,
@@ -64,26 +52,64 @@ interface City {
     AppLinkPreviewComponent,
   ],
   providers: [MessageService],
-  templateUrl: './app-link-detail-page.component.html',
-  styleUrls: ['./app-link-detail-page.component.scss'],
+  templateUrl: './app-link-form.component.html',
+  styleUrls: ['./app-link-form.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppLinkDetailPageComponent implements OnInit {
+export class AppLinkFormComponent implements OnInit, OnChanges {
   private readonly appLinkService = inject(AppLinkService);
-  private readonly dataService = inject(DataService);
-  private readonly router = inject(Router);
-  private readonly route = inject(ActivatedRoute);
+  private readonly globalDataService = inject(GlobalDataService);
   private readonly fb = inject(FormBuilder);
   private readonly messageService = inject(MessageService);
 
-  readonly isEditMode = signal(false);
-  readonly isLoading = signal(false);
-  readonly appLinkId = signal<number | null>(null);
+  // Inputs
+  readonly appLink = input<DynamicLinkProduct | null>(null);
 
-  readonly brands = signal<Brand[]>([]);
+  // Outputs
+  readonly save = output<void>();
+  readonly cancel = output<void>();
+
+  readonly isLoading = signal(false);
+  readonly formValueChanged = signal(0); // Signal to track form changes
+
+  // Global data from GlobalDataService
+  readonly brands = this.globalDataService.brands;
+  readonly channels = this.globalDataService.channels;
+  readonly cities = this.globalDataService.citiesShort;
+
+  // Component-specific data
   readonly products = signal<ProductData[]>([]);
-  readonly channels = signal<Channel[]>([]);
-  readonly cities = signal<City[]>([]);
+
+  // Computed: selected brand name
+  readonly selectedBrandName = computed(() => {
+    // Trigger recomputation when form changes
+    this.formValueChanged();
+
+    const brandId = this.appLinkForm.get('brandId')?.value;
+    if (!brandId) return '';
+
+    const brand = this.brands().find(b => b.id === brandId);
+    return brand?.name || '';
+  });
+
+  // Computed: pending fields count
+  readonly pendingFieldsCount = computed(() => {
+    // Trigger recomputation when form changes
+    this.formValueChanged();
+
+    const form = this.appLinkForm;
+    let pendingCount = 0;
+
+    // Required fields
+    if (!form.get('campaignName')?.value) pendingCount++;
+    if (!form.get('title')?.value) pendingCount++;
+    if (!form.get('description')?.value) pendingCount++;
+    if (!form.get('brandId')?.value) pendingCount++;
+    if (!form.get('productCode')?.value) pendingCount++;
+    if (!form.get('imageUrl')?.value) pendingCount++;
+
+    return pendingCount;
+  });
 
   readonly appLinkForm = this.fb.nonNullable.group({
     campaignName: ['', [Validators.required, Validators.maxLength(100)]],
@@ -91,7 +117,7 @@ export class AppLinkDetailPageComponent implements OnInit {
     description: ['', [Validators.required, Validators.maxLength(200)]],
     brandId: [0 as number | null, Validators.required],
     productCode: ['', Validators.required],
-    urlDynamicLink: ['', [Validators.required, this.urlValidator]],
+    urlDynamicLink: ['https://www.bips.com/'],  // Hidden field with default value
     imageUrl: ['', Validators.required],
     useCustomImage: [false],
     customImageFile: [null as File | null],
@@ -101,15 +127,13 @@ export class AppLinkDetailPageComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.loadBrands();
-    this.loadChannels();
-    this.loadCities();
+    // Asegurar que los catálogos globales estén cargados
+    this.ensureGlobalDataLoaded();
 
-    const id = this.route.snapshot.paramMap.get('campaignName');
-    if (id) {
-      this.isEditMode.set(true);
-      this.loadAppLink(+id);
-    }
+    // Watch form changes to update pending fields count
+    this.appLinkForm.valueChanges.subscribe(() => {
+      this.formValueChanged.update(v => v + 1);
+    });
 
     // Watch brand changes to load products
     this.appLinkForm.get('brandId')?.valueChanges.subscribe((brandId) => {
@@ -140,25 +164,26 @@ export class AppLinkDetailPageComponent implements OnInit {
     });
   }
 
-  private loadBrands(): void {
-    this.dataService.get$<Brand[]>('Brand/BrandsListSorted').subscribe({
-      next: (brands) => this.brands.set(brands),
-      error: (error) => console.error('Error loading brands:', error),
-    });
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['appLink'] && this.appLink()) {
+      this.loadAppLinkData(this.appLink()!);
+    }
   }
 
-  private loadChannels(): void {
-    this.dataService.get$<Channel[]>('Channels').subscribe({
-      next: (channels) => this.channels.set(channels),
-      error: (error) => console.error('Error loading channels:', error),
-    });
-  }
-
-  private loadCities(): void {
-    this.dataService.get$<City[]>('Cities').subscribe({
-      next: (cities) => this.cities.set(cities),
-      error: (error) => console.error('Error loading cities:', error),
-    });
+  /**
+   * Asegura que los catálogos globales estén cargados
+   * Si están vacíos, dispara la carga
+   */
+  private ensureGlobalDataLoaded(): void {
+    if (this.brands().length === 0) {
+      this.globalDataService.forceRefresh('brands');
+    }
+    if (this.channels().length === 0) {
+      this.globalDataService.forceRefresh('channels');
+    }
+    if (this.cities().length === 0) {
+      this.globalDataService.forceRefresh('citiesShort');
+    }
   }
 
   private loadProducts(brandId: number): void {
@@ -168,41 +193,24 @@ export class AppLinkDetailPageComponent implements OnInit {
     });
   }
 
-  private loadAppLink(id: number): void {
-    this.isLoading.set(true);
-    this.appLinkService.getAppLinkById(id).subscribe({
-      next: (appLink) => {
-        this.appLinkId.set(appLink.dynamicLinkXProductId);
-        this.appLinkForm.patchValue({
-          campaignName: appLink.campaignName || '',
-          title: appLink.title,
-          description: appLink.description,
-          brandId: appLink.brandId,
-          productCode: appLink.productCode || '',
-          urlDynamicLink: appLink.deepLink,
-          imageUrl: appLink.imageUrl,
-          channelId: appLink.channelId,
-          cityId: appLink.cityId,
-          isActive: appLink.isActive,
-          useCustomImage: false,
-        });
-
-        if (appLink.brandId) {
-          this.loadProducts(appLink.brandId);
-        }
-
-        this.isLoading.set(false);
-      },
-      error: () => {
-        this.isLoading.set(false);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: `Error al cargar el app link ${id}`,
-        });
-        this.router.navigate(['/notification-managements/app-link']);
-      },
+  private loadAppLinkData(appLink: DynamicLinkProduct): void {
+    this.appLinkForm.patchValue({
+      campaignName: appLink.campaignName || '',
+      title: appLink.title,
+      description: appLink.description,
+      brandId: appLink.brandId,
+      productCode: appLink.productCode || '',
+      urlDynamicLink: appLink.deepLink,
+      imageUrl: appLink.imageUrl,
+      channelId: appLink.channelId,
+      cityId: appLink.cityId,
+      isActive: appLink.isActive,
+      useCustomImage: false,
     });
+
+    if (appLink.brandId) {
+      this.loadProducts(appLink.brandId);
+    }
   }
 
   onFileSelected(event: Event): void {
@@ -293,8 +301,9 @@ export class AppLinkDetailPageComponent implements OnInit {
       campaignName: formValue.campaignName,
     };
 
-    const request$ = this.isEditMode()
-      ? this.appLinkService.updateAppLink(this.appLinkId()!, requestData)
+    const isEditMode = !!this.appLink();
+    const request$ = isEditMode
+      ? this.appLinkService.updateAppLink(this.appLink()!.dynamicLinkXProductId, requestData)
       : this.appLinkService.createAppLink(requestData);
 
     request$.subscribe({
@@ -302,18 +311,19 @@ export class AppLinkDetailPageComponent implements OnInit {
         this.messageService.add({
           severity: 'success',
           summary: 'Éxito',
-          detail: this.isEditMode()
+          detail: isEditMode
             ? 'App link actualizado exitosamente'
             : 'App link creado exitosamente',
         });
-        this.router.navigate(['/notification-managements/app-link']);
+        this.isLoading.set(false);
+        this.save.emit();
       },
       error: () => {
         this.isLoading.set(false);
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: this.isEditMode()
+          detail: isEditMode
             ? 'Error al actualizar el app link'
             : 'Error al crear el app link',
         });
@@ -322,23 +332,10 @@ export class AppLinkDetailPageComponent implements OnInit {
   }
 
   onCancel(): void {
-    this.router.navigate(['/notification-managements/app-link']);
+    this.cancel.emit();
   }
 
   // Custom Validators
-  private urlValidator(control: AbstractControl): ValidationErrors | null {
-    if (!control.value) return null;
-
-    try {
-      const url = new URL(control.value);
-      return url.protocol === 'http:' || url.protocol === 'https:'
-        ? null
-        : { invalidUrl: true };
-    } catch {
-      return { invalidUrl: true };
-    }
-  }
-
   private noSpecialCharactersValidator(control: AbstractControl): ValidationErrors | null {
     if (!control.value) return null;
 

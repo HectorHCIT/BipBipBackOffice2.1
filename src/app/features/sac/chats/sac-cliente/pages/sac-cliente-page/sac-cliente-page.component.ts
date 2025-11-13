@@ -21,7 +21,8 @@ import { InputTextModule } from 'primeng/inputtext';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { ToastModule } from 'primeng/toast';
-import { MenuItem, MessageService } from 'primeng/api';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { MenuItem, MessageService, ConfirmationService } from 'primeng/api';
 import { DialogService } from 'primeng/dynamicdialog';
 
 // Componentes
@@ -31,7 +32,8 @@ import {
   ChatInputComponent,
   ChatBodyComponent,
   MessageSubmitData,
-  ImageViewerDialogComponent
+  ImageViewerDialogComponent,
+  PredefinedResponsesDialogComponent
 } from '../../../shared/components';
 
 
@@ -44,7 +46,8 @@ import {
   ChatCardData,
   ChatMessageBlock
 } from '../../services/chat-adapter.service';
-import { LocationService } from '../../../shared/services';
+import { LocationService, CustomerService, ChatHistoryService, PushNotificationService } from '../../../shared/services';
+import { SaveChatHistory, ChatBox } from '../../../shared/models';
 
 // Firebase
 import { Timestamp } from '@angular/fire/firestore';
@@ -78,12 +81,13 @@ import {
     IconFieldModule,
     InputIconModule,
     ToastModule,
+    ConfirmDialogModule,
     ChatHeaderComponent,
     ChatCardComponent,
     ChatInputComponent,
     ChatBodyComponent
   ],
-  providers: [MessageService, DialogService],
+  providers: [MessageService, DialogService, ConfirmationService],
   templateUrl: './sac-cliente-page.component.html',
   styleUrls: ['./sac-cliente-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -94,9 +98,13 @@ export class SacClientePageComponent implements OnInit {
   private readonly chatAdapter = inject(ChatAdapterService);
   private readonly messageService = inject(MessageService);
   private readonly dialogService = inject(DialogService);
+  private readonly confirmationService = inject(ConfirmationService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly locationService = inject(LocationService);
   private readonly imageUploadService = inject(ImageUploadService);
+  private readonly customerService = inject(CustomerService);
+  private readonly chatHistoryService = inject(ChatHistoryService);
+  private readonly pushNotificationService = inject(PushNotificationService);
 
   // ViewChild para el chat input
   readonly chatInput = viewChild<ChatInputComponent>('chatInput');
@@ -118,6 +126,7 @@ export class SacClientePageComponent implements OnInit {
   readonly allMessages = signal<Map<string, FirebaseChatMessage[]>>(new Map());
   readonly selectedChatId = signal<string | null>(null);
   readonly searchTerm = signal('');
+  readonly customerNames = signal<Map<number, string>>(new Map());  // Map customerId -> customerName
 
   // Computed signals
   readonly selectedChat = computed(() => {
@@ -150,8 +159,9 @@ export class SacClientePageComponent implements OnInit {
 
     const messages = this.selectedChatMessages();
     const unreadCount = this.chatAdapter.countUnreadMessages(messages);
+    const customerName = this.customerNames().get(chat.customerId);
 
-    return this.chatAdapter.toCardData(chat, unreadCount, true);
+    return this.chatAdapter.toCardData(chat, unreadCount, true, customerName);
   });
 
   readonly filteredChats = computed(() => {
@@ -266,6 +276,7 @@ export class SacClientePageComponent implements OnInit {
           // Subscribirse a mensajes de todos los chats
           chats.forEach(chat => {
             this.subscribeToMessages(chat.uid);
+            this.loadCustomerName(chat.customerId);
           });
 
           return [];
@@ -281,6 +292,30 @@ export class SacClientePageComponent implements OnInit {
           });
         }
       });
+  }
+
+  /**
+   * Carga el nombre de un cliente y lo almacena en el map
+   */
+  private loadCustomerName(customerId: number): void {
+    // Si ya está cargado, no hacer la llamada de nuevo
+    if (this.customerNames().has(customerId)) {
+      return;
+    }
+
+    this.customerService.getCustomerName(customerId).subscribe({
+      next: (name) => {
+        this.customerNames.update(map => {
+          const newMap = new Map(map);
+          newMap.set(customerId, name);
+          return newMap;
+        });
+      },
+      error: (error) => {
+        console.warn(`No se pudo cargar el nombre del cliente ${customerId}:`, error);
+        // No mostrar error al usuario, no es crítico
+      }
+    });
   }
 
   /**
@@ -347,6 +382,9 @@ export class SacClientePageComponent implements OnInit {
    */
   async onTakeUnassignedChat(chatId: string): Promise<void> {
     try {
+      // Encontrar el chat en la lista de no asignados para obtener el customerId
+      const chat = this.unassignedChats().find(c => c.uid === chatId);
+
       await this.firebaseChatService.assignChat(
         chatId,
         this.userId(),
@@ -358,6 +396,11 @@ export class SacClientePageComponent implements OnInit {
         summary: 'Chat asignado',
         detail: 'El chat ha sido asignado exitosamente'
       });
+
+      // Cargar nombre del cliente si existe el chat
+      if (chat) {
+        this.loadCustomerName(chat.customerId);
+      }
 
       // Seleccionar el chat automáticamente
       this.selectedChatId.set(chatId);
@@ -412,7 +455,24 @@ export class SacClientePageComponent implements OnInit {
       // Limpiar el input después de enviar exitosamente
       this.chatInput()?.finishUpload();
 
-      // TODO: Enviar push notification al cliente
+      // Enviar push notification al cliente
+      try {
+        await firstValueFrom(
+          this.pushNotificationService.notifyCustomer(
+            chat.uid,
+            0,  // orderId - siempre 0 por ahora ya que no existe en el modelo
+            chat.uid,
+            {
+              title: 'Nuevo mensaje de SAC',
+              body: messageData.message || 'Has recibido un nuevo mensaje'
+            }
+          )
+        );
+        console.log('✅ Notificación push enviada');
+      } catch (pushError) {
+        console.warn('⚠️ No se pudo enviar la notificación push:', pushError);
+        // No mostrar error al usuario, no es crítico
+      }
 
     } catch (error) {
       console.error('❌ Error al enviar mensaje:', error);
@@ -433,8 +493,23 @@ export class SacClientePageComponent implements OnInit {
    * Abre el dialog de respuestas predefinidas
    */
   onOpenPredefinedResponses(): void {
-    // TODO: Implementar en Fase 7
-    console.log('Dialog de respuestas predefinidas - pendiente');
+    const ref = this.dialogService.open(PredefinedResponsesDialogComponent, {
+      header: ' ',  // Espacio vacío, el componente maneja su propio header
+      modal: true,
+      dismissableMask: false,
+      width: '700px',
+      contentStyle: { padding: 0 },
+      style: { maxWidth: '95vw' }
+    });
+
+    // Cuando se selecciona una respuesta, insertarla en el chat input
+    if (ref) {
+      ref.onClose.subscribe((result) => {
+        if (result?.response) {
+          this.chatInput()?.setMessage(result.response);
+        }
+      });
+    }
   }
 
   /**
@@ -455,8 +530,81 @@ export class SacClientePageComponent implements OnInit {
    * Maneja la finalización de un chat
    */
   async onFinalizeChat(chatId: string): Promise<void> {
-    // TODO: Implementar en Fase 5
-    console.log('Finalizar chat:', chatId);
+    // Buscar el chat
+    const chat = this.selectedChat();
+    if (!chat || chat.uid !== chatId) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'No se pudo encontrar el chat'
+      });
+      return;
+    }
+
+    // Mostrar confirmation dialog
+    this.confirmationService.confirm({
+      message: '¿Estás seguro de finalizar este chat? Esta acción no se puede deshacer.',
+      header: 'Confirmar finalización',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Sí, finalizar',
+      rejectLabel: 'Cancelar',
+      acceptButtonStyleClass: 'p-button-danger',
+      accept: async () => {
+        try {
+          // 1. Obtener todos los mensajes
+          const messages = this.allMessages().get(chatId) || [];
+
+          // 2. Transformar mensajes al formato ChatBox
+          const chatBoxes: ChatBox[] = messages.map(msg => ({
+            message: msg.Message || '',
+            dateMessage: this.timestampToISO(msg.Datetime || msg.dateTime),
+            sendBy: msg.customer ? 'Cliente' : 'SAC'
+          }));
+
+          // 3. Preparar datos para guardar
+          const chatHistory: SaveChatHistory = {
+            tipoChat: 'SC',  // SAC-Cliente
+            userChat: this.userName(),
+            idCustomer: chat.customerId,
+            orderId: null,  // No hay orderId en el modelo actual
+            chat: chatBoxes,
+            assignedAt: chat.dateTimeAssigned ? this.timestampToISO(chat.dateTimeAssigned) : undefined,
+            createdAt: this.timestampToISO(chat.createdAt)
+          };
+
+          // 4. Guardar en el backend
+          await firstValueFrom(this.chatHistoryService.saveChatEnded(chatHistory));
+
+          // 5. Eliminar chat de Firebase
+          await this.firebaseChatService.deleteChat(chatId);
+
+          // 6. Limpiar UI
+          this.selectedChatId.set(null);
+
+          // 7. Mostrar éxito
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Chat finalizado',
+            detail: 'El chat ha sido finalizado y guardado en el historial'
+          });
+
+        } catch (error) {
+          console.error('Error al finalizar chat:', error);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'No se pudo finalizar el chat. Por favor, intenta nuevamente.'
+          });
+        }
+      }
+    });
+  }
+
+  /**
+   * Convierte Timestamp de Firebase a ISO string
+   */
+  private timestampToISO(timestamp: Timestamp): string {
+    return timestamp.toDate().toISOString();
   }
 
   /**
@@ -473,8 +621,9 @@ export class SacClientePageComponent implements OnInit {
     const messages = this.allMessages().get(chat.uid) || [];
     const unreadCount = this.chatAdapter.countUnreadMessages(messages);
     const isSelected = chat.uid === this.selectedChatId();
+    const customerName = this.customerNames().get(chat.customerId);
 
-    return this.chatAdapter.toCardData(chat, unreadCount, isSelected);
+    return this.chatAdapter.toCardData(chat, unreadCount, isSelected, customerName);
   }
 
   /**

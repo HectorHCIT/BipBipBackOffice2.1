@@ -1,0 +1,47 @@
+// Desktop: Sidebar fijo visible
+.desktop-sidebar {
+  display: block;
+
+  // Ocultar en mobile
+  @media (max-width: 768px) {
+    display: none;
+  }
+}
+
+// Main content con margen adaptativo
+.main-content {
+  flex: 1;
+  transition: margin-left 300ms ease-in-out;
+
+  // Mobile: sin margen (sidebar está en drawer)
+  @media (max-width: 768px) {
+    margin-left: 0 !important;
+  }
+}
+
+// Drawer mobile personalizado
+:host ::ng-deep {
+  .mobile-drawer {
+    width: 256px !important; // w-64
+    max-width: 80vw !important; // Responsive para pantallas muy pequeñas
+
+    // Contenido del drawer sin padding
+    .p-drawer-content {
+      padding: 0;
+      overflow: hidden;
+      background: var(--surface-0);
+    }
+
+    // El sidebar dentro del drawer debe ocupar todo el alto
+    app-sidebar {
+      aside {
+        position: static !important;
+        height: 100vh !important;
+        top: 0 !important;
+        left: 0 !important;
+        border-right: none !important;
+        width: 100% !important;
+      }
+    }
+  }
+}

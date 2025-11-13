@@ -32,6 +32,7 @@ import { NavigationItem } from '@core/models/auth.model';
     TooltipModule,
     BadgeModule
   ],
+  styleUrls: ['./sidebar.component.scss'],
   template: `
     <aside
       class="fixed left-0 top-16 h-[calc(100vh-4rem)] bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-300 z-40 overflow-hidden"

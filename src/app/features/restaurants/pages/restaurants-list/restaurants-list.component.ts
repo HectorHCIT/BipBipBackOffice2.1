@@ -219,6 +219,62 @@ export class RestaurantsListComponent implements OnInit {
     this.router.navigate(['/restaurants/restaurant/create']);
   }
 
+  isActiveDelivery(active: boolean, publish: boolean):boolean {
+    return active && publish;
+  }
+
+  /**
+   * Toggle delivery status (publish)
+   * Controls if the restaurant can receive delivery orders
+   */
+  onToggleDeliveryStatus(restaurantId: number, popover: any): void {
+    popover.hide();
+    this.restaurantService.toggleDeliveryStatus(restaurantId).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Éxito',
+          detail: 'Estado de domicilio actualizado correctamente'
+        });
+        this.loadRestaurants();
+      },
+      error: (error) => {
+        console.error('Error toggling delivery status:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Error al actualizar el estado de domicilio'
+        });
+      }
+    });
+  }
+
+  /**
+   * Toggle store status (active)
+   * Controls if the restaurant can receive delivery + takeaway orders
+   */
+  onToggleStoreStatus(restaurantId: number, popover: any): void {
+    popover.hide();
+    this.restaurantService.toggleStoreStatus(restaurantId).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Éxito',
+          detail: 'Estado general actualizado correctamente'
+        });
+        this.loadRestaurants();
+      },
+      error: (error) => {
+        console.error('Error toggling store status:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Error al actualizar el estado general'
+        });
+      }
+    });
+  }
+
   /**
    * Handle view restaurant details
    */

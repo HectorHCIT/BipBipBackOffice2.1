@@ -15,14 +15,19 @@ import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
 import { CardModule } from 'primeng/card';
 import { InputTextModule } from 'primeng/inputtext';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
 import { SelectModule } from 'primeng/select';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { TagModule } from 'primeng/tag';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { DrawerModule } from 'primeng/drawer';
+import { BreadcrumbModule } from 'primeng/breadcrumb';
+import { ConfirmationService, MessageService, MenuItem } from 'primeng/api';
 import { AppLinkService } from '../../services';
 import { DynamicLinkProduct, STATUS_FILTER_OPTIONS } from '../../models';
+import { AppLinkFormComponent } from '../../components';
 
 @Component({
   selector: 'app-app-links-list-page',
@@ -34,11 +39,16 @@ import { DynamicLinkProduct, STATUS_FILTER_OPTIONS } from '../../models';
     TableModule,
     CardModule,
     InputTextModule,
+    IconFieldModule,
+    InputIconModule,
     SelectModule,
     ToggleSwitchModule,
     TagModule,
     ToastModule,
     ConfirmDialogModule,
+    DrawerModule,
+    BreadcrumbModule,
+    AppLinkFormComponent,
   ],
   providers: [ConfirmationService, MessageService],
   templateUrl: './app-links-list-page.component.html',
@@ -51,6 +61,13 @@ export class AppLinksListPageComponent implements OnInit {
   private readonly confirmationService = inject(ConfirmationService);
   private readonly messageService = inject(MessageService);
 
+  // Breadcrumb
+  readonly breadcrumbItems: MenuItem[] = [
+    { label: 'Gestión de Notificaciones', routerLink: '/notification-management' },
+    { label: 'App Links' }
+  ];
+  readonly home: MenuItem = { icon: 'pi pi-home', routerLink: '/' };
+
   readonly appLinks = this.appLinkService.appLinks;
   readonly pagination = this.appLinkService.pagination;
   readonly isLoading = this.appLinkService.isLoading;
@@ -61,6 +78,10 @@ export class AppLinksListPageComponent implements OnInit {
   readonly statusFilter = signal<boolean | null>(null);
   readonly page = signal(1);
   readonly pageSize = signal(10);
+
+  // Drawer state
+  readonly drawerVisible = signal(false);
+  readonly selectedAppLink = signal<DynamicLinkProduct | null>(null);
 
   private readonly searchSubject = new Subject<string>();
 
@@ -112,14 +133,24 @@ export class AppLinksListPageComponent implements OnInit {
   }
 
   onCreateAppLink(): void {
-    this.router.navigate(['/notification-managements/app-link/new']);
+    this.selectedAppLink.set(null);
+    this.drawerVisible.set(true);
   }
 
   onEditAppLink(appLink: DynamicLinkProduct): void {
-    this.router.navigate([
-      '/notification-managements/app-link/edit',
-      appLink.campaignName || appLink.dynamicLinkXProductId,
-    ]);
+    this.selectedAppLink.set(appLink);
+    this.drawerVisible.set(true);
+  }
+
+  onDrawerClose(): void {
+    this.drawerVisible.set(false);
+    this.selectedAppLink.set(null);
+  }
+
+  onFormSave(): void {
+    this.drawerVisible.set(false);
+    this.selectedAppLink.set(null);
+    this.loadData();
   }
 
   onToggleStatus(appLink: DynamicLinkProduct, event: boolean): void {

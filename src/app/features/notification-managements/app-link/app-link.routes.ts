@@ -8,18 +8,4 @@ export const APP_LINK_ROUTES: Routes = [
         (m) => m.AppLinksListPageComponent
       ),
   },
-  {
-    path: 'new',
-    loadComponent: () =>
-      import('./pages/app-link-detail-page/app-link-detail-page.component').then(
-        (m) => m.AppLinkDetailPageComponent
-      ),
-  },
-  {
-    path: 'edit/:campaignName',
-    loadComponent: () =>
-      import('./pages/app-link-detail-page/app-link-detail-page.component').then(
-        (m) => m.AppLinkDetailPageComponent
-      ),
-  },
 ];

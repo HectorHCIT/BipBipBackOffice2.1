@@ -1,44 +1,95 @@
-<p-card>
-  <ng-template pTemplate="header">
-    <div class="p-4">
-      <h4 class="text-md font-semibold m-0">Vista Previa Móvil</h4>
-    </div>
-  </ng-template>
+<div class="flex flex-col items-center gap-4 p-6">
+  <h2 class="text-2xl font-bold text-surface-900 text-center">Vista Previa</h2>
+  <p class="text-base text-surface-600 text-center">Así se verá el enlace en la aplicación móvil</p>
 
-  <div class="flex justify-center p-4">
-    <div class="mobile-preview-container">
-      <!-- Mobile Frame -->
-      <div class="mobile-frame">
-        <!-- Image -->
-        @if (displayImage()) {
-          <div class="preview-image-container">
-            <img
-              [src]="displayImage()"
-              [alt]="displayTitle()"
-              class="preview-image"
+  <!-- Mobile Frame Container (90% width with phone bezel) -->
+  <div class="w-[90%] max-w-[420px] bg-surface-900 rounded-[3rem] shadow-2xl p-3 relative">
+    <!-- Phone Notch/Status Bar -->
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-surface-900 rounded-b-3xl z-10"></div>
+
+    <!-- Screen Content -->
+    <div class="bg-white rounded-[2.5rem] overflow-hidden shadow-inner">
+      <!-- Mobile Header -->
+      <div class="bg-primary px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i class="pi pi-arrow-left text-white text-lg"></i>
+          <span class="text-white font-semibold text-lg">Bip App</span>
+        </div>
+        <span class="text-white text-sm font-medium">{{ currentTime() }}</span>
+      </div>
+
+      <!-- App Link Content -->
+      <div class="bg-white">
+        <!-- Brand Badge (if brand selected) -->
+        @if (brandName()) {
+          <div class="absolute top-16 right-6 z-10">
+            <p-tag
+              [value]="brandName()"
+              severity="contrast"
+              [rounded]="true"
+              styleClass="font-bold uppercase text-xs shadow-md"
             />
-            <!-- Badge -->
-            <div class="image-badge">
+          </div>
+        }
+
+        <!-- Image Section -->
+        @if (image()) {
+          <div class="relative w-full h-72 bg-surface-100">
+            <img
+              [src]="image()"
+              [alt]="title()"
+              class="w-full h-full object-cover"
+            />
+            <!-- Image Type Badge -->
+            <div class="absolute bottom-3 left-3">
               <p-tag
-                [value]="displayUseCustomImage() ? 'Imagen Personalizada' : 'Imagen de Producto'"
-                [severity]="displayUseCustomImage() ? 'info' : 'success'"
+                [value]="imageType()"
+                [severity]="imageTypeSeverity()"
                 [rounded]="true"
+                styleClass="text-xs"
               />
             </div>
           </div>
         } @else {
-          <div class="preview-image-placeholder">
-            <i class="pi pi-image text-4xl text-color-secondary"></i>
-            <p class="text-sm text-color-secondary m-0 mt-2">Sin imagen</p>
+          <div class="w-full h-72 bg-surface-100 flex items-center justify-center">
+            <div class="text-center text-surface-400">
+              <i class="pi pi-image text-6xl mb-3"></i>
+              <p class="text-sm">Sin imagen</p>
+            </div>
           </div>
         }
 
-        <!-- Content -->
-        <div class="preview-content">
-          <h3 class="preview-title">{{ displayTitle() }}</h3>
-          <p class="preview-description">{{ displayDescription() }}</p>
+        <!-- Content Section -->
+        <div class="p-6">
+          <h3 class="text-xl font-bold mb-3 text-surface-900 leading-tight">
+            {{ title() }}
+          </h3>
+          <p class="text-base text-surface-600 leading-relaxed mb-6">
+            {{ description() }}
+          </p>
+
+          <!-- Action Button -->
+          <p-button
+            label="Abrir enlace"
+            icon="pi pi-external-link"
+            styleClass="w-full"
+            [raised]="true"
+          />
+        </div>
+
+        <!-- Footer: Form Status -->
+        <div class="border-t border-surface-200 px-6 py-4 bg-surface-50">
+          <div class="flex items-center justify-center gap-2">
+            @if (pendingFields() === 0) {
+              <i class="pi pi-check-circle text-green-600"></i>
+              <span class="text-sm font-medium text-green-600">{{ pendingMessage() }}</span>
+            } @else {
+              <i class="pi pi-info-circle text-orange-600"></i>
+              <span class="text-sm font-medium text-orange-600">{{ pendingMessage() }}</span>
+            }
+          </div>
         </div>
       </div>
     </div>
   </div>
-</p-card>
+</div>

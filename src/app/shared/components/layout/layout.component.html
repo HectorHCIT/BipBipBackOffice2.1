@@ -1,0 +1,43 @@
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+  <!-- Navbar -->
+  <app-navbar
+    [isSidebarCollapsed]="isSidebarCollapsed()"
+    (toggleSidebar)="toggleSidebar()"
+  />
+
+  <!-- Main Layout -->
+  <div class="flex">
+    <!-- Sidebar Desktop (oculto en mobile) -->
+    <div class="desktop-sidebar">
+      <app-sidebar
+        [isCollapsed]="isSidebarCollapsed()"
+        (toggleCollapse)="toggleSidebar()"
+      />
+    </div>
+
+    <!-- Drawer Mobile -->
+    <p-drawer
+      [visible]="isDrawerOpen()"
+      (visibleChange)="isDrawerOpen.set($event)"
+      position="full"
+      [modal]="true"
+      [showCloseIcon]="true"
+    >
+      <app-sidebar
+        [isCollapsed]="false"
+        (toggleCollapse)="closeDrawer()"
+      />
+    </p-drawer>
+
+    <!-- Main Content -->
+    <main
+      class="main-content"
+      [class.ml-64]="!isSidebarCollapsed() && !isMobile()"
+      [class.ml-16]="isSidebarCollapsed() && !isMobile()"
+    >
+      <div class="p-6 mt-16">
+        <router-outlet />
+      </div>
+    </main>
+  </div>
+</div>

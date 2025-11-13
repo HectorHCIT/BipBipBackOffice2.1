@@ -8,11 +8,17 @@
   </div>
 
   <!-- Layout principal: 2 columnas -->
-  <div class="page-content border-[1px] border-gray-400 rounded-lg ">
+  <div class="page-content border-[1px] border-gray-400 rounded-lg">
     <!-- ============================================ -->
     <!-- COLUMNA 1: Lista de chats con búsqueda -->
     <!-- ============================================ -->
-    <div class="flex flex-col h-full border-r-[1px] border-gray-400">
+    <!-- En móvil: solo visible cuando NO hay chat seleccionado -->
+    <!-- En desktop: siempre visible -->
+    <div
+      class="flex flex-col h-full border-r-[1px] border-gray-400"
+      [class.mobile-chat-list]="true"
+      [class.mobile-hidden]="selectedChatId()"
+    >
       <!-- Input de búsqueda fijo arriba -->
       <div class="flex flex-col gap-3 p-4 border-b-[1px] border-gray-400 flex-shrink-0">
         <p-iconfield iconPosition="left">
@@ -88,7 +94,13 @@
     <!-- ============================================ -->
     <!-- COLUMNA 2: Chat activo (Header + Body + Input) -->
     <!-- ============================================ -->
-    <div class="flex flex-col h-full">
+    <!-- En móvil: solo visible cuando HAY chat seleccionado -->
+    <!-- En desktop: siempre visible -->
+    <div
+      class="flex flex-col h-full"
+      [class.mobile-chat-view]="true"
+      [class.mobile-hidden]="!selectedChatId()"
+    >
       @if (selectedChat(); as chat) {
         <!-- Header del chat - fijo arriba -->
         <app-chat-header
@@ -134,4 +146,7 @@
 
   <!-- Toast para notificaciones -->
   <p-toast position="top-right" />
+
+  <!-- Confirm Dialog para finalizar chat -->
+  <p-confirmDialog />
 </div>

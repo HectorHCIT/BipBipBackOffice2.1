@@ -1,0 +1,221 @@
+.predefined-responses {
+  display: flex;
+  flex-direction: column;
+  min-height: 60vh;
+  max-height: 80vh;
+  background: var(--surface-0);
+
+  // Header
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--surface-border);
+    background: var(--surface-50);
+    flex-shrink: 0;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-color);
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  // Content
+  &__content {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  // Modo Lista
+  &__list-mode {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  &__search {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--surface-border);
+    flex-shrink: 0;
+  }
+
+  &__loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 3rem;
+    color: var(--text-color-secondary);
+  }
+
+  &__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 3rem;
+    color: var(--text-color-secondary);
+
+    i {
+      font-size: 3rem;
+      opacity: 0.5;
+    }
+
+    p {
+      margin: 0;
+      text-align: center;
+    }
+  }
+
+  // Cards de respuestas
+  &__card {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--surface-border);
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: var(--surface-hover);
+    }
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  &__card-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__card-title {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-color);
+  }
+
+  &__card-text {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--text-color-secondary);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__card-menu-btn {
+    flex-shrink: 0;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+
+  // Modo Formulario
+  &__form-mode {
+    padding: 1.5rem;
+    overflow-y: auto;
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  &__form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  &__form-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-color);
+  }
+
+  &__form-counter {
+    display: block;
+    text-align: right;
+    font-size: 0.75rem;
+    color: var(--text-color-secondary);
+    margin-top: 0.25rem;
+  }
+
+  &__form-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+  }
+
+  // DataView override
+  ::ng-deep {
+    .p-dataview-content {
+      background: transparent;
+      border: none;
+    }
+
+    .p-dataview-list {
+      .p-dataview-content {
+        padding: 0;
+      }
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .predefined-responses {
+    &__header {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.75rem;
+    }
+
+    &__title {
+      font-size: 1.125rem;
+    }
+
+    &__actions {
+      justify-content: space-between;
+    }
+
+    &__form {
+      max-width: 100%;
+    }
+
+    &__form-actions {
+      flex-direction: column;
+
+      button {
+        width: 100%;
+      }
+    }
+  }
+}

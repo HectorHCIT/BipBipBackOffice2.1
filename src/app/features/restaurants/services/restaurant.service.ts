@@ -335,4 +335,20 @@ export class RestaurantService {
   deleteCoverageZone(zoneId: number): Observable<any> {
     return this.dataService.delete$(`Restaurant/zone/${zoneId}`);
   }
+
+  /**
+   * Toggle delivery status (publish)
+   * Controls if the restaurant can receive delivery orders
+   */
+  toggleDeliveryStatus(storeId: number): Observable<any> {
+    return this.dataService.put$(`Restaurant/toggle-delivery-status?storeId=${storeId}`, {});
+  }
+
+  /**
+   * Toggle store status (active)
+   * Controls if the restaurant can receive delivery + takeaway orders
+   */
+  toggleStoreStatus(storeId: number): Observable<any> {
+    return this.dataService.put$(`Restaurant/toggle-store-status?storeId=${storeId}`, {});
+  }
 }

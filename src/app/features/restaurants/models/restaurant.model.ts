@@ -24,6 +24,8 @@ export interface Restaurant {
   restShortName: string;
   restStatus: boolean;
   restFeaturesStatus: RESTFeaturesStatus;
+  active: boolean;
+  publish: boolean;
 }
 
 /**
