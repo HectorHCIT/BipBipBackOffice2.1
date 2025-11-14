@@ -20,15 +20,15 @@
     <!-- Información del chat -->
     <div class="flex-1 min-w-0 flex flex-col gap-1 py-2">
       <!-- Fila 1: Cliente y Agente -->
-      <div class="flex items-center gap-4">
+      <div class="flex items-center gap-2 flex-wrap">
         <div class="flex items-center gap-2 flex-shrink-0">
           <i class="pi pi-user text-base"></i>
-          <p class="text-sm font-medium whitespace-nowrap">{{ data.customerName }}</p>
+          <p class="text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis max-w-[150px]">{{ data.customerName }}</p>
         </div>
 
         @if (data.agentName) {
-          <!-- Separador vertical -->
-          <div class="h-0 w-[21px] flex items-center justify-center">
+          <!-- Separador vertical (oculto en mobile muy pequeño) -->
+          <div class="h-0 w-[21px] items-center justify-center hidden sm:flex">
             <div class="h-[1px] w-[21px] bg-surface-border rotate-90"></div>
           </div>
 
@@ -38,20 +38,20 @@
             } @else {
               <i class="pi pi-headphones text-base"></i>
             }
-            <p class="text-sm font-medium whitespace-nowrap">{{ data.agentName }}</p>
+            <p class="text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis max-w-[150px]">{{ data.agentName }}</p>
           </div>
         }
       </div>
 
       <!-- Fila 2: Orden y Tiempo transcurrido -->
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2 flex-wrap">
         @if (data.orderNumber) {
           <div class="flex items-center gap-2.5">
             <p class="text-xs whitespace-nowrap">Orden N°: {{ data.orderNumber }}</p>
           </div>
 
-          <!-- Separador vertical -->
-          <div class="h-0 w-[21px] flex items-center justify-center">
+          <!-- Separador vertical (oculto en mobile muy pequeño) -->
+          <div class="h-0 w-[21px] items-center justify-center hidden sm:flex">
             <div class="h-[1px] w-[21px] bg-surface-border rotate-90"></div>
           </div>
         }

@@ -1,0 +1,95 @@
+.orders-page {
+  padding: 1.5rem;
+
+  .page-header {
+    h2 {
+      color: #1f2937;
+    }
+
+    p {
+      font-size: 0.875rem;
+    }
+  }
+
+  // Estilos para tabs
+  :host ::ng-deep p-tabs {
+    .p-tabs-nav {
+      background: white;
+      border-bottom: 2px solid #e5e7eb;
+      padding: 0 1rem;
+      border-radius: 8px 8px 0 0;
+    }
+
+    .p-tab {
+      padding: 1rem 1.5rem;
+      font-weight: 500;
+      color: #6b7280;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s ease;
+
+      &:hover {
+        color: #FB0021;
+        background: rgba(251, 0, 33, 0.05);
+      }
+
+      &.p-tab-active {
+        color: #FB0021;
+        border-bottom-color: #FB0021;
+        background: rgba(251, 0, 33, 0.02);
+      }
+    }
+
+    .p-tabpanels {
+      background: transparent;
+      padding: 0;
+    }
+
+    .p-tabpanel {
+      padding: 0;
+    }
+  }
+
+  .tab-content {
+    padding-top: 1.5rem;
+  }
+
+  // Dark mode
+  :host-context(.dark) {
+    .page-header h2 {
+      color: #f3f4f6;
+    }
+
+    :host ::ng-deep p-tabs {
+      .p-tabs-nav {
+        background: #1f2937;
+        border-bottom-color: #374151;
+      }
+
+      .p-tab {
+        color: #9ca3af;
+
+        &:hover {
+          background: rgba(251, 0, 33, 0.1);
+        }
+
+        &.p-tab-active {
+          background: rgba(251, 0, 33, 0.05);
+        }
+      }
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .orders-page {
+    padding: 1rem;
+
+    :host ::ng-deep p-tabs {
+      .p-tab {
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
+      }
+    }
+  }
+}

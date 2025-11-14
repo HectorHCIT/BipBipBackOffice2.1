@@ -33,7 +33,8 @@ import {
   ChatBodyComponent,
   MessageSubmitData,
   ImageViewerDialogComponent,
-  PredefinedResponsesDialogComponent
+  PredefinedResponsesDialogComponent,
+  AgentStatusIndicatorComponent
 } from '../../../shared/components';
 
 
@@ -46,8 +47,8 @@ import {
   ChatCardData,
   ChatMessageBlock
 } from '../../services/chat-adapter.service';
-import { LocationService, CustomerService, ChatHistoryService, PushNotificationService } from '../../../shared/services';
-import { SaveChatHistory, ChatBox } from '../../../shared/models';
+import { LocationService, CustomerService, ChatHistoryService, PushNotificationService, AgentStatusService } from '../../../shared/services';
+import { SaveChatHistory, ChatBox, SACUser, AgentStatus } from '../../../shared/models';
 
 // Firebase
 import { Timestamp } from '@angular/fire/firestore';
@@ -85,7 +86,8 @@ import {
     ChatHeaderComponent,
     ChatCardComponent,
     ChatInputComponent,
-    ChatBodyComponent
+    ChatBodyComponent,
+    AgentStatusIndicatorComponent
   ],
   providers: [MessageService, DialogService, ConfirmationService],
   templateUrl: './sac-cliente-page.component.html',
@@ -105,6 +107,7 @@ export class SacClientePageComponent implements OnInit {
   private readonly customerService = inject(CustomerService);
   private readonly chatHistoryService = inject(ChatHistoryService);
   private readonly pushNotificationService = inject(PushNotificationService);
+  private readonly agentStatusService = inject(AgentStatusService);
 
   // ViewChild para el chat input
   readonly chatInput = viewChild<ChatInputComponent>('chatInput');
@@ -127,6 +130,7 @@ export class SacClientePageComponent implements OnInit {
   readonly selectedChatId = signal<string | null>(null);
   readonly searchTerm = signal('');
   readonly customerNames = signal<Map<number, string>>(new Map());  // Map customerId -> customerName
+  readonly agentStatus = signal<AgentStatus>('offline');  // Estado actual del agente
 
   // Computed signals
   readonly selectedChat = computed(() => {
@@ -175,6 +179,27 @@ export class SacClientePageComponent implements OnInit {
       chat.userName?.toLowerCase().includes(search) ||
       chat.uid.toLowerCase().includes(search)
     );
+  });
+
+  // ✅ VALIDACIONES: Solo mostrar chats pendientes si está online
+  readonly visibleUnassignedChats = computed(() => {
+    return this.agentStatus() === 'online' ? this.unassignedChats() : [];
+  });
+
+  // ✅ VALIDACIONES: Solo puede tomar chats si está online
+  readonly canTakeChats = computed(() => {
+    return this.agentStatus() === 'online';
+  });
+
+  // ✅ VALIDACIONES: Solo puede finalizar chats si está online
+  readonly canFinalizeChats = computed(() => {
+    return this.agentStatus() === 'online';
+  });
+
+  // ✅ ADMIN: Computed signal para verificar si el usuario es admin
+  readonly isAdminUser = computed(() => {
+    const role = this.authService.userRole();
+    return role?.toLowerCase() === 'admin' || role?.toLowerCase() === 'administrador';
   });
 
   readonly chatInfo = computed(() => {
@@ -231,11 +256,10 @@ export class SacClientePageComponent implements OnInit {
   }
 
   /**
-   * Verifica si el usuario es admin (TODO: implementar lógica real)
+   * Verifica si el usuario es admin
    */
   isAdmin(): boolean {
-    // TODO: Implementar lógica real para verificar si es admin
-    return false;
+    return this.isAdminUser();
   }
 
   /**
@@ -246,26 +270,47 @@ export class SacClientePageComponent implements OnInit {
     console.log('[SacClientePage] userId():', this.userId());
     console.log('[SacClientePage] userName():', this.userName());
 
-    // Chats no asignados
-    this.firebaseChatService.getUnassignedChats()
+    // ✅ Suscribirse al estado del agente
+    this.agentStatusService.getAgentData(this.userId())
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (chats) => {
-          console.log('[SacClientePage] Chats no asignados recibidos:', chats.length, chats);
-          this.unassignedChats.set(chats);
+        next: (agent) => {
+          if (agent) {
+            this.agentStatus.set(agent.currentStatus);
+            console.log('[SacClientePage] Estado del agente actualizado:', agent.currentStatus);
+          }
         },
         error: (error) => {
-          console.error('[SacClientePage] Error al cargar chats no asignados:', error);
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'No se pudieron cargar los chats pendientes'
-          });
+          console.error('[SacClientePage] Error al obtener estado del agente:', error);
         }
       });
 
-    // Chats asignados al usuario
-    this.firebaseChatService.getUserChats(this.userId())
+    // ✅ ADMIN: Los admins NO ven chats no asignados
+    if (!this.isAdminUser()) {
+      this.firebaseChatService.getUnassignedChats()
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (chats) => {
+            console.log('[SacClientePage] Chats no asignados recibidos:', chats.length, chats);
+            this.unassignedChats.set(chats);
+          },
+          error: (error) => {
+            console.error('[SacClientePage] Error al cargar chats no asignados:', error);
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'No se pudieron cargar los chats pendientes'
+            });
+          }
+        });
+    }
+
+    // ✅ ADMIN: Chats asignados - Admins ven TODOS, agentes solo los suyos
+    const chatsObservable = this.isAdminUser()
+      ? this.firebaseChatService.getAllAssignedChats()
+      : this.firebaseChatService.getUserChats(this.userId());
+
+    chatsObservable
       .pipe(
         takeUntilDestroyed(this.destroyRef),
         // Para cada chat asignado, subscribirse a sus mensajes
@@ -381,6 +426,16 @@ export class SacClientePageComponent implements OnInit {
    * Toma un chat no asignado
    */
   async onTakeUnassignedChat(chatId: string): Promise<void> {
+    // ✅ VALIDACIÓN: Solo puede tomar chats si está online
+    if (!this.canTakeChats()) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Acción no permitida',
+        detail: 'Debes estar en estado "Online" para tomar chats'
+      });
+      return;
+    }
+
     try {
       // Encontrar el chat en la lista de no asignados para obtener el customerId
       const chat = this.unassignedChats().find(c => c.uid === chatId);
@@ -459,7 +514,7 @@ export class SacClientePageComponent implements OnInit {
       try {
         await firstValueFrom(
           this.pushNotificationService.notifyCustomer(
-            chat.uid,
+            chat.customerId.toString(),  // customerId como string
             0,  // orderId - siempre 0 por ahora ya que no existe en el modelo
             chat.uid,
             {
@@ -468,7 +523,7 @@ export class SacClientePageComponent implements OnInit {
             }
           )
         );
-        console.log('✅ Notificación push enviada');
+        console.log('✅ Notificación push enviada al cliente:', chat.customerId);
       } catch (pushError) {
         console.warn('⚠️ No se pudo enviar la notificación push:', pushError);
         // No mostrar error al usuario, no es crítico
@@ -530,6 +585,16 @@ export class SacClientePageComponent implements OnInit {
    * Maneja la finalización de un chat
    */
   async onFinalizeChat(chatId: string): Promise<void> {
+    // ✅ VALIDACIÓN: Solo puede finalizar chats si está online
+    if (!this.canFinalizeChats()) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Acción no permitida',
+        detail: 'Debes estar en estado "Online" para finalizar chats'
+      });
+      return;
+    }
+
     // Buscar el chat
     const chat = this.selectedChat();
     if (!chat || chat.uid !== chatId) {
@@ -568,7 +633,7 @@ export class SacClientePageComponent implements OnInit {
             idCustomer: chat.customerId,
             orderId: null,  // No hay orderId en el modelo actual
             chat: chatBoxes,
-            assignedAt: chat.dateTimeAssigned ? this.timestampToISO(chat.dateTimeAssigned) : undefined,
+            assignedAt: this.timestampToISO(chat.dateTimeAssigned),
             createdAt: this.timestampToISO(chat.createdAt)
           };
 
@@ -603,7 +668,10 @@ export class SacClientePageComponent implements OnInit {
   /**
    * Convierte Timestamp de Firebase a ISO string
    */
-  private timestampToISO(timestamp: Timestamp): string {
+  private timestampToISO(timestamp: Timestamp | undefined): string {
+    if (!timestamp) {
+      return new Date().toISOString(); // Fallback a fecha actual si no existe
+    }
     return timestamp.toDate().toISOString();
   }
 

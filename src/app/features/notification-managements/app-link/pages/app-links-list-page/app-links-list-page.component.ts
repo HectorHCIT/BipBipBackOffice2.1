@@ -12,7 +12,7 @@ import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ButtonModule } from 'primeng/button';
-import { TableModule } from 'primeng/table';
+import { TableModule, TableLazyLoadEvent } from 'primeng/table';
 import { CardModule } from 'primeng/card';
 import { InputTextModule } from 'primeng/inputtext';
 import { IconFieldModule } from 'primeng/iconfield';
@@ -93,8 +93,8 @@ export class AppLinksListPageComponent implements OnInit {
   ];
 
   ngOnInit(): void {
-    this.loadData();
     this.setupSearchDebounce();
+    // Note: loadData() is not called here because lazy table will trigger onLazyLoad automatically
   }
 
   private setupSearchDebounce(): void {
@@ -126,9 +126,13 @@ export class AppLinksListPageComponent implements OnInit {
     this.loadData();
   }
 
-  onPageChange(event: any): void {
-    this.page.set(event.page + 1);
-    this.pageSize.set(event.rows);
+  onLazyLoad(event: TableLazyLoadEvent): void {
+    // Calculate page from event.first (0-based index) and event.rows (page size)
+    const page = Math.floor((event.first || 0) / (event.rows || 10)) + 1;
+    const pageSize = event.rows || 10;
+
+    this.page.set(page);
+    this.pageSize.set(pageSize);
     this.loadData();
   }
 

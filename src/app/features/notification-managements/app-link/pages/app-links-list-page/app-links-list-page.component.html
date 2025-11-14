@@ -55,7 +55,7 @@
         [rows]="pageSize()"
         [totalRecords]="pagination().totalCount"
         [rowsPerPageOptions]="[5, 10, 15, 20]"
-        (onPage)="onPageChange($event)"
+        (onLazyLoad)="onLazyLoad($event)"
         [tableStyle]="{ 'min-width': '60rem' }"
         styleClass="p-datatable-sm"
       >

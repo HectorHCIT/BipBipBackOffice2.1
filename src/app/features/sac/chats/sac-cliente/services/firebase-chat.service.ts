@@ -85,6 +85,27 @@ export class FirebaseChatService {
   }
 
   /**
+   * Obtiene TODOS los chats asignados (para admins)
+   * @returns Observable con todos los chats asignados, sin importar el usuario
+   */
+  getAllAssignedChats(): Observable<FirebaseChatDocument[]> {
+    console.log('[FirebaseChatService] Cargando TODOS los chats asignados (admin view)');
+
+    const q = query(
+      collection(this.firestore, FIREBASE_COLLECTIONS.SAC),
+      where('userAssigned', '==', true)
+    );
+
+    return (collectionData(q, { idField: 'uid' }) as Observable<FirebaseChatDocument[]>).pipe(
+      map(chats => {
+        console.log('[FirebaseChatService] Todos los chats asignados:', chats.length);
+        // Filtrar solo los NO finalizados
+        return chats.filter(c => !c.finished);
+      })
+    );
+  }
+
+  /**
    * Obtiene mensajes de un chat específico
    * @param chatId ID del chat (ej: "help_424639")
    */

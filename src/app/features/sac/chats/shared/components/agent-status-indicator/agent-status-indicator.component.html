@@ -1,0 +1,63 @@
+@if (agentData(); as agent) {
+  <div class="agent-status">
+    <!-- Avatar con iniciales + status dot -->
+    <div class="agent-status__avatar-container">
+      <div class="agent-status__avatar" [class]="avatarClass()">
+        {{ initials() }}
+      </div>
+      <div class="agent-status__dot" [class]="statusDotClass()"></div>
+    </div>
+
+    <!-- Información del agente -->
+    <div class="agent-status__info">
+      <!-- Nombre del agente -->
+      <h3 class="agent-status__name">{{ agent.name || 'Agente SAC' }}</h3>
+
+      <!-- Contador de chats -->
+      <div class="agent-status__detail">
+        <i class="pi pi-comments"></i>
+        <span>{{ agent.activeChatRooms }} {{ agent.activeChatRooms === 1 ? 'chat activo' : 'chats activos' }}</span>
+      </div>
+    </div>
+
+    <!-- Select selector de estado -->
+    <div class="agent-status__dropdown">
+      <p-select
+        [options]="statusOptions"
+        [(ngModel)]="selectedStatus"
+        (onChange)="onStatusChange($event)"
+        [disabled]="isUpdating()"
+        optionLabel="label"
+        optionValue="value"
+        [style]="{'width': '120px'}"
+      >
+        <!-- Template para el item seleccionado -->
+        <ng-template pTemplate="selectedItem">
+          <div class="status-option">
+            <span class="status-dot" [class]="selectedStatusDotClass()"></span>
+            <span class="status-label">{{ selectedStatusLabel() }}</span>
+          </div>
+        </ng-template>
+
+        <!-- Template para los items del dropdown -->
+        <ng-template let-option pTemplate="item">
+          <div class="status-option">
+            <span class="status-dot" [class]="option.dotClass"></span>
+            <span class="status-label">{{ option.label }}</span>
+          </div>
+        </ng-template>
+      </p-select>
+    </div>
+  </div>
+} @else {
+  <!-- Loading state -->
+  <div class="agent-status agent-status--loading">
+    <div class="agent-status__avatar-container">
+      <div class="agent-status__avatar agent-status__avatar--skeleton"></div>
+    </div>
+    <div class="agent-status__info">
+      <div class="agent-status__skeleton agent-status__skeleton--name"></div>
+      <div class="agent-status__skeleton agent-status__skeleton--email"></div>
+    </div>
+  </div>
+}

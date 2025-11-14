@@ -8,3 +8,4 @@ export * from './chat-body/chat-body.types';
 export * from './emoji-picker';
 export * from './image-viewer-dialog';
 export * from './predefined-responses-dialog';
+export * from './agent-status-indicator/agent-status-indicator.component';

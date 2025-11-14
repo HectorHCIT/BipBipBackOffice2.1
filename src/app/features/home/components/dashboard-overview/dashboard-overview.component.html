@@ -1,9 +1,9 @@
 <div class="dashboard-overview">
   <!-- Filtros -->
   <div class="filters-section mb-4">
-    <form [formGroup]="filtersForm" class="flex gap-4 items-end">
+    <form [formGroup]="filtersForm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
       <!-- Select de Ciudad -->
-      <div class="filter-item flex-1">
+      <div class="filter-item">
         <label for="city-select" class="block mb-2 font-semibold">Ciudad</label>
         <p-select
           inputId="city-select"
@@ -15,9 +15,23 @@
         />
       </div>
 
-      <!-- Filtro de Fecha -->
-      <div class="filter-item flex-1">
-        <label for="date-filter" class="block mb-2 font-semibold">Filtro Fecha</label>
+      <!-- Select de Rango Predefinido -->
+      <div class="filter-item">
+        <label for="range-select" class="block mb-2 font-semibold">Periodo</label>
+        <p-select
+          inputId="range-select"
+          formControlName="selectedDateRange"
+          [options]="dateRangeOptions()"
+          optionLabel="label"
+          placeholder="Seleccionar periodo"
+          class="w-full"
+          (onChange)="onDateRangeChange()"
+        />
+      </div>
+
+      <!-- Filtro de Fecha Manual -->
+      <div class="filter-item">
+        <label for="date-filter" class="block mb-2 font-semibold">Fechas Personalizadas</label>
         <p-datepicker
           inputId="date-filter"
           formControlName="dateRange"
@@ -26,38 +40,74 @@
           iconDisplay="input"
           placeholder="Seleccionar fechas"
           class="w-full"
+          (onSelect)="onManualDateChange()"
         />
       </div>
 
-      <!-- Botón Aplicar Filtros -->
-      <div class="filter-item">
+      <!-- Botones de acción -->
+      <div class="filter-item flex items-end gap-2">
         <p-button
-          label="Aplicar Filtros"
+          label="Aplicar"
           icon="pi pi-filter"
           (click)="applyFilters()"
           [loading]="isLoading()"
+          styleClass="flex-1"
+        />
+        <p-button
+          label="Limpiar"
+          icon="pi pi-times"
+          (click)="clearFilters()"
+          [disabled]="isLoading()"
+          severity="secondary"
+          [outlined]="true"
         />
       </div>
     </form>
+
+    <!-- Mensaje de error -->
+    @if (error()) {
+      <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded mb-4">
+        <div class="flex items-center gap-2">
+          <i class="pi pi-exclamation-triangle"></i>
+          <span>{{ error() }}</span>
+        </div>
+      </div>
+    }
   </div>
 
   <!-- KPIs -->
   <div class="kpis-section mb-4">
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      @for (kpi of kpis(); track kpi.label) {
-        <p-card styleClass="kpi-card">
-          <div class="flex justify-between items-center">
-            <div>
-              <p class="text-sm text-gray-500 mb-1">{{ kpi.label }}</p>
-              <p class="text-3xl font-bold">{{ formatNumber(kpi.value) }}</p>
-            </div>
-            @if (kpi.icon) {
-              <div class="kpi-icon">
-                <i [class]="kpi.icon + ' text-4xl text-primary-500'"></i>
+      @if (isLoading()) {
+        @for (i of [1, 2, 3]; track i) {
+          <p-card styleClass="kpi-card">
+            <div class="flex justify-between items-center">
+              <div class="flex-1">
+                <p-skeleton width="60%" height="1rem" styleClass="mb-2" />
+                <p-skeleton width="40%" height="2.5rem" />
               </div>
-            }
-          </div>
-        </p-card>
+              <div class="kpi-icon">
+                <p-skeleton shape="circle" size="3rem" />
+              </div>
+            </div>
+          </p-card>
+        }
+      } @else {
+        @for (kpi of kpis(); track kpi.label) {
+          <p-card styleClass="kpi-card">
+            <div class="flex justify-between items-center">
+              <div>
+                <p class="text-sm text-gray-500 mb-1">{{ kpi.label }}</p>
+                <p class="text-3xl font-bold">{{ formatNumber(kpi.value) }}</p>
+              </div>
+              @if (kpi.icon) {
+                <div class="kpi-icon">
+                  <i [class]="kpi.icon + ' text-4xl text-primary-500'"></i>
+                </div>
+              }
+            </div>
+          </p-card>
+        }
       }
     </div>
   </div>
@@ -77,7 +127,16 @@
         </div>
       </ng-template>
 
-      @if (dashboardData()) {
+      @if (isLoading()) {
+        <div class="p-4">
+          @for (i of [1, 2, 3, 4]; track i) {
+            <div class="flex justify-between mb-3">
+              <p-skeleton width="40%" height="1.5rem" />
+              <p-skeleton width="20%" height="1.5rem" />
+            </div>
+          }
+        </div>
+      } @else if (dashboardData()) {
         <p-table
           [value]="dashboardData()!.ordersByPaymentMethod"
           [tableStyle]="{ 'min-width': '100%' }"
@@ -127,7 +186,19 @@
         </div>
       </ng-template>
 
-      @if (chartData()) {
+      @if (isLoading()) {
+        <div class="p-4 flex flex-col items-center">
+          <p-skeleton shape="circle" size="12rem" styleClass="mb-4" />
+          <div class="w-full">
+            @for (i of [1, 2, 3, 4]; track i) {
+              <div class="flex items-center gap-2 mb-2">
+                <p-skeleton shape="circle" size="1rem" />
+                <p-skeleton width="70%" height="1rem" />
+              </div>
+            }
+          </div>
+        </div>
+      } @else if (chartData()) {
         <div class="chart-container">
           <div class="chart-wrapper">
             <p-chart
@@ -167,15 +238,23 @@
         </div>
       </ng-template>
 
-      @if (dashboardData()) {
+      @if (isLoading()) {
+        <div class="p-4">
+          @for (i of [1, 2, 3, 4]; track i) {
+            <div class="flex justify-between items-center mb-3">
+              <p-skeleton width="30%" height="1.5rem" />
+              <p-skeleton width="3rem" height="2rem" />
+              <p-skeleton width="20%" height="1.5rem" />
+            </div>
+          }
+        </div>
+      } @else if (dashboardData()) {
         <p-table
           [value]="dashboardData()!.ordersByBrand"
           [tableStyle]="{ 'min-width': '100%' }"
           [paginator]="dashboardData()!.ordersByBrand.length > 6"
           [rows]="6"
           [rowsPerPageOptions]="[6, 12, 24]"
-          [showCurrentPageReport]="true"
-          currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} marcas"
           styleClass="payment-methods-table"
         >
           <ng-template pTemplate="header">
@@ -221,7 +300,16 @@
         </div>
       </ng-template>
 
-      @if (dashboardData()) {
+      @if (isLoading()) {
+        <div class="p-4">
+          @for (i of [1, 2, 3, 4]; track i) {
+            <div class="flex justify-between mb-3">
+              <p-skeleton width="40%" height="1.5rem" />
+              <p-skeleton width="20%" height="1.5rem" />
+            </div>
+          }
+        </div>
+      } @else if (dashboardData()) {
         <p-table
           [value]="dashboardData()!.ordersByCity"
           [tableStyle]="{ 'min-width': '100%' }"

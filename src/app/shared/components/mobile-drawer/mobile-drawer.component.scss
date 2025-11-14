@@ -1,0 +1,249 @@
+// Mobile Drawer Component Styles
+// Diseño optimizado para touch con BEM methodology
+
+.mobile-drawer {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+  background: var(--surface-0);
+  overflow: hidden;
+
+  // ========================================
+  // Header
+  // ========================================
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--surface-border);
+    flex-shrink: 0;
+  }
+
+  &__logo {
+    display: flex;
+    align-items: center;
+  }
+
+  &__close-btn {
+    font-size: 1.5rem;
+  }
+
+  // ========================================
+  // Navigation
+  // ========================================
+  &__nav {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.5rem 0;
+    -webkit-overflow-scrolling: touch; // Smooth scroll en iOS
+  }
+
+  &__loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+  }
+
+  // ========================================
+  // Section (Nivel 1 + sus hijos)
+  // ========================================
+  &__section {
+    margin-bottom: 0.25rem;
+  }
+
+  &__divider {
+    height: 1px;
+    background: var(--surface-border);
+    margin: 0.5rem 1rem;
+  }
+
+  // ========================================
+  // Item Principal (Nivel 1)
+  // ========================================
+  &__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 1rem 1.5rem;
+    min-height: 56px; // Touch target mínimo
+    text-decoration: none;
+    color: var(--text-color);
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    transition: background-color 150ms ease;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+
+    // Hover state
+    &:hover,
+    &:active {
+      background: var(--surface-hover);
+    }
+
+    // Active route
+    &--active {
+      background: #fb0021 !important;
+      color: white !important;
+
+      .mobile-drawer__icon,
+      .mobile-drawer__text,
+      .mobile-drawer__chevron {
+        color: white !important;
+      }
+    }
+
+    // Highlighted (tiene hijos y alguno está activo)
+    &--highlighted {
+      background: rgba(251, 0, 33, 0.05);
+      color: #fb0021;
+
+      .mobile-drawer__icon,
+      .mobile-drawer__text {
+        color: #fb0021;
+      }
+    }
+  }
+
+  &__item-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
+    min-width: 0; // Permite truncate
+  }
+
+  &__item-end {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  &__icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    color: var(--text-color-secondary);
+  }
+
+  &__text {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-color);
+  }
+
+  &__badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.5rem;
+    height: 1.5rem;
+    padding: 0 0.5rem;
+    background: #fb0021;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 9999px;
+  }
+
+  &__chevron {
+    font-size: 1rem;
+    color: var(--text-color-secondary);
+  }
+
+  &__chevron--small {
+    font-size: 0.875rem;
+    color: var(--text-color-secondary);
+  }
+
+  // ========================================
+  // Submenu (Nivel 2 y 3)
+  // ========================================
+  &__submenu {
+    background: var(--surface-50);
+    padding: 0.25rem 0;
+  }
+
+  &__submenu--nested {
+    padding-left: 1rem;
+  }
+
+  &__subitem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0.875rem 1.5rem 0.875rem 3rem;
+    min-height: 48px; // Touch target
+    text-decoration: none;
+    color: var(--text-color-secondary);
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    transition: background-color 150ms ease;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+
+    // Hover state
+    &:hover,
+    &:active {
+      background: var(--surface-hover);
+    }
+
+    // Active route
+    &--active {
+      background: #fb0021 !important;
+      color: white !important;
+
+      .mobile-drawer__subtext,
+      .mobile-drawer__chevron--small {
+        color: white !important;
+      }
+    }
+
+    // Highlighted (tiene nietos y alguno está activo)
+    &--highlighted {
+      background: rgba(251, 0, 33, 0.05);
+      color: #fb0021;
+
+      .mobile-drawer__subtext {
+        color: #fb0021;
+      }
+    }
+
+    // Nivel 3 (nietos)
+    &--nested {
+      padding-left: 4rem;
+    }
+  }
+
+  &__subtext {
+    font-size: 0.9375rem;
+    font-weight: 400;
+    color: inherit;
+    flex: 1;
+  }
+}
+
+// Dark mode adjustments
+:host-context(.dark) {
+  .mobile-drawer {
+    &__item,
+    &__subitem {
+      &:hover,
+      &:active {
+        background: rgba(255, 255, 255, 0.05);
+      }
+    }
+
+    &__submenu {
+      background: rgba(0, 0, 0, 0.2);
+    }
+  }
+}

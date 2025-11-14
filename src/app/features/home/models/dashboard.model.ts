@@ -1,3 +1,52 @@
+import type { OrderStatusType } from '@shared/enums/order-status.enum';
+
+/**
+ * API Response wrapper
+ */
+export interface ApiResponse<T> {
+  success: boolean;
+  message?: string;
+  data?: T;
+  error?: ApiErrorDto;
+}
+
+export interface ApiErrorDto {
+  code?: string;
+  message?: string;
+  details?: string;
+}
+
+/**
+ * API DTOs - Interfaces que coinciden con los schemas del swagger
+ */
+export interface HomeByCityDto {
+  cityName: string;
+  totalOrders: number;
+}
+
+export interface HomeByBrandsDto {
+  brandName: string;
+  brandLogoUrl: string;
+  totalOrders: number;
+}
+
+export interface HomeByPaymentMethodDto {
+  paymentMethodName: string;
+  totalOrders: number;
+}
+
+export interface HomeByChannelDto {
+  channelDescription: string;
+  totalOrders: number;
+}
+
+export interface HomeTotalOrdersByStatusDto {
+  totalOrders: number;
+}
+
+/**
+ * Dashboard Data interfaces (usadas en el componente)
+ */
 export interface DashboardKPI {
   label: string;
   value: number;
@@ -38,8 +87,13 @@ export interface DashboardData {
   ordersByCity: OrdersByCity[];
 }
 
+/**
+ * Dashboard Filters
+ */
 export interface DashboardFilters {
-  cityId?: string;
   startDate?: Date;
   endDate?: Date;
+  approved?: boolean;
+  orderStatusId?: OrderStatusType;
+  cityId?: number;
 }

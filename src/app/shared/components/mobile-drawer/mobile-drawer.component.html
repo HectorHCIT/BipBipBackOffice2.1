@@ -1,0 +1,138 @@
+<div class="mobile-drawer">
+  <!-- Header -->
+  <div class="mobile-drawer__header">
+    <div class="mobile-drawer__logo">
+      <img
+        src="loginLogo.png"
+        alt="BipBip Logo"
+        class="h-8 w-auto"
+      />
+    </div>
+    <p-button
+      [text]="true"
+      [rounded]="true"
+      icon="pi pi-times"
+      severity="secondary"
+      (onClick)="onClose()"
+      styleClass="mobile-drawer__close-btn"
+    />
+  </div>
+
+  <!-- Navigation Menu -->
+  <nav class="mobile-drawer__nav">
+    <!-- Loading State -->
+    @if (navigationService.isLoading()) {
+      <div class="mobile-drawer__loading">
+        <i class="pi pi-spin pi-spinner text-3xl text-gray-400"></i>
+        <p class="text-sm text-gray-500 mt-2">Cargando menú...</p>
+      </div>
+    }
+
+    <!-- Navigation Items -->
+    @for (item of navigationService.navigation(); track item.id) {
+      <div class="mobile-drawer__section">
+        <!-- NIVEL 1: Item Principal -->
+        @if (!item.children || item.children.length === 0) {
+          <!-- Item sin hijos - enlace directo -->
+          <a
+            [routerLink]="item.link"
+            routerLinkActive="mobile-drawer__item--active"
+            [routerLinkActiveOptions]="{exact: false}"
+            class="mobile-drawer__item"
+            (click)="onClose()"
+          >
+            <div class="mobile-drawer__item-content">
+              <i [class]="item.icon + ' mobile-drawer__icon'"></i>
+              <span class="mobile-drawer__text">{{ item.title }}</span>
+            </div>
+            @if (item.badge) {
+              <span class="mobile-drawer__badge">
+                {{ item.badge }}
+              </span>
+            }
+          </a>
+        } @else {
+          <!-- Item con hijos - collapsable -->
+          <div>
+            <button
+              (click)="toggleItem(item)"
+              class="mobile-drawer__item"
+              [class.mobile-drawer__item--highlighted]="item.exactMatch"
+            >
+              <div class="mobile-drawer__item-content">
+                <i [class]="item.icon + ' mobile-drawer__icon'"></i>
+                <span class="mobile-drawer__text">{{ item.title }}</span>
+              </div>
+              <div class="mobile-drawer__item-end">
+                @if (item.badge) {
+                  <span class="mobile-drawer__badge">
+                    {{ item.badge }}
+                  </span>
+                }
+                <i
+                  [class]="item.unfolded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"
+                  class="mobile-drawer__chevron"
+                ></i>
+              </div>
+            </button>
+
+            <!-- NIVEL 2: Hijos -->
+            @if (item.unfolded) {
+              <div class="mobile-drawer__submenu">
+                @for (child of item.children; track child.id) {
+                  @if (!child.children || child.children.length === 0) {
+                    <!-- Hijo sin nietos -->
+                    <a
+                      [routerLink]="child.link"
+                      routerLinkActive="mobile-drawer__subitem--active"
+                      [routerLinkActiveOptions]="{exact: false}"
+                      class="mobile-drawer__subitem"
+                      (click)="onClose()"
+                    >
+                      <span class="mobile-drawer__subtext">{{ child.title }}</span>
+                    </a>
+                  } @else {
+                    <!-- Hijo con nietos -->
+                    <div>
+                      <button
+                        (click)="toggleItem(child)"
+                        class="mobile-drawer__subitem"
+                        [class.mobile-drawer__subitem--highlighted]="child.exactMatch"
+                      >
+                        <span class="mobile-drawer__subtext">{{ child.title }}</span>
+                        <i
+                          [class]="child.unfolded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"
+                          class="mobile-drawer__chevron--small"
+                        ></i>
+                      </button>
+
+                      <!-- NIVEL 3: Nietos -->
+                      @if (child.unfolded) {
+                        <div class="mobile-drawer__submenu--nested">
+                          @for (grandChild of child.children; track grandChild.id) {
+                            <a
+                              [routerLink]="grandChild.link"
+                              routerLinkActive="mobile-drawer__subitem--active"
+                              [routerLinkActiveOptions]="{exact: false}"
+                              class="mobile-drawer__subitem mobile-drawer__subitem--nested"
+                              (click)="onClose()"
+                            >
+                              <span class="mobile-drawer__subtext">{{ grandChild.title }}</span>
+                            </a>
+                          }
+                        </div>
+                      }
+                    </div>
+                  }
+                }
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Divider después de cada sección principal -->
+        <div class="mobile-drawer__divider"></div>
+      </div>
+    }
+  </nav>
+</div>

@@ -1,0 +1,87 @@
+import { OrderStatusType } from '@/app/shared/enums/order-status.enum';
+
+/**
+ * Filtros para el dashboard de órdenes
+ */
+export interface OrdersFilters {
+  brandId?: number;
+  startDate?: string; // ISO date string
+  endDate?: string; // ISO date string
+  approved?: boolean;
+  excludedStatusId?: number;
+  orderStatusId?: number;
+}
+
+/**
+ * KPI individual de estado de orden
+ */
+export interface OrderStatusKpi {
+  statusId: OrderStatusType;
+  statusName: string;
+  count: number;
+  icon: string;
+  color: string;
+}
+
+/**
+ * Item de la tabla/donut de órdenes por estado
+ */
+export interface OrdersByStatusItem {
+  statusName: string;
+  totalOrders: number;
+  totalMoney: number;
+}
+
+/**
+ * Respuesta del endpoint by-status/summary
+ */
+export interface OrdersByStatusSummaryResponse {
+  items: OrdersByStatusItem[];
+  pageNumber: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+}
+
+/**
+ * Respuesta de conteo simple
+ */
+export interface CountResponse {
+  total: number;
+}
+
+/**
+ * Respuesta de valor promedio
+ */
+export interface AvgValueResponse {
+  value: number;
+}
+
+/**
+ * Data completa del dashboard de órdenes
+ */
+export interface OrdersDashboardData {
+  statusKpis: OrderStatusKpi[];
+  ordersByStatus: OrdersByStatusItem[];
+  avgPerHour: number;
+  recurrentCustomers: number;
+}
+
+/**
+ * Opciones de período predefinido
+ */
+export enum PeriodType {
+  Today = 'today',
+  Yesterday = 'yesterday',
+  LastWeek = 'lastWeek',
+  LastMonth = 'lastMonth',
+  Custom = 'custom'
+}
+
+/**
+ * Opción de período para el dropdown
+ */
+export interface PeriodOption {
+  label: string;
+  value: PeriodType;
+}

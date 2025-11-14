@@ -77,6 +77,7 @@
           icon="pi pi-check"
           size="small"
           severity="success"
+          [disabled]="disableTakeButton"
           (onClick)="onTakeClick($event)"
         />
       } @else if (showMenu) {

@@ -82,7 +82,7 @@ export const environment = {
   apiURLReports: '${getEnvValue('API_URL_REPORTS')}',
   apiURLSignalR: '${getEnvValue('API_URL_SIGNALR')}',
   invoicesURL: '${getEnvValue('INVOICES_URL')}',
-
+  apiURLDashb: '${getEnvValue('API_URL_DASH')}',
   // Maps
   mapboxToken: '${getEnvValue('MAPBOX_TOKEN')}',
   googleMapsApiKey: '${getEnvValue('GOOGLE_MAPS_API_KEY')}',

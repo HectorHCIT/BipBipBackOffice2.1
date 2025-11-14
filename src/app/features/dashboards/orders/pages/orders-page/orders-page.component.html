@@ -1,0 +1,47 @@
+<div class="orders-page">
+  <!-- Header -->
+  <div class="page-header mb-4">
+    <h2 class="text-2xl font-bold m-0 text-gray-900 dark:text-white">Dashboard de Órdenes</h2>
+    <p class="text-gray-600 dark:text-gray-400 mt-1">Análisis completo de órdenes, incidencias, tiempos de entrega y frecuencia de compra</p>
+  </div>
+
+  <!-- Tabs -->
+  <p-tabs [value]="activeTabIndex()">
+    <p-tablist>
+      <p-tab [value]="0">Órdenes</p-tab>
+      <p-tab [value]="1">Incidencias</p-tab>
+      <p-tab [value]="2">Tiempos de Entrega</p-tab>
+      <p-tab [value]="3">Frecuencia de Compra</p-tab>
+    </p-tablist>
+
+    <p-tabpanels>
+      <!-- Tab 1: Órdenes -->
+      <p-tabpanel [value]="0">
+        <div class="tab-content">
+          <app-orders-general />
+        </div>
+      </p-tabpanel>
+
+      <!-- Tab 2: Incidencias -->
+      <p-tabpanel [value]="1">
+        <div class="tab-content">
+          <app-incidencias />
+        </div>
+      </p-tabpanel>
+
+      <!-- Tab 3: Tiempos de Entrega -->
+      <p-tabpanel [value]="2">
+        <div class="tab-content">
+          <app-tiempos-entrega />
+        </div>
+      </p-tabpanel>
+
+      <!-- Tab 4: Frecuencia de Compra -->
+      <p-tabpanel [value]="3">
+        <div class="tab-content">
+          <app-frecuencia-compra />
+        </div>
+      </p-tabpanel>
+    </p-tabpanels>
+  </p-tabs>
+</div>

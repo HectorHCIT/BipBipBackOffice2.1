@@ -1,0 +1,46 @@
+.frecuencia-compra {
+  :host ::ng-deep p-card {
+    .p-card {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 12px;
+
+      .p-card-body {
+        padding: 0;
+      }
+    }
+  }
+
+  i {
+    display: block;
+  }
+
+  h3 {
+    margin: 0;
+  }
+
+  p {
+    margin: 0;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  li {
+    padding: 0.25rem 0;
+  }
+}
+
+// Dark mode
+:host-context(.dark) {
+  .frecuencia-compra {
+    :host ::ng-deep p-card {
+      .p-card {
+        background: #1f2937;
+        border-color: #374151;
+      }
+    }
+  }
+}

@@ -2,3 +2,20 @@
   display: block;
   width: 100%;
 }
+
+// Responsive para header en pantallas pequeñas
+.w-full {
+  > div {
+    // Reducir padding en mobile
+    @media (max-width: 640px) {
+      padding-left: 0.75rem;
+      padding-right: 0.75rem;
+    }
+
+    @media (max-width: 390px) {
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+      gap: 0.5rem;
+    }
+  }
+}

@@ -21,11 +21,12 @@
       (visibleChange)="isDrawerOpen.set($event)"
       position="full"
       [modal]="true"
-      [showCloseIcon]="true"
+      [showCloseIcon]="false"
+      styleClass="mobile-drawer-wrapper"
     >
-      <app-sidebar
-        [isCollapsed]="false"
-        (toggleCollapse)="closeDrawer()"
+      <app-mobile-drawer
+        [visible]="isDrawerOpen()"
+        (closeDrawer)="closeDrawer()"
       />
     </p-drawer>
 
@@ -35,7 +36,7 @@
       [class.ml-64]="!isSidebarCollapsed() && !isMobile()"
       [class.ml-16]="isSidebarCollapsed() && !isMobile()"
     >
-      <div class="p-6 mt-16">
+      <div class="p-2 md:p-6  mt-16">
         <router-outlet />
       </div>
     </main>

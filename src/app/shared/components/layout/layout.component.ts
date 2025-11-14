@@ -8,6 +8,7 @@ import { DrawerModule } from 'primeng/drawer';
 
 import { NavbarComponent } from '../navbar/navbar.component';
 import { SidebarComponent } from '../sidebar/sidebar.component';
+import { MobileDrawerComponent } from '../mobile-drawer/mobile-drawer.component';
 
 /**
  * LayoutComponent - Layout principal con navbar y sidebar
@@ -15,7 +16,7 @@ import { SidebarComponent } from '../sidebar/sidebar.component';
  * Features:
  * - ✅ Navbar fijo en la parte superior
  * - ✅ Sidebar contraíble en desktop
- * - ✅ Drawer full en mobile (≤768px)
+ * - ✅ Mobile drawer independiente (≤768px)
  * - ✅ Cierre automático de drawer en navegación (mobile)
  * - ✅ Responsive design
  * - ✅ Dark mode support
@@ -27,6 +28,7 @@ import { SidebarComponent } from '../sidebar/sidebar.component';
     RouterOutlet,
     NavbarComponent,
     SidebarComponent,
+    MobileDrawerComponent,
     DrawerModule
   ],
   templateUrl: './layout.component.html',

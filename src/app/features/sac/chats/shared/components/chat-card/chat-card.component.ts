@@ -36,6 +36,8 @@ export class ChatCardComponent {
   @Input() isSelected = false;
   @Input() showMenu = true;
   @Input() showTakeButton = false;
+  @Input() disableTakeButton = false;  // ✅ Nueva propiedad para deshabilitar botón "Tomar"
+  @Input() disableFinalizeButton = false;  // ✅ Nueva propiedad para deshabilitar botón "Finalizar"
 
   @Output() cardClick = new EventEmitter<ChatCardData>();
   @Output() finalizarChat = new EventEmitter<string>();
@@ -44,14 +46,17 @@ export class ChatCardComponent {
   /**
    * Items del menú de acciones
    */
-  menuItems: MenuItem[] = [
-    {
-      label: 'Finalizar',
-      icon: 'pi pi-times',
-      command: () => this.onFinalizarClick(),
-      styleClass: 'text-red-600 hover:bg-red-50'
-    }
-  ];
+  get menuItems(): MenuItem[] {
+    return [
+      {
+        label: 'Finalizar',
+        icon: 'pi pi-times',
+        command: () => this.onFinalizarClick(),
+        styleClass: 'text-red-600 hover:bg-red-50',
+        disabled: this.disableFinalizeButton  // ✅ Deshabilitar si no está online
+      }
+    ];
+  }
 
   /**
    * Obtiene la inicial del cliente

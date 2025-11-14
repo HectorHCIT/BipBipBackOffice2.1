@@ -1,0 +1,248 @@
+<div class="cancelaciones-page">
+  <!-- Filtros -->
+  <div class="filters-section mb-4">
+    <form [formGroup]="filtersForm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+      <!-- Select de Marca -->
+      <div class="filter-item">
+        <label for="brand-select" class="block mb-2 font-semibold">Marca</label>
+        <p-select
+          inputId="brand-select"
+          formControlName="selectedBrand"
+          [options]="brands()"
+          optionLabel="name"
+          placeholder="Seleccionar marca"
+          class="w-full"
+        />
+      </div>
+
+      <!-- Select de Rango Predefinido -->
+      <div class="filter-item">
+        <label for="range-select" class="block mb-2 font-semibold">Periodo</label>
+        <p-select
+          inputId="range-select"
+          formControlName="selectedDateRange"
+          [options]="dateRangeOptions()"
+          optionLabel="label"
+          placeholder="Seleccionar periodo"
+          class="w-full"
+          (onChange)="onDateRangeChange()"
+        />
+      </div>
+
+      <!-- Filtro de Fecha Manual -->
+      <div class="filter-item">
+        <label for="date-filter" class="block mb-2 font-semibold">Fechas Personalizadas</label>
+        <p-datepicker
+          inputId="date-filter"
+          formControlName="dateRange"
+          selectionMode="range"
+          [showIcon]="true"
+          iconDisplay="input"
+          placeholder="Seleccionar fechas"
+          class="w-full"
+          (onSelect)="onManualDateChange()"
+        />
+      </div>
+
+      <!-- Botones de acción -->
+      <div class="filter-item flex items-end gap-2">
+        <p-button
+          label="Aplicar"
+          icon="pi pi-filter"
+          (click)="applyFilters()"
+          [loading]="isLoading()"
+          styleClass="flex-1"
+        />
+        <p-button
+          label="Limpiar"
+          icon="pi pi-times"
+          (click)="clearFilters()"
+          [disabled]="isLoading()"
+          severity="secondary"
+          [outlined]="true"
+        />
+      </div>
+    </form>
+
+    <!-- Mensaje de error -->
+    @if (error()) {
+      <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded mb-4">
+        <div class="flex items-center gap-2">
+          <i class="pi pi-exclamation-triangle"></i>
+          <span>{{ error() }}</span>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpis-section mb-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      @if (isLoading()) {
+        @for (i of [1, 2]; track i) {
+          <p-card styleClass="kpi-card">
+            <div class="flex justify-between items-center">
+              <div class="flex-1">
+                <p-skeleton width="60%" height="1rem" styleClass="mb-2" />
+                <p-skeleton width="40%" height="2.5rem" />
+              </div>
+              <div class="kpi-icon">
+                <p-skeleton shape="circle" size="3rem" />
+              </div>
+            </div>
+          </p-card>
+        }
+      } @else {
+        @for (kpi of kpis(); track kpi.label) {
+          <p-card styleClass="kpi-card">
+            <div class="flex justify-between items-center">
+              <div>
+                <p class="text-sm text-gray-500 mb-1">{{ kpi.label }}</p>
+                <h3 class="text-2xl font-bold m-0">{{ kpi.value }}</h3>
+              </div>
+              <div class="kpi-icon">
+                <i [class]="kpi.icon + ' text-3xl text-primary-500'"></i>
+              </div>
+            </div>
+          </p-card>
+        }
+      }
+    </div>
+  </div>
+
+  <!-- Gráficos de Barras: Cancelaciones por Marca y por Canal -->
+  <div class="charts-section mb-4">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <!-- Cancelaciones por Marca -->
+      <p-card>
+        <ng-template pTemplate="header">
+          <div class="p-4">
+            <h3 class="text-lg font-semibold m-0">Cancelaciones por Marca</h3>
+          </div>
+        </ng-template>
+
+        @if (isLoading()) {
+          <div class="p-4">
+            <p-skeleton height="300px" />
+          </div>
+        } @else if (chartByBrandData()) {
+          <div class="chart-container" style="height: 300px;">
+            <p-chart type="bar" [data]="chartByBrandData()" [options]="barChartOptions" />
+          </div>
+        } @else {
+          <div class="p-4 text-center text-gray-500">
+            <p>No hay datos disponibles</p>
+          </div>
+        }
+      </p-card>
+
+      <!-- Cancelaciones por Canal -->
+      <p-card>
+        <ng-template pTemplate="header">
+          <div class="p-4">
+            <h3 class="text-lg font-semibold m-0">Cancelaciones por Canal</h3>
+          </div>
+        </ng-template>
+
+        @if (isLoading()) {
+          <div class="p-4">
+            <p-skeleton height="300px" />
+          </div>
+        } @else if (chartByChannelData()) {
+          <div class="chart-container" style="height: 300px;">
+            <p-chart type="bar" [data]="chartByChannelData()" [options]="barChartOptions" />
+          </div>
+        } @else {
+          <div class="p-4 text-center text-gray-500">
+            <p>No hay datos disponibles</p>
+          </div>
+        }
+      </p-card>
+    </div>
+  </div>
+
+  <!-- Tabla de Cancelaciones Detallada -->
+  <div class="table-section mb-4">
+    <p-card>
+      <ng-template pTemplate="header">
+        <div class="p-4">
+          <h3 class="text-lg font-semibold m-0">Detalle de Cancelaciones</h3>
+        </div>
+      </ng-template>
+
+      @if (isLoading()) {
+        <div class="p-4">
+          <p-skeleton height="400px" />
+        </div>
+      } @else {
+        <p-table
+          [value]="cancelationsList()"
+          [lazy]="true"
+          [paginator]="true"
+          [rows]="pageSize()"
+          [first]="(currentPage() - 1) * pageSize()"
+          [totalRecords]="totalRecords()"
+          [loading]="isLoading()"
+          [rowsPerPageOptions]="[10, 25, 50]"
+          [showCurrentPageReport]="true"
+          currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} cancelaciones"
+          styleClass="p-datatable-sm"
+          (onLazyLoad)="onLazyLoad($event)"
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Orden</th>
+              <th>Cliente</th>
+              <th>Fecha Cancelación</th>
+              <th>Marca</th>
+              <th>Unidad</th>
+              <th class="text-right">Total</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-item>
+            <tr>
+              <td>{{ item.newOrderId }}</td>
+              <td>{{ item.customerFirstName }}</td>
+              <td>{{ formatDate(item.dateCanceled) }}</td>
+              <td>{{ item.brandShortName }}</td>
+              <td>{{ item.storeShortName }}</td>
+              <td class="text-right font-semibold">{{ formatCurrency(item.total) }}</td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="6" class="text-center text-gray-500 py-4">
+                No hay cancelaciones para mostrar
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      }
+    </p-card>
+  </div>
+
+  <!-- Gráfico de Cancelaciones por Unidad -->
+  <div class="store-chart-section mb-4">
+    <p-card>
+      <ng-template pTemplate="header">
+        <div class="p-4">
+          <h3 class="text-lg font-semibold m-0">Cancelaciones por Unidad</h3>
+        </div>
+      </ng-template>
+
+      @if (isLoading()) {
+        <div class="p-4">
+          <p-skeleton height="400px" />
+        </div>
+      } @else if (chartByStoreData()) {
+        <div class="chart-container" style="height: 400px;">
+          <p-chart type="bar" [data]="chartByStoreData()" [options]="barChartOptions" />
+        </div>
+      } @else {
+        <div class="p-4 text-center text-gray-500">
+          <p>No hay datos disponibles</p>
+        </div>
+      }
+    </p-card>
+  </div>
+</div>

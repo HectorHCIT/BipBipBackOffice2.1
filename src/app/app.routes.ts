@@ -62,6 +62,11 @@ export const routes: Routes = [
       {
         path: 'notification-managements',
         loadChildren: () => import('./features/notification-managements/notification-managements.routes').then(m => m.NOTIFICATION_MANAGEMENTS_ROUTES)
+      },
+      // Dashboards
+      {
+        path: 'dashboards',
+        loadChildren: () => import('./features/dashboards/dashboards.routes').then(m => m.DASHBOARDS_ROUTES)
       }
       // TODO: Agregar más módulos padre aquí (Drivers, etc.)
     ]
