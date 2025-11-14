@@ -8,6 +8,8 @@ import {
   OrderStatusKpi,
   OrdersByStatusItem,
   OrdersByStatusSummaryResponse,
+  OrdersByUnitItem,
+  OrdersByCityItem,
   CountResponse,
   AvgValueResponse,
   OrdersDashboardData
@@ -168,6 +170,44 @@ export class OrdersDashboardService {
   }
 
   /**
+   * Obtiene las órdenes agrupadas por tienda/unidad
+   */
+  getOrdersByUnit(filters: OrdersFilters): Observable<OrdersByUnitItem[]> {
+    const params = this.buildParams(filters).set('TopN', '10');
+
+    return this.http.get<ApiResponse<OrdersByUnitItem[]>>(
+      `${this.baseUrl}/by-store/top`,
+      { params }
+    ).pipe(
+      map(response => response.data ?? []),
+      catchError(error => {
+        console.error('Error loading orders by unit:', error);
+        // Retornar array vacío en caso de error para no romper el dashboard
+        return [[]];
+      })
+    );
+  }
+
+  /**
+   * Obtiene las órdenes agrupadas por ciudad
+   */
+  getOrdersByCity(filters: OrdersFilters): Observable<OrdersByCityItem[]> {
+    const params = this.buildParams(filters).set('TopN', '10');
+
+    return this.http.get<ApiResponse<OrdersByCityItem[]>>(
+      `${this.baseUrl}/by-city/top`,
+      { params }
+    ).pipe(
+      map(response => response.data ?? []),
+      catchError(error => {
+        console.error('Error loading orders by city:', error);
+        // Retornar array vacío en caso de error para no romper el dashboard
+        return [[]];
+      })
+    );
+  }
+
+  /**
    * Obtiene todos los datos del dashboard en una sola llamada
    */
   getDashboardData(filters: OrdersFilters): Observable<OrdersDashboardData> {
@@ -175,7 +215,9 @@ export class OrdersDashboardService {
       statusKpis: this.getStatusKpis(filters),
       ordersByStatus: this.getOrdersByStatus(filters),
       avgPerHour: this.getAvgPerHour(filters),
-      recurrentCustomers: this.getRecurrentCustomers(filters)
+      recurrentCustomers: this.getRecurrentCustomers(filters),
+      ordersByUnit: this.getOrdersByUnit(filters),
+      ordersByCity: this.getOrdersByCity(filters)
     }).pipe(
       catchError(error => {
         console.error('Error loading dashboard data:', error);

@@ -1,52 +1,64 @@
 <div class="orders-general w-full">
   <!-- Filters Section -->
   <p-card styleClass="mb-4 dark:border-[1px] dark:border-gray-700">
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 rounded-lg">
-      <!-- Brand Selector -->
-      <div>
-        <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-          Marca
-        </label>
-        <p-select
-          [options]="brandOptions()"
-          [(ngModel)]="selectedBrandId"
-          optionLabel="name"
-          optionValue="id"
-          placeholder="Seleccionar marca"
-          (onChange)="onBrandChange($event.value)"
-          styleClass="w-full"
-        />
+    <div class="p-4 rounded-lg">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <!-- Brand Selector -->
+        <div>
+          <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+            Marca
+          </label>
+          <p-select
+            [options]="brandOptions()"
+            [(ngModel)]="selectedBrandId"
+            optionLabel="name"
+            optionValue="id"
+            placeholder="Seleccionar marca"
+            (onChange)="onBrandChange($event.value)"
+            styleClass="w-full"
+          />
+        </div>
+
+        <!-- Date Range Picker (Always Visible) -->
+        <div>
+          <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+            Rango de Fechas
+          </label>
+          <p-datepicker
+            [(ngModel)]="dateRange"
+            selectionMode="range"
+            [showIcon]="true"
+            placeholder="Seleccionar rango"
+            dateFormat="dd/mm/yy"
+            styleClass="w-full"
+            (onSelect)="onDateRangeSelect()"
+          />
+        </div>
+
+        <!-- Period Selector -->
+        <div>
+          <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+            Período
+          </label>
+          <p-select
+            [options]="periodOptions"
+            [(ngModel)]="selectedPeriod"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Seleccionar período"
+            (onChange)="onPeriodChange($event.value)"
+            styleClass="w-full"
+          />
+        </div>
       </div>
 
-      <!-- Date Range Picker (Always Visible) -->
-      <div>
-        <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-          Rango de Fechas
-        </label>
-        <p-datepicker
-          [(ngModel)]="dateRange"
-          selectionMode="range"
-          [showIcon]="true"
-          placeholder="Seleccionar rango"
-          dateFormat="dd/mm/yy"
-          (onSelect)="onDateRangeChange($event)"
-          styleClass="w-full"
-        />
-      </div>
-
-      <!-- Period Selector -->
-      <div>
-        <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-          Período
-        </label>
-        <p-select
-          [options]="periodOptions"
-          [(ngModel)]="selectedPeriod"
-          optionLabel="label"
-          optionValue="value"
-          placeholder="Seleccionar período"
-          (onChange)="onPeriodChange($event.value)"
-          styleClass="w-full"
+      <!-- Apply Filters Button -->
+      <div class="flex justify-end">
+        <p-button
+          label="Aplicar Filtros"
+          icon="pi pi-filter"
+          (onClick)="applyFilters()"
+          [loading]="isLoading()"
         />
       </div>
     </div>
@@ -204,5 +216,95 @@
         </p-card>
       </div>
     </div>
+  </div>
+
+  <!-- Second Row: Bar Chart + City Table -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+    <!-- Left Column: Bar Chart - Orders by Unit -->
+    <p-card class="dark:border-[1px] dark:border-gray-700">
+      <ng-template pTemplate="header">
+        <div class="p-4">
+          <h3 class="text-lg font-semibold m-0">Pedidos por Unidad</h3>
+        </div>
+      </ng-template>
+
+      @if (isLoading()) {
+        <p-skeleton width="100%" height="400px" />
+      } @else if (barChartData()) {
+        <div class="chart-container" style="height: 400px;">
+          <p-chart
+            type="bar"
+            [data]="barChartData()"
+            [options]="barChartOptions"
+            class="h-[20rem] "
+          />
+        </div>
+      } @else {
+        <div class="text-center py-8 text-gray-500">
+          No hay datos para mostrar
+        </div>
+      }
+    </p-card>
+
+    <!-- Right Column: Table - Orders by City -->
+    <p-card class="dark:border-[1px] dark:border-gray-700">
+      <ng-template pTemplate="header">
+        <div class="p-4">
+          <h3 class="text-lg font-semibold m-0">Pedidos por Ciudad</h3>
+        </div>
+      </ng-template>
+
+      @if (isLoading()) {
+        <p-skeleton width="100%" height="500px" />
+      } @else {
+        <p-table
+          [value]="ordersByCity()"
+          styleClass="p-datatable-sm"
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              <th class="uppercase text-xs font-semibold">Ciudad</th>
+              <th class="uppercase text-xs font-semibold text-right hidden md:table-cell">Pedidos</th>
+              <th class="uppercase text-xs font-semibold text-right hidden md:table-cell">Promedio/Día</th>
+              <th class="uppercase text-xs font-semibold text-right">Total</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-item>
+            <tr class="hover:bg-gray-50 dark:hover:bg-gray-800">
+              <!-- Desktop: Solo nombre de ciudad -->
+              <td class="font-medium hidden md:table-cell">{{ item.cityName }}</td>
+
+              <!-- Mobile: Mini card con ciudad + pedidos + promedio -->
+              <td class="md:hidden">
+                <div class="flex flex-col gap-1">
+                  <div class="font-semibold text-sm">{{ item.cityName }}</div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400">
+                    {{ formatNumber(item.totalOrders) }} pedidos • {{ item.avgOrdersPerDay | number:'1.1-1' }}/día
+                  </div>
+                </div>
+              </td>
+
+              <!-- Desktop: Pedidos -->
+              <td class="text-right hidden md:table-cell">{{ formatNumber(item.totalOrders) }}</td>
+
+              <!-- Desktop: Promedio/Día -->
+              <td class="text-right hidden md:table-cell">{{ item.avgOrdersPerDay | number:'1.1-1' }}</td>
+
+              <!-- Both: Total money -->
+              <td class="text-right font-semibold text-primary-500 dark:text-gray-300">
+                {{ formatCurrency(item.totalMoney) }}
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="4" class="text-center py-8 text-gray-500">
+                No hay datos disponibles para el período seleccionado
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      }
+    </p-card>
   </div>
 </div>

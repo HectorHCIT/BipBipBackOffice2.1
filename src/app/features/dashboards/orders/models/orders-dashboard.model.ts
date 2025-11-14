@@ -58,6 +58,26 @@ export interface AvgValueResponse {
 }
 
 /**
+ * Item para el gráfico de barras de pedidos por tienda/unidad
+ * Mapea OrdersByStoreItemDto del API
+ */
+export interface OrdersByUnitItem {
+  storeShortName: string;  // Nombre corto de la tienda (del API)
+  totalOrders: number;     // Total de pedidos
+}
+
+/**
+ * Item para la tabla de pedidos por ciudad
+ * Mapea OrdersByCityItemDto del API
+ */
+export interface OrdersByCityItem {
+  cityName: string;          // Nombre de la ciudad
+  totalOrders: number;       // Total de pedidos
+  avgOrdersPerDay: number;   // Promedio de pedidos por día
+  totalMoney: number;        // Total en dinero
+}
+
+/**
  * Data completa del dashboard de órdenes
  */
 export interface OrdersDashboardData {
@@ -65,6 +85,8 @@ export interface OrdersDashboardData {
   ordersByStatus: OrdersByStatusItem[];
   avgPerHour: number;
   recurrentCustomers: number;
+  ordersByUnit: OrdersByUnitItem[];
+  ordersByCity: OrdersByCityItem[];
 }
 
 /**

@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, signal, computed, inject, OnInit } from '@angular/core';
-import { CommonModule, DecimalPipe, CurrencyPipe } from '@angular/common';
+import { CommonModule, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CardModule } from 'primeng/card';
 import { SkeletonModule } from 'primeng/skeleton';
@@ -7,6 +7,7 @@ import { TableModule } from 'primeng/table';
 import { SelectModule } from 'primeng/select';
 import { DatePickerModule } from 'primeng/datepicker';
 import { ChartModule } from 'primeng/chart';
+import { ButtonModule } from 'primeng/button';
 import { GlobalDataService } from '@core/services/global-data.service';
 import { OrdersDashboardService } from '../../services';
 import { OrdersFilters, PeriodType, PeriodOption, OrderStatusKpi, OrdersByStatusItem, OrdersDashboardData } from '../../models';
@@ -33,8 +34,8 @@ import { OrdersFilters, PeriodType, PeriodOption, OrderStatusKpi, OrdersByStatus
     SelectModule,
     DatePickerModule,
     ChartModule,
-    DecimalPipe,
-    CurrencyPipe
+    ButtonModule,
+    DecimalPipe
   ],
   templateUrl: './orders-general.component.html',
   styleUrls: ['./orders-general.component.scss'],
@@ -82,6 +83,8 @@ export class OrdersGeneralComponent implements OnInit {
   readonly ordersByStatus = computed(() => this.dashboardData()?.ordersByStatus ?? []);
   readonly avgPerHour = computed(() => this.dashboardData()?.avgPerHour ?? 0);
   readonly recurrentCustomers = computed(() => this.dashboardData()?.recurrentCustomers ?? 0);
+  readonly ordersByUnit = computed(() => this.dashboardData()?.ordersByUnit ?? []);
+  readonly ordersByCity = computed(() => this.dashboardData()?.ordersByCity ?? []);
 
   // Chart data
   readonly donutChartData = computed(() => {
@@ -130,6 +133,79 @@ export class OrdersGeneralComponent implements OnInit {
     }
   };
 
+  // Bar chart data for orders by unit
+  readonly barChartData = computed(() => {
+    const orders = this.ordersByUnit();
+    if (orders.length === 0) return null;
+
+    // Mismo patrón de colores que el donut chart
+    const colors = [
+      '#FB0021',  // primary-500 - Brand red
+      '#F7395B',  // primary-400 - Medium red
+      '#E9001C',  // primary-600 - Dark red
+      '#FA8D9F',  // primary-200 - Light red
+      '#FCC4CD',  // primary-100 - Very light red
+      '#F85D78',  // primary-300 - Light-medium red
+      '#FB0021',  // Repeat pattern if more than 6 bars
+      '#F7395B',
+      '#E9001C',
+      '#FA8D9F'
+    ];
+
+    const borderColors = [
+      '#E9001C',  // primary-600
+      '#F85D78',  // primary-300
+      '#D10019',  // primary-700
+      '#F7395B',  // primary-400
+      '#FA8D9F',  // primary-200
+      '#F7395B',  // primary-400
+      '#E9001C',
+      '#F85D78',
+      '#D10019',
+      '#F7395B'
+    ];
+
+    return {
+      labels: orders.map(o => o.storeShortName),
+      datasets: [{
+        label: 'Pedidos',
+        data: orders.map(o => o.totalOrders),
+        backgroundColor: colors.slice(0, orders.length),
+        borderColor: borderColors.slice(0, orders.length),
+        borderWidth: 1
+      }]
+    };
+  });
+
+  // Bar chart options
+  readonly barChartOptions = {
+    plugins: {
+      legend: {
+        display: false
+      },
+      tooltip: {
+        callbacks: {
+          label: (context: any) => {
+            const item = this.ordersByUnit()[context.dataIndex];
+            return `Pedidos: ${this.formatNumber(item.totalOrders)}`;
+          }
+        }
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          callback: (value: number | string) => this.formatNumber(Number(value))
+        }
+      }
+    },
+    responsive: true,
+    maintainAspectRatio: false,
+    barThickness: 40,  // Grosor de las barras (más alto = más gruesas)
+    maxBarThickness: 60  // Grosor máximo
+  };
+
   ngOnInit(): void {
     // Cargar solo las marcas si no están cargadas
     if (this.globalDataService.brands().length === 0) {
@@ -153,6 +229,8 @@ export class OrdersGeneralComponent implements OnInit {
     };
 
     const dates = this.calculateDateRange();
+    console.log('📅 buildFilters - calculateDateRange result:', dates);
+
     if (dates.startDate) {
       filters.startDate = dates.startDate;
     }
@@ -160,57 +238,74 @@ export class OrdersGeneralComponent implements OnInit {
       filters.endDate = dates.endDate;
     }
 
+    console.log('✅ buildFilters - final filters:', filters);
     return filters;
   }
 
   /**
    * Calcula el rango de fechas basado en el período seleccionado
+   * Retorna solo la fecha en formato YYYY-MM-DD sin horas
    */
   private calculateDateRange(): { startDate: string; endDate: string } {
     const now = new Date();
     let startDate: Date;
-    let endDate: Date = new Date(now);
+    let endDate: Date;
+
+    console.log('🗓️ calculateDateRange - period:', this.selectedPeriod());
 
     switch (this.selectedPeriod()) {
       case PeriodType.Today:
-        startDate = new Date(now.setHours(0, 0, 0, 0));
-        endDate = new Date(now.setHours(23, 59, 59, 999));
+        startDate = new Date(now);
+        endDate = new Date(now);
         break;
 
       case PeriodType.Yesterday:
         startDate = new Date(now);
         startDate.setDate(startDate.getDate() - 1);
-        startDate.setHours(0, 0, 0, 0);
         endDate = new Date(startDate);
-        endDate.setHours(23, 59, 59, 999);
         break;
 
       case PeriodType.LastWeek:
         startDate = new Date(now);
         startDate.setDate(startDate.getDate() - 7);
-        startDate.setHours(0, 0, 0, 0);
+        endDate = new Date(now);
         break;
 
       case PeriodType.LastMonth:
         startDate = new Date(now);
         startDate.setMonth(startDate.getMonth() - 1);
-        startDate.setHours(0, 0, 0, 0);
+        endDate = new Date(now);
         break;
 
       case PeriodType.Custom:
         const range = this.dateRange();
+        console.log('📆 calculateDateRange - Custom range from signal:', range);
         startDate = range[0] ?? new Date();
         endDate = range[1] ?? new Date();
         break;
 
       default:
-        startDate = new Date(now.setHours(0, 0, 0, 0));
+        startDate = new Date(now);
+        endDate = new Date(now);
     }
 
-    return {
-      startDate: startDate.toISOString(),
-      endDate: endDate.toISOString()
+    const result = {
+      startDate: this.formatDateOnly(startDate),
+      endDate: this.formatDateOnly(endDate)
     };
+    console.log('🕐 calculateDateRange - result:', result);
+
+    return result;
+  }
+
+  /**
+   * Formatea una fecha a string YYYY-MM-DD sin horas
+   */
+  private formatDateOnly(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   /**
@@ -246,8 +341,16 @@ export class OrdersGeneralComponent implements OnInit {
       const dates = this.calculateDateRangeForPeriod(period);
       this.dateRange.set([dates.start, dates.end]);
     }
+    // No aplicamos los filtros automáticamente, esperamos al botón "Aplicar"
+  }
 
-    this.loadDashboardData();
+  /**
+   * Maneja la selección manual de fechas en el picker
+   * Cambia automáticamente el período a "Custom"
+   */
+  onDateRangeSelect(): void {
+    this.selectedPeriod.set(PeriodType.Custom);
+    console.log('📅 Date range manually selected, switching to Custom period');
   }
 
   /**
@@ -255,6 +358,25 @@ export class OrdersGeneralComponent implements OnInit {
    */
   onBrandChange(brandId: number | undefined): void {
     this.selectedBrandId.set(brandId);
+    // No aplicamos los filtros automáticamente, esperamos al botón "Aplicar"
+  }
+
+  /**
+   * Aplica los filtros seleccionados y recarga los datos
+   */
+  applyFilters(): void {
+    // Validar que tengamos un rango de fechas completo si es Custom
+    if (this.selectedPeriod() === PeriodType.Custom) {
+      const range = this.dateRange();
+      if (!range || range.length < 2 || !range[0] || !range[1]) {
+        this.error.set('Por favor selecciona un rango de fechas válido');
+        return;
+      }
+    }
+
+    console.log('🔍 applyFilters - selectedPeriod:', this.selectedPeriod());
+    console.log('🔍 applyFilters - dateRange:', this.dateRange());
+
     this.loadDashboardData();
   }
 
@@ -308,17 +430,6 @@ export class OrdersGeneralComponent implements OnInit {
     return { start: startDate, end: endDate };
   }
 
-  /**
-   * Maneja el cambio de rango de fechas personalizado
-   */
-  onDateRangeChange(event: any): void {
-    const dates = Array.isArray(event) ? event : [event];
-    this.dateRange.set(dates);
-    if (dates && dates.length === 2 && dates[0] && dates[1]) {
-      this.selectedPeriod.set(PeriodType.Custom);
-      this.loadDashboardData();
-    }
-  }
 
   /**
    * Formatea números con separadores de miles (formato Honduras)
