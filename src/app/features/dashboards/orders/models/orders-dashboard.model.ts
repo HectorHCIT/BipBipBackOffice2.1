@@ -1,4 +1,4 @@
-import { OrderStatusType } from '@/app/shared/enums/order-status.enum';
+import { OrderStatusType } from '@shared/enums/order-status.enum';
 
 /**
  * Filtros para el dashboard de órdenes

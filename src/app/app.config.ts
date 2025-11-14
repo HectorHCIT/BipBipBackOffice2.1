@@ -7,7 +7,7 @@ import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import { provideFirestore, getFirestore } from '@angular/fire/firestore';
 import { provideDatabase, getDatabase } from '@angular/fire/database';
 import { registerLocaleData } from '@angular/common';
-import localeEs from '@angular/common/locales/es';
+import localeEsHN from '@angular/common/locales/es-HN';
 
 import Aura from '@primeuix/themes/aura';
 import { definePreset } from '@primeuix/themes';
@@ -16,8 +16,8 @@ import { routes } from './app.routes';
 import { environment } from '../environments/environment';
 import { authInterceptor, errorInterceptor } from './core/interceptors';
 
-// Register Spanish locale
-registerLocaleData(localeEs, 'es-HN');
+// Register Honduras locale
+registerLocaleData(localeEsHN, 'es-HN');
 
 const BipBipTheme = definePreset(Aura, BipBipPreset);
 

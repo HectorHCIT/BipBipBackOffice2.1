@@ -12,7 +12,7 @@
 .main-content {
   flex: 1;
   transition: margin-left 300ms ease-in-out;
-
+  width: 100%;
   // Mobile: sin margen (sidebar está en drawer)
   @media (max-width: 768px) {
     margin-left: 0 !important;

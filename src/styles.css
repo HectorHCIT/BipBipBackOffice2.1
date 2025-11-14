@@ -44,6 +44,48 @@
 @variant dark (&.dark, .dark &);
 
 /* ============================================
+   TAILWIND THEME CUSTOMIZATION
+   Extender Tailwind con colores de la marca
+   ============================================ */
+@theme {
+  /* Primary Colors - Rojo de Marca */
+  --color-primary-50: #FEE5E9;
+  --color-primary-100: #FCBCC6;
+  --color-primary-200: #FA8D9F;
+  --color-primary-300: #F85D78;
+  --color-primary-400: #F7395B;
+  --color-primary-500: #FB0021;
+  --color-primary-600: #E9001C;
+  --color-primary-700: #D10019;
+  --color-primary-800: #B80016;
+  --color-primary-900: #8F0011;
+
+  /* Success Colors - Verde */
+  --color-success-50: #E5FCF2;
+  --color-success-100: #BEF8DE;
+  --color-success-200: #92F4C9;
+  --color-success-300: #66F0B4;
+  --color-success-400: #34ED9F;
+  --color-success-500: #01EB7B;
+  --color-success-600: #00D470;
+  --color-success-700: #00BD64;
+  --color-success-800: #00A659;
+  --color-success-900: #008744;
+
+  /* Danger Colors - Rojo Error */
+  --color-danger-50: #FEE5E5;
+  --color-danger-100: #FCBEBE;
+  --color-danger-200: #FA9393;
+  --color-danger-300: #F86868;
+  --color-danger-400: #F64747;
+  --color-danger-500: #E7001E;
+  --color-danger-600: #D1001B;
+  --color-danger-700: #BB0018;
+  --color-danger-800: #A50015;
+  --color-danger-900: #7F0011;
+}
+
+/* ============================================
    PRIMENG COLOR CUSTOMIZATION
    Colores personalizados para mantener consistencia
    con el proyecto anterior

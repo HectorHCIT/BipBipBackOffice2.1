@@ -1,3 +1,102 @@
 .orders-general {
-  // Estilos específicos del componente
+  // KPI Cards
+  :host ::ng-deep {
+    .kpi-card {
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px #f50101e5;
+      }
+
+      .p-card-body {
+        padding: 1.25rem;
+      }
+    }
+
+    .kpi-card-secondary {
+      .p-card-body {
+        padding: 1rem;
+      }
+    }
+
+    // Tabla de órdenes por estado
+    .p-datatable {
+      .p-datatable-thead > tr > th {
+        background-color: #F9FAFB;
+        border-bottom: 2px solid var(--color-primary-500); // Brand red desde Tailwind
+        padding: 0.75rem 1rem;
+        font-weight: 600;
+        color: #374151;
+      }
+
+      .p-datatable-tbody > tr {
+        transition: background-color 0.2s ease;
+
+        > td {
+          padding: 0.75rem 1rem;
+          border-bottom: 1px solid #F3F4F6;
+        }
+      }
+    }
+
+    // Tabla alta con más espaciado
+    .orders-table-tall {
+      .p-datatable-tbody > tr > td {
+        padding: 1.25rem 1rem !important; // Más padding vertical para ocupar más espacio
+        font-size: 0.95rem;
+      }
+    }
+
+    // Cards
+    .p-card {
+      border-radius: 12px;
+      overflow: hidden;
+
+      .p-card-header {
+        border-bottom: 1px solid #E5E7EB;
+        background-color: #F9FAFB;
+      }
+
+      .p-card-body {
+        padding: 1.5rem;
+      }
+    }
+
+    // Chart container
+    .chart-container {
+      position: relative;
+      width: 100%;
+    }
+  }
+}
+
+// Dark mode
+:host-context(.dark) {
+  .orders-general {
+    :host ::ng-deep {
+      // Border rojo sutil para todos los cards en dark mode
+      .p-card {
+        border: 1px solid rgb(from var(--color-primary-500) r g b / 0.25); // Usando color de Tailwind con 25% opacidad
+        background-color: #1F2937;
+
+        .p-card-header {
+          border-bottom-color: #374151;
+          background-color: #111827;
+        }
+      }
+
+      .p-datatable {
+        .p-datatable-thead > tr > th {
+          background-color: #1F2937;
+          border-bottom: 2px solid var(--color-primary-500); // Brand red desde Tailwind
+          color: #D1D5DB;
+        }
+
+        .p-datatable-tbody > tr > td {
+          border-bottom-color: #374151;
+        }
+      }
+    }
+  }
 }

@@ -1,20 +1,208 @@
-<div class="orders-general">
-  <p-card>
-    <div class="p-4 text-center">
-      <i class="pi pi-shopping-cart text-6xl text-primary-500 mb-4"></i>
-      <h3 class="text-xl font-semibold mb-2">Dashboard General de Órdenes</h3>
-      <p class="text-gray-600 dark:text-gray-400">
-        Vista general con estadísticas y métricas principales de órdenes
-      </p>
-      <div class="mt-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-        <p class="text-sm text-gray-500 dark:text-gray-400">Próximamente:</p>
-        <ul class="text-sm text-gray-600 dark:text-gray-300 mt-2 space-y-1">
-          <li>• Total de órdenes por período</li>
-          <li>• Órdenes por estado</li>
-          <li>• Comparativas por marca/canal</li>
-          <li>• Gráficos de tendencias</li>
-        </ul>
+<div class="orders-general w-full">
+  <!-- Filters Section -->
+  <p-card styleClass="mb-4 dark:border-[1px] dark:border-gray-700">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 rounded-lg">
+      <!-- Brand Selector -->
+      <div>
+        <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+          Marca
+        </label>
+        <p-select
+          [options]="brandOptions()"
+          [(ngModel)]="selectedBrandId"
+          optionLabel="name"
+          optionValue="id"
+          placeholder="Seleccionar marca"
+          (onChange)="onBrandChange($event.value)"
+          styleClass="w-full"
+        />
+      </div>
+
+      <!-- Date Range Picker (Always Visible) -->
+      <div>
+        <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+          Rango de Fechas
+        </label>
+        <p-datepicker
+          [(ngModel)]="dateRange"
+          selectionMode="range"
+          [showIcon]="true"
+          placeholder="Seleccionar rango"
+          dateFormat="dd/mm/yy"
+          (onSelect)="onDateRangeChange($event)"
+          styleClass="w-full"
+        />
+      </div>
+
+      <!-- Period Selector -->
+      <div>
+        <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+          Período
+        </label>
+        <p-select
+          [options]="periodOptions"
+          [(ngModel)]="selectedPeriod"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Seleccionar período"
+          (onChange)="onPeriodChange($event.value)"
+          styleClass="w-full"
+        />
       </div>
     </div>
   </p-card>
+
+  <!-- Error Message -->
+  @if (error()) {
+    <p-card styleClass="mb-4 border-l-4 border-red-500">
+      <div class="flex items-center gap-3">
+        <i class="pi pi-exclamation-triangle text-red-500 text-2xl"></i>
+        <div>
+          <p class="text-red-700 dark:text-red-400 font-medium">{{ error() }}</p>
+        </div>
+      </div>
+    </p-card>
+  }
+
+  <!-- Status KPIs Row -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-4">
+    @if (isLoading()) {
+      @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+        <p-card class="dark:border-[1px] dark:border-gray-700">
+          <p-skeleton width="100%" height="80px" />
+        </p-card>
+      }
+    } @else {
+      @for (kpi of statusKpis(); track kpi.statusId) {
+        <p-card styleClass="kpi-card dark:border-[1px] dark:border-gray-700">
+          <div class="text-center">
+            <i [class]="'pi ' + kpi.icon + ' text-4xl mb-3 text-' + kpi.color"></i>
+            <div class="text-3xl font-bold mb-1">{{ formatNumber(kpi.count) }}</div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">{{ kpi.statusName }}</div>
+          </div>
+        </p-card>
+      }
+    }
+  </div>
+
+  <!-- Content Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <!-- Left Column: Table -->
+    <div class="flex flex-col h-full">
+      <p-card class="dark:border-[1px] dark:border-gray-700 h-full flex flex-col">
+        <ng-template pTemplate="header">
+          <div class="p-4">
+            <h3 class="text-lg font-semibold m-0">Órdenes por Estado</h3>
+          </div>
+        </ng-template>
+
+        @if (isLoading()) {
+          <p-skeleton width="100%" height="550px" />
+        } @else {
+          <div class="flex-grow">
+            <p-table
+              [value]="ordersByStatus()"
+              styleClass="p-datatable-sm orders-table-tall orders-table-responsive"
+            >
+              <ng-template pTemplate="header">
+                <tr>
+                  <th class="uppercase text-xs font-semibold">Estado</th>
+                  <th class="uppercase text-xs font-semibold text-right hidden md:table-cell">Total Pedidos</th>
+                  <th class="uppercase text-xs font-semibold text-right">Total</th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-item>
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-800">
+                  <!-- Desktop: Solo nombre del estado -->
+                  <td class="font-medium hidden md:table-cell">{{ item.statusName }}</td>
+
+                  <!-- Mobile: Mini card con estado + cantidad -->
+                  <td class="md:hidden">
+                    <div class="flex flex-col gap-1">
+                      <div class="font-semibold text-sm">{{ item.statusName }}</div>
+                      <div class="text-xs text-gray-500 dark:text-gray-400">
+                        {{ formatNumber(item.totalOrders) }} pedidos
+                      </div>
+                    </div>
+                  </td>
+
+                  <!-- Desktop: Solo cantidad -->
+                  <td class="text-right hidden md:table-cell">{{ formatNumber(item.totalOrders) }}</td>
+
+                  <!-- Both: Total money -->
+                  <td class="text-right font-semibold text-primary-500 dark:text-gray-300">
+                    {{ formatCurrency(item.totalMoney) }}
+                  </td>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="emptymessage">
+                <tr>
+                  <td colspan="3" class="text-center py-8 text-gray-500">
+                    No hay datos disponibles para el período seleccionado
+                  </td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </div>
+        }
+      </p-card>
+    </div>
+
+    <!-- Right Column: Chart + KPIs -->
+    <div class="flex flex-col gap-4">
+      <!-- Donut Chart -->
+      <p-card class="dark:border-[1px] dark:border-gray-700">
+        <ng-template pTemplate="header">
+          <div class="p-4">
+            <h3 class="text-lg font-semibold m-0">Distribución por Estado</h3>
+          </div>
+        </ng-template>
+
+        @if (isLoading()) {
+          <p-skeleton width="100%" height="300px" />
+        } @else if (ordersByStatus().length > 0) {
+          <div class="chart-container" style="height: 300px;">
+            <p-chart
+              type="doughnut"
+              [data]="donutChartData()"
+              [options]="donutChartOptions"
+            />
+          </div>
+        } @else {
+          <div class="text-center py-8 text-gray-500">
+            No hay datos para mostrar
+          </div>
+        }
+      </p-card>
+
+      <!-- Secondary KPIs in a Row -->
+      <div class="grid grid-cols-2 gap-4">
+        <!-- Avg Per Hour KPI -->
+        <p-card styleClass="kpi-card-secondary dark:border-[1px] dark:border-gray-700">
+          @if (isLoading()) {
+            <p-skeleton width="100%" height="80px" />
+          } @else {
+            <div class="flex flex-col items-center text-center">
+              <i class="pi pi-clock text-4xl text-primary-500 mb-2"></i>
+              <div class="text-2xl font-bold">{{ avgPerHour() | number:'1.1-1' }}</div>
+              <div class="text-sm text-gray-500 dark:text-gray-400">Promedio/Hora</div>
+            </div>
+          }
+        </p-card>
+
+        <!-- Recurrent Customers KPI -->
+        <p-card styleClass="kpi-card-secondary dark:border-[1px] dark:border-gray-700">
+          @if (isLoading()) {
+            <p-skeleton width="100%" height="80px" />
+          } @else {
+            <div class="flex flex-col items-center text-center">
+              <i class="pi pi-users text-4xl text-primary-500 mb-2"></i>
+              <div class="text-2xl font-bold">{{ formatNumber(recurrentCustomers()) }}</div>
+              <div class="text-sm text-gray-500 dark:text-gray-400">Clientes Recurrentes</div>
+            </div>
+          }
+        </p-card>
+      </div>
+    </div>
+  </div>
 </div>
