@@ -1,0 +1,106 @@
+.kpi-clientes {
+  // KPI Cards styling
+  :host ::ng-deep .kpi-card {
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 16px rgba(251, 0, 33, 0.15);
+      border-color: rgba(251, 0, 33, 0.2);
+    }
+
+    .p-card-body {
+      padding: 0.5rem;
+    }
+  }
+
+  // Large KPI Cards styling
+  :host ::ng-deep .large-kpi-card {
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 16px rgba(251, 0, 33, 0.15);
+      border-color: rgba(251, 0, 33, 0.2);
+    }
+  }
+
+  // Table styling
+  :host ::ng-deep .p-datatable {
+    .p-datatable-header {
+      background: transparent;
+      border: none;
+      padding: 0;
+    }
+
+    .p-datatable-thead > tr > th {
+      background-color: #f9fafb;
+      color: #374151;
+      font-weight: 600;
+      border-bottom: 2px solid #FB0021;
+      padding: 0.75rem;
+      font-size: 0.875rem;
+
+      @media (prefers-color-scheme: dark) {
+        background-color: #1f2937;
+        color: #e5e7eb;
+      }
+    }
+
+    .p-datatable-tbody > tr {
+      &:hover {
+        background-color: rgba(251, 0, 33, 0.05);
+      }
+
+      > td {
+        padding: 0.75rem;
+        border-bottom: 1px solid #e5e7eb;
+        font-size: 0.875rem;
+
+        @media (prefers-color-scheme: dark) {
+          border-bottom: 1px solid #374151;
+        }
+      }
+    }
+
+    .p-datatable-tfoot > tr > td {
+      border-top: 2px solid #FB0021;
+      padding: 0.75rem;
+      font-size: 0.875rem;
+    }
+  }
+
+  // Chart container styling
+  .chart-container {
+    position: relative;
+    canvas {
+      max-height: 100%;
+    }
+  }
+
+  // Responsive adjustments
+  @media (max-width: 1024px) {
+    .grid {
+      gap: 1rem;
+    }
+  }
+
+  @media (max-width: 640px) {
+    :host ::ng-deep .kpi-card,
+    :host ::ng-deep .large-kpi-card {
+      .text-4xl {
+        font-size: 2rem;
+      }
+
+      .text-5xl {
+        font-size: 3rem;
+      }
+
+      .text-6xl {
+        font-size: 3.5rem;
+      }
+    }
+  }
+}

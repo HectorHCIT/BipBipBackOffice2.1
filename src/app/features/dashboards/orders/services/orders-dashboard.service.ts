@@ -10,6 +10,15 @@ import {
   OrdersByStatusSummaryResponse,
   OrdersByUnitItem,
   OrdersByCityItem,
+  OrdersByChannelItem,
+  OrdersByChannelSummaryResponse,
+  OrdersByBrandItem,
+  AvgTicketByBrandItem,
+  AvgTicketByChannelItem,
+  AvgTicketByPaymentMethodItem,
+  ShippingCostsByDayItem,
+  ShippingRangeItem,
+  ShippingStatistics,
   CountResponse,
   AvgValueResponse,
   OrdersDashboardData
@@ -208,6 +217,182 @@ export class OrdersDashboardService {
   }
 
   /**
+   * Obtiene las órdenes agrupadas por canal/tipo de entrega
+   */
+  getOrdersByChannel(filters: OrdersFilters): Observable<OrdersByChannelItem[]> {
+    const params = this.buildParams(filters);
+
+    return this.http.get<ApiResponse<OrdersByChannelSummaryResponse>>(
+      `${this.baseUrl}/by-channel/summary`,
+      { params }
+    ).pipe(
+      map(response => response.data?.items ?? []),
+      catchError(error => {
+        console.error('Error loading orders by channel:', error);
+        // Retornar array vacío en caso de error para no romper el dashboard
+        return [[]];
+      })
+    );
+  }
+
+  /**
+   * Obtiene las órdenes agrupadas por marca con logos y totales de ventas
+   */
+  getOrdersByBrand(filters: OrdersFilters): Observable<OrdersByBrandItem[]> {
+    const params = this.buildParams(filters).set('TopN', '10');
+
+    return this.http.get<ApiResponse<OrdersByBrandItem[]>>(
+      `${this.baseUrl}/brand-sales/summary`,
+      { params }
+    ).pipe(
+      map(response => response.data ?? []),
+      catchError(error => {
+        console.error('Error loading orders by brand:', error);
+        // Retornar array vacío en caso de error para no romper el dashboard
+        return [[]];
+      })
+    );
+  }
+
+  /**
+   * Obtiene el ticket promedio global
+   */
+  getAvgTicketGlobal(filters: OrdersFilters): Observable<number> {
+    const params = this.buildParams(filters);
+
+    return this.http.get<ApiResponse<AvgValueResponse>>(`${this.baseUrl}/avg-ticket/global`, { params }).pipe(
+      map(response => response.data?.value ?? 0),
+      catchError(error => {
+        console.error('Error loading global avg ticket:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * Obtiene el ticket promedio por marca (Top 10)
+   */
+  getAvgTicketByBrand(filters: OrdersFilters): Observable<AvgTicketByBrandItem[]> {
+    const params = this.buildParams(filters).set('TopN', '10');
+
+    return this.http.get<ApiResponse<AvgTicketByBrandItem[]>>(
+      `${this.baseUrl}/avg-ticket/by-brand/top`,
+      { params }
+    ).pipe(
+      map(response => response.data ?? []),
+      catchError(error => {
+        console.error('Error loading avg ticket by brand:', error);
+        // Retornar array vacío en caso de error para no romper el dashboard
+        return [[]];
+      })
+    );
+  }
+
+  /**
+   * Obtiene el ticket promedio por canal (Top 10)
+   */
+  getAvgTicketByChannel(filters: OrdersFilters): Observable<AvgTicketByChannelItem[]> {
+    const params = this.buildParams(filters).set('TopN', '10');
+
+    return this.http.get<ApiResponse<AvgTicketByChannelItem[]>>(
+      `${this.baseUrl}/avg-ticket/by-channel/top`,
+      { params }
+    ).pipe(
+      map(response => response.data ?? []),
+      catchError(error => {
+        console.error('Error loading avg ticket by channel:', error);
+        // Retornar array vacío en caso de error para no romper el dashboard
+        return [[]];
+      })
+    );
+  }
+
+  /**
+   * Obtiene el ticket promedio por método de pago (Top 10)
+   */
+  getAvgTicketByPaymentMethod(filters: OrdersFilters): Observable<AvgTicketByPaymentMethodItem[]> {
+    const params = this.buildParams(filters).set('TopN', '10');
+
+    return this.http.get<ApiResponse<AvgTicketByPaymentMethodItem[]>>(
+      `${this.baseUrl}/avg-ticket/by-payment-method/top`,
+      { params }
+    ).pipe(
+      map(response => response.data ?? []),
+      catchError(error => {
+        console.error('Error loading avg ticket by payment method:', error);
+        // Retornar array vacío en caso de error para no romper el dashboard
+        return [[]];
+      })
+    );
+  }
+
+  /**
+   * Obtiene los costos de envío agrupados por día
+   */
+  getShippingCostsByDay(filters: OrdersFilters): Observable<ShippingCostsByDayItem[]> {
+    const params = this.buildParams(filters);
+
+    return this.http.get<ApiResponse<ShippingCostsByDayItem[]>>(
+      `${this.baseUrl}/shipping-costs/by-day`,
+      { params }
+    ).pipe(
+      map(response => response.data ?? []),
+      catchError(error => {
+        console.error('Error loading shipping costs by day:', error);
+        // Retornar array vacío en caso de error para no romper el dashboard
+        return [[]];
+      })
+    );
+  }
+
+  /**
+   * Obtiene los rangos de costos de envío
+   * TODO: Reemplazar con endpoint real cuando esté disponible
+   * Endpoint esperado: GET /api/v1/orders/shipping-costs/by-range
+   */
+  getShippingRanges(filters: OrdersFilters): Observable<ShippingRangeItem[]> {
+    // Datos mockeados basados en la imagen del usuario
+    const mockData: ShippingRangeItem[] = [
+      { rangoKm: '7.0000 - 100000.0000 km', totalCostoEnvios: 170, totalPagosEnvios: 140 },
+      { rangoKm: '7.0000 - 10.0000 km', totalCostoEnvios: 67743, totalPagosEnvios: 70434 },
+      { rangoKm: '5.0000 - 7.0000 km', totalCostoEnvios: 146919, totalPagosEnvios: 159566 },
+      { rangoKm: '5.0000 - 12.5000 km', totalCostoEnvios: 8669, totalPagosEnvios: 10710 },
+      { rangoKm: '3.0000 - 5.0000 km', totalCostoEnvios: 395433, totalPagosEnvios: 418705 },
+      { rangoKm: '2.0000 - 3.0000 km', totalCostoEnvios: 7560, totalPagosEnvios: 7319 }
+    ];
+
+    console.warn('🚧 Using MOCKED data for shipping ranges. Replace with real API call when endpoint is available.');
+
+    return new Observable(observer => {
+      observer.next(mockData);
+      observer.complete();
+    });
+  }
+
+  /**
+   * Obtiene las estadísticas de envíos (KPIs)
+   * TODO: Reemplazar con endpoint real cuando esté disponible
+   * Endpoint esperado: GET /api/v1/orders/shipping-costs/statistics
+   */
+  getShippingStatistics(filters: OrdersFilters): Observable<ShippingStatistics> {
+    // Datos mockeados basados en la imagen del usuario
+    const mockData: ShippingStatistics = {
+      promedioPagosEnvio: 48.52,
+      promedioCostoEnvio: 50.59,
+      costoMaximoEnvio: 159,
+      totalCostosEnvio: 2411308,
+      totalPagosEnvio: 2312438
+    };
+
+    console.warn('🚧 Using MOCKED data for shipping statistics. Replace with real API call when endpoint is available.');
+
+    return new Observable(observer => {
+      observer.next(mockData);
+      observer.complete();
+    });
+  }
+
+  /**
    * Obtiene todos los datos del dashboard en una sola llamada
    */
   getDashboardData(filters: OrdersFilters): Observable<OrdersDashboardData> {
@@ -217,7 +402,16 @@ export class OrdersDashboardService {
       avgPerHour: this.getAvgPerHour(filters),
       recurrentCustomers: this.getRecurrentCustomers(filters),
       ordersByUnit: this.getOrdersByUnit(filters),
-      ordersByCity: this.getOrdersByCity(filters)
+      ordersByCity: this.getOrdersByCity(filters),
+      ordersByChannel: this.getOrdersByChannel(filters),
+      ordersByBrand: this.getOrdersByBrand(filters),
+      avgTicketGlobal: this.getAvgTicketGlobal(filters),
+      avgTicketByBrand: this.getAvgTicketByBrand(filters),
+      avgTicketByChannel: this.getAvgTicketByChannel(filters),
+      avgTicketByPaymentMethod: this.getAvgTicketByPaymentMethod(filters),
+      shippingCostsByDay: this.getShippingCostsByDay(filters),
+      shippingRanges: this.getShippingRanges(filters),
+      shippingStatistics: this.getShippingStatistics(filters)
     }).pipe(
       catchError(error => {
         console.error('Error loading dashboard data:', error);

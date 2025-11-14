@@ -231,12 +231,12 @@
       @if (isLoading()) {
         <p-skeleton width="100%" height="400px" />
       } @else if (barChartData()) {
-        <div class="chart-container" style="height: 400px;">
+        <div class="w-full" >
           <p-chart
             type="bar"
             [data]="barChartData()"
             [options]="barChartOptions"
-            class="h-[20rem] "
+            class="h-[30rem]"
           />
         </div>
       } @else {
@@ -306,5 +306,514 @@
         </p-table>
       }
     </p-card>
+  </div>
+
+  <!-- Third Row: Channel Section - KPIs + Tables -->
+  <div class="mt-4">
+    <!-- Section Title -->
+    <div class="mb-4">
+      <h2 class="text-xl font-bold text-gray-800 dark:text-gray-200">Órdenes por Canal</h2>
+      <p class="text-sm text-gray-500 dark:text-gray-400">Distribución de pedidos según el tipo de entrega</p>
+    </div>
+
+    <!-- Channel KPIs Row -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+      @if (isLoading()) {
+        @for (i of [1, 2, 3, 4]; track i) {
+          <p-card class="dark:border-[1px] dark:border-gray-700">
+            <p-skeleton width="100%" height="100px" />
+          </p-card>
+        }
+      } @else {
+        @for (kpi of channelKpis(); track kpi.channelName) {
+          <p-card styleClass="kpi-card dark:border-[1px] dark:border-gray-700">
+            <div class="text-center">
+              <i [class]="'pi ' + kpi.icon + ' text-4xl mb-3 text-' + kpi.color"></i>
+              <div class="text-3xl font-bold mb-1">{{ formatNumber(kpi.count) }}</div>
+              <div class="text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">{{ kpi.channelName }}</div>
+              <div class="text-xs text-gray-500 dark:text-gray-400">Órdenes</div>
+            </div>
+          </p-card>
+        }
+      }
+    </div>
+
+    <!-- Tables Row: Channel Detail + Brand Detail -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <!-- Left Column: Channel Detail Table -->
+      <p-card class="dark:border-[1px] dark:border-gray-700">
+        <ng-template pTemplate="header">
+          <div class="p-4">
+            <h3 class="text-lg font-semibold m-0">Detalle Por Canal</h3>
+          </div>
+        </ng-template>
+
+        @if (isLoading()) {
+          <p-skeleton width="100%" height="400px" />
+        } @else {
+          <p-table
+            [value]="ordersByChannel()"
+            styleClass="p-datatable-sm"
+          >
+            <ng-template pTemplate="header">
+              <tr>
+                <th class="uppercase text-xs font-semibold">Canal</th>
+                <th class="uppercase text-xs font-semibold text-right hidden md:table-cell">Total Pedidos</th>
+                <th class="uppercase text-xs font-semibold text-right">Total</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-item>
+              <tr class="hover:bg-gray-50 dark:hover:bg-gray-800">
+                <!-- Desktop: Solo nombre del canal -->
+                <td class="font-medium hidden md:table-cell">{{ item.channelDescription }}</td>
+
+                <!-- Mobile: Mini card con canal + pedidos -->
+                <td class="md:hidden">
+                  <div class="flex flex-col gap-1">
+                    <div class="font-semibold text-sm">{{ item.channelDescription }}</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400">
+                      {{ formatNumber(item.totalOrders) }} pedidos
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Desktop: Total pedidos -->
+                <td class="text-right hidden md:table-cell">{{ formatNumber(item.totalOrders) }}</td>
+
+                <!-- Both: Total money -->
+                <td class="text-right font-semibold text-primary-500 dark:text-gray-300">
+                  {{ formatCurrency(item.totalMoney) }}
+                </td>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+              <tr>
+                <td colspan="3" class="text-center py-8 text-gray-500">
+                  No hay datos disponibles para el período seleccionado
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        }
+      </p-card>
+
+      <!-- Right Column: Brand Detail Table -->
+      <p-card class="dark:border-[1px] dark:border-gray-700">
+        <ng-template pTemplate="header">
+          <div class="p-4">
+            <h3 class="text-lg font-semibold m-0">Por Marca</h3>
+          </div>
+        </ng-template>
+
+        @if (isLoading()) {
+          <p-skeleton width="100%" height="400px" />
+        } @else {
+          <p-table
+            [value]="ordersByBrand()"
+            styleClass="p-datatable-sm"
+          >
+            <ng-template pTemplate="header">
+              <tr>
+                <th class="uppercase text-xs font-semibold w-16">Logo</th>
+                <th class="uppercase text-xs font-semibold">Marca</th>
+                <th class="uppercase text-xs font-semibold text-right">Total</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-item>
+              <tr class="hover:bg-gray-50 dark:hover:bg-gray-800">
+                <!-- Logo -->
+                <td class="w-16">
+                  @if (item.logo) {
+                    <img
+                      [src]="item.logo"
+                      [alt]="item.brandShortName"
+                      class="w-10 h-10 object-contain rounded"
+                    />
+                  } @else {
+                    <div class="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded flex items-center justify-center">
+                      <i class="pi pi-image text-gray-400"></i>
+                    </div>
+                  }
+                </td>
+
+                <!-- Brand Name -->
+                <td class="font-medium">{{ item.brandShortName }}</td>
+
+                <!-- Total money -->
+                <td class="text-right font-semibold text-primary-500 dark:text-gray-300">
+                  {{ formatCurrency(item.totalMoney) }}
+                </td>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+              <tr>
+                <td colspan="3" class="text-center py-8 text-gray-500">
+                  No hay datos disponibles para el período seleccionado
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        }
+      </p-card>
+    </div>
+
+    <!-- Fourth Row: Sales Metrics Section -->
+    <div class="mt-4">
+      <!-- Section Title -->
+      <div class="mb-4">
+        <h2 class="text-xl font-bold text-gray-800 dark:text-gray-200">Métricas de Ventas</h2>
+        <p class="text-sm text-gray-500 dark:text-gray-400">Análisis de ventas y ticket promedio por marca</p>
+      </div>
+
+      <!-- First Row: Total Sales By Brand Table (Full Width) -->
+      <div class="mb-4">
+        <p-card class="dark:border-[1px] dark:border-gray-700">
+          <ng-template pTemplate="header">
+            <div class="p-4">
+              <h3 class="text-lg font-semibold m-0">Total Ventas Por Marca</h3>
+            </div>
+          </ng-template>
+
+          @if (isLoading()) {
+            <p-skeleton width="100%" height="400px" />
+          } @else {
+            <p-table
+              [value]="ordersByBrand()"
+              styleClass="p-datatable-sm"
+            >
+              <ng-template pTemplate="header">
+                <tr>
+                  <th class="uppercase text-xs font-semibold w-16">Logo</th>
+                  <th class="uppercase text-xs font-semibold">Marca</th>
+                  <th class="uppercase text-xs font-semibold text-right">Total</th>
+                  <th class="uppercase text-xs font-semibold text-right hidden md:table-cell">Entregadas</th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-item>
+                <tr>
+                  <!-- Logo -->
+                  <td class="w-16">
+                    @if (item.logo) {
+                      <img
+                        [src]="item.logo"
+                        [alt]="item.brandShortName"
+                        class="w-10 h-10 object-contain rounded"
+                        loading="lazy"
+                      />
+                    } @else {
+                      <div class="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded flex items-center justify-center">
+                        <i class="pi pi-building text-gray-400"></i>
+                      </div>
+                    }
+                  </td>
+
+                  <!-- Brand name -->
+                  <td class="font-medium">{{ item.brandShortName }}</td>
+
+                  <!-- Total money -->
+                  <td class="text-right font-semibold text-primary-500 dark:text-gray-300">
+                    {{ formatCurrency(item.totalMoney) }}
+                  </td>
+
+                  <!-- Total delivered (desktop only) -->
+                  <td class="text-right text-sm text-gray-600 dark:text-gray-400 hidden md:table-cell">
+                    {{ item.totalSalesDelivered ? formatCurrency(item.totalSalesDelivered) : '-' }}
+                  </td>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="footer">
+                <tr class="font-bold bg-gray-50 dark:bg-gray-800">
+                  <td colspan="2" class="text-right">Total:</td>
+                  <td class="text-right text-primary-500">
+                    {{ formatCurrency(totalSales()) }}
+                  </td>
+                  <td class="text-right hidden md:table-cell">
+                    {{ formatCurrency(totalSalesDelivered()) }}
+                  </td>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="emptymessage">
+                <tr>
+                  <td colspan="4" class="text-center py-8 text-gray-500">
+                    No hay datos disponibles para el período seleccionado
+                  </td>
+                </tr>
+              </ng-template>
+            </p-table>
+          }
+        </p-card>
+      </div>
+
+      <!-- Second Row: Average Ticket Chart (2/3) + KPI (1/3) -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <!-- Left: Average Ticket By Brand Chart (Takes 2 columns) -->
+        <div class="lg:col-span-2">
+          <p-card class="dark:border-[1px] dark:border-gray-700 h-full">
+            <ng-template pTemplate="header">
+              <div class="p-4">
+                <h3 class="text-lg font-semibold m-0">Ticket Promedio Por Marca</h3>
+              </div>
+            </ng-template>
+
+            @if (isLoading()) {
+              <p-skeleton width="100%" height="400px" />
+            } @else if (avgTicketBarChartData()) {
+              <div class="w-full">
+                <p-chart
+                  type="bar"
+                  [data]="avgTicketBarChartData()"
+                  [options]="avgTicketBarChartOptions"
+                  class="h-[30rem]"
+                />
+              </div>
+            } @else {
+              <div class="text-center py-8 text-gray-500">
+                No hay datos para mostrar
+              </div>
+            }
+          </p-card>
+        </div>
+
+        <!-- Right: Average Ticket KPI (Takes 1 column) -->
+        <div class="lg:col-span-1">
+          <p-card class="dark:border-[1px] dark:border-gray-700 h-full">
+            <ng-template pTemplate="header">
+              <div class="p-4">
+                <h3 class="text-lg font-semibold m-0">Promedio De Tickets</h3>
+              </div>
+            </ng-template>
+
+            @if (isLoading()) {
+              <p-skeleton width="100%" height="150px" />
+            } @else {
+              <div class="text-center py-8">
+                <i class="pi pi-shopping-cart text-6xl mb-4 text-primary-500"></i>
+                <div class="text-4xl font-bold text-primary-500 mb-2">
+                  {{ formatCurrency(avgTicketGlobal()) }}
+                </div>
+                <div class="text-sm text-gray-500 dark:text-gray-400">Ticket promedio global</div>
+              </div>
+            }
+          </p-card>
+        </div>
+      </div>
+
+      <!-- Fifth Row: Ticket Promedio por Canal y Método de Pago -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+        <!-- Left: Average Ticket By Channel Chart -->
+        <div>
+          <p-card class="dark:border-[1px] dark:border-gray-700 h-full">
+            <ng-template pTemplate="header">
+              <div class="p-4">
+                <h3 class="text-lg font-semibold m-0">Ticket Promedio Por Canal</h3>
+              </div>
+            </ng-template>
+
+            @if (isLoading()) {
+              <p-skeleton width="100%" height="400px" />
+            } @else if (avgTicketByChannelChartData()) {
+              <div class="w-full">
+                <p-chart
+                  type="bar"
+                  [data]="avgTicketByChannelChartData()"
+                  [options]="avgTicketByChannelChartOptions"
+                  class="h-[30rem]"
+                />
+              </div>
+            } @else {
+              <div class="text-center py-8 text-gray-500">
+                No hay datos para mostrar
+              </div>
+            }
+          </p-card>
+        </div>
+
+        <!-- Right: Average Ticket By Payment Method Chart -->
+        <div>
+          <p-card class="dark:border-[1px] dark:border-gray-700 h-full">
+            <ng-template pTemplate="header">
+              <div class="p-4">
+                <h3 class="text-lg font-semibold m-0">Ticket Promedio Por Método de Pago</h3>
+              </div>
+            </ng-template>
+
+            @if (isLoading()) {
+              <p-skeleton width="100%" height="400px" />
+            } @else if (avgTicketByPaymentMethodChartData()) {
+              <div class="w-full">
+                <p-chart
+                  type="bar"
+                  [data]="avgTicketByPaymentMethodChartData()"
+                  [options]="avgTicketByPaymentMethodChartOptions"
+                  class="h-[30rem]"
+                />
+              </div>
+            } @else {
+              <div class="text-center py-8 text-gray-500">
+                No hay datos para mostrar
+              </div>
+            }
+          </p-card>
+        </div>
+      </div>
+
+      <!-- Sixth Row: Shipping Costs Line Chart (Full Width) -->
+      <div class="mt-4">
+        <p-card class="dark:border-[1px] dark:border-gray-700">
+          <ng-template pTemplate="header">
+            <div class="p-4">
+              <h3 class="text-lg font-semibold m-0">Costos de Envío</h3>
+            </div>
+          </ng-template>
+
+          @if (isLoading()) {
+            <p-skeleton width="100%" height="400px" />
+          } @else if (shippingCostsLineChartData()) {
+            <div class="w-full">
+              <p-chart
+                type="line"
+                [data]="shippingCostsLineChartData()"
+                [options]="shippingCostsLineChartOptions"
+                class="h-[30rem]"
+              />
+            </div>
+          } @else {
+            <div class="text-center py-8 text-gray-500">
+              No hay datos para mostrar
+            </div>
+          }
+        </p-card>
+      </div>
+
+      <!-- Seventh Row: Shipping Metrics Section -->
+      <div class="mt-4">
+        <!-- Section Title -->
+        <div class="mb-4">
+          <h2 class="text-xl font-bold text-gray-800 dark:text-gray-200">Métricas de Envío</h2>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Análisis de costos y pagos de envío por rangos de distancia</p>
+        </div>
+
+        <!-- KPIs Row: 5 shipping statistics -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
+          <!-- Promedio de Pagos de Envío -->
+          <p-card styleClass="kpi-card dark:border-[1px] dark:border-gray-700">
+            @if (isLoading()) {
+              <p-skeleton width="100%" height="100px" />
+            } @else {
+              <div class="text-center">
+                <i class="pi pi-dollar text-4xl mb-3 text-primary-500"></i>
+                <div class="text-3xl font-bold mb-1">{{ shippingStatistics().promedioPagosEnvio | number:'1.2-2' }}</div>
+                <div class="text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">Promedio de Pagos de Envío</div>
+              </div>
+            }
+          </p-card>
+
+          <!-- Promedio de Costo de Envío -->
+          <p-card styleClass="kpi-card dark:border-[1px] dark:border-gray-700">
+            @if (isLoading()) {
+              <p-skeleton width="100%" height="100px" />
+            } @else {
+              <div class="text-center">
+                <i class="pi pi-money-bill text-4xl mb-3 text-primary-500"></i>
+                <div class="text-3xl font-bold mb-1">{{ shippingStatistics().promedioCostoEnvio | number:'1.2-2' }}</div>
+                <div class="text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">Promedio de Costo de Envío</div>
+              </div>
+            }
+          </p-card>
+
+          <!-- Costo Máximo de Envío -->
+          <p-card styleClass="kpi-card dark:border-[1px] dark:border-gray-700">
+            @if (isLoading()) {
+              <p-skeleton width="100%" height="100px" />
+            } @else {
+              <div class="text-center">
+                <i class="pi pi-chart-line text-4xl mb-3 text-primary-500"></i>
+                <div class="text-3xl font-bold mb-1">{{ formatNumber(shippingStatistics().costoMaximoEnvio) }}</div>
+                <div class="text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">Costo máximo de envío</div>
+              </div>
+            }
+          </p-card>
+
+          <!-- Total de Costos de Envío -->
+          <p-card styleClass="kpi-card dark:border-[1px] dark:border-gray-700">
+            @if (isLoading()) {
+              <p-skeleton width="100%" height="100px" />
+            } @else {
+              <div class="text-center">
+                <i class="pi pi-wallet text-4xl mb-3 text-primary-500"></i>
+                <div class="text-3xl font-bold mb-1">{{ formatNumber(shippingStatistics().totalCostosEnvio) }}</div>
+                <div class="text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">Total de costos de envío</div>
+              </div>
+            }
+          </p-card>
+
+          <!-- Total Pago de Envío -->
+          <p-card styleClass="kpi-card dark:border-[1px] dark:border-gray-700">
+            @if (isLoading()) {
+              <p-skeleton width="100%" height="100px" />
+            } @else {
+              <div class="text-center">
+                <i class="pi pi-credit-card text-4xl mb-3 text-primary-500"></i>
+                <div class="text-3xl font-bold mb-1">{{ formatNumber(shippingStatistics().totalPagosEnvio) }}</div>
+                <div class="text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">Total pago de envío</div>
+              </div>
+            }
+          </p-card>
+        </div>
+
+        <!-- Promedios de Rangos Table -->
+        <div>
+          <p-card class="dark:border-[1px] dark:border-gray-700">
+            <ng-template pTemplate="header">
+              <div class="p-4">
+                <h3 class="text-lg font-semibold m-0">Promedios de Rangos</h3>
+              </div>
+            </ng-template>
+
+            @if (isLoading()) {
+              <p-skeleton width="100%" height="400px" />
+            } @else {
+              <p-table
+                [value]="shippingRanges()"
+                styleClass="p-datatable-sm"
+                [paginator]="true"
+                [rows]="10"
+                [showCurrentPageReport]="true"
+                currentPageReportTemplate="Página {first} de {last}"
+              >
+                <ng-template pTemplate="header">
+                  <tr>
+                    <th class="uppercase text-xs font-semibold">Rango KM</th>
+                    <th class="uppercase text-xs font-semibold text-right">Total Costo de Envíos</th>
+                    <th class="uppercase text-xs font-semibold text-right">Total Pagos de Envíos</th>
+                  </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-item>
+                  <tr class="hover:bg-gray-50 dark:hover:bg-gray-800">
+                    <td class="font-medium">{{ item.rangoKm }}</td>
+                    <td class="text-right">{{ formatNumber(item.totalCostoEnvios) }}</td>
+                    <td class="text-right">{{ formatNumber(item.totalPagosEnvios) }}</td>
+                  </tr>
+                </ng-template>
+                <ng-template pTemplate="footer">
+                  <tr class="font-bold bg-gray-50 dark:bg-gray-800">
+                    <td class="text-right text-primary-500">Total: {{ formatNumber(totalRangesCostos() + totalRangesPagos()) }}</td>
+                    <td class="text-right">{{ formatNumber(totalRangesCostos()) }}</td>
+                    <td class="text-right">{{ formatNumber(totalRangesPagos()) }}</td>
+                  </tr>
+                </ng-template>
+                <ng-template pTemplate="emptymessage">
+                  <tr>
+                    <td colspan="3" class="text-center py-8 text-gray-500">
+                      No hay datos disponibles para el período seleccionado
+                    </td>
+                  </tr>
+                </ng-template>
+              </p-table>
+            }
+          </p-card>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

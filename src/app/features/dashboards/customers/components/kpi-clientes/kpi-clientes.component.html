@@ -1,0 +1,222 @@
+<div class="kpi-clientes w-full">
+  <!-- Error Message -->
+  @if (error()) {
+    <p-card styleClass="mb-4 border-l-4 border-red-500">
+      <div class="flex items-center gap-3">
+        <i class="pi pi-exclamation-triangle text-red-500 text-2xl"></i>
+        <div>
+          <p class="text-red-700 dark:text-red-400 font-medium">{{ error() }}</p>
+        </div>
+      </div>
+    </p-card>
+  }
+
+  <!-- Fila 1: 3 KPIs Principales -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+    @if (isLoading()) {
+      @for (i of [1, 2, 3]; track i) {
+        <p-card class="dark:border-[1px] dark:border-gray-700">
+          <p-skeleton width="100%" height="120px" />
+        </p-card>
+      }
+    } @else {
+      <!-- Total Clientes Penalizados -->
+      <p-card styleClass="kpi-card dark:border-[1px] dark:border-gray-700">
+        <div class="text-center py-4">
+          <i class="pi pi-lock text-5xl mb-3 text-primary-500"></i>
+          <div class="text-4xl font-bold mb-2 text-gray-900 dark:text-white">
+            {{ formatNumber(totalPenalized()) }}
+          </div>
+          <div class="text-base text-gray-600 dark:text-gray-400 font-medium">Total Clientes Penalizados</div>
+        </div>
+      </p-card>
+
+      <!-- Edades Promedio -->
+      <p-card styleClass="kpi-card dark:border-[1px] dark:border-gray-700">
+        <div class="text-center py-4">
+          <i class="pi pi-calendar text-5xl mb-3 text-primary-400"></i>
+          <div class="text-4xl font-bold mb-2 text-gray-900 dark:text-white">
+            {{ formatNumber(averageAge()) }}
+          </div>
+          <div class="text-base text-gray-600 dark:text-gray-400 font-medium">Edades Promedio</div>
+        </div>
+      </p-card>
+
+      <!-- Usuarios registrados -->
+      <p-card styleClass="kpi-card dark:border-[1px] dark:border-gray-700">
+        <div class="text-center py-4">
+          <i class="pi pi-users text-5xl mb-3 text-primary-600"></i>
+          <div class="text-4xl font-bold mb-2 text-gray-900 dark:text-white">
+            {{ formatNumber(totalRegistered()) }}
+          </div>
+          <div class="text-base text-gray-600 dark:text-gray-400 font-medium">Usuarios registrados</div>
+        </div>
+      </p-card>
+    }
+  </div>
+
+  <!-- Fila 2: 3 Gráficos de Línea -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+    <!-- Usuarios Registrados - El mes pasado -->
+    <p-card styleClass="dark:border-[1px] dark:border-gray-700">
+      <ng-template pTemplate="header">
+        <div class="px-4 pt-4 pb-2">
+          <h3 class="text-lg font-semibold m-0 text-gray-900 dark:text-white flex items-center gap-2">
+            <i class="pi pi-chart-line text-primary-500"></i>
+            Usuarios Registrados - El mes pasado
+          </h3>
+        </div>
+      </ng-template>
+
+      @if (isLoading()) {
+        <div class="p-4">
+          <p-skeleton width="100%" height="300px" />
+        </div>
+      } @else {
+        <div class="p-4">
+          <div class="chart-container" style="height: 300px;">
+            <p-chart type="line" [data]="registrationsLastMonthChartData()" [options]="lineChartOptions" />
+          </div>
+        </div>
+      }
+    </p-card>
+
+    <!-- Usuarios Registrados - Este mes semanal -->
+    <p-card styleClass="dark:border-[1px] dark:border-gray-700">
+      <ng-template pTemplate="header">
+        <div class="px-4 pt-4 pb-2">
+          <h3 class="text-lg font-semibold m-0 text-gray-900 dark:text-white flex items-center gap-2">
+            <i class="pi pi-chart-line text-primary-400"></i>
+            Usuarios Registrados - Este mes semanal
+          </h3>
+        </div>
+      </ng-template>
+
+      @if (isLoading()) {
+        <div class="p-4">
+          <p-skeleton width="100%" height="300px" />
+        </div>
+      } @else {
+        <div class="p-4">
+          <div class="chart-container" style="height: 300px;">
+            <p-chart type="line" [data]="registrationsThisMonthChartData()" [options]="lineChartOptions" />
+          </div>
+        </div>
+      }
+    </p-card>
+
+    <!-- Usuarios Registrados - Últimos 12 meses -->
+    <p-card styleClass="dark:border-[1px] dark:border-gray-700">
+      <ng-template pTemplate="header">
+        <div class="px-4 pt-4 pb-2">
+          <h3 class="text-lg font-semibold m-0 text-gray-900 dark:text-white flex items-center gap-2">
+            <i class="pi pi-chart-line text-primary-600"></i>
+            Usuarios Registrados - Últimos 12 meses
+          </h3>
+        </div>
+      </ng-template>
+
+      @if (isLoading()) {
+        <div class="p-4">
+          <p-skeleton width="100%" height="300px" />
+        </div>
+      } @else {
+        <div class="p-4">
+          <div class="chart-container" style="height: 300px;">
+            <p-chart type="line" [data]="registrationsLastYearChartData()" [options]="lineChartOptions" />
+          </div>
+        </div>
+      }
+    </p-card>
+  </div>
+
+  <!-- Fila 3: 2 KPIs Grandes + 1 Tabla -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+    <!-- Clientes sin compra -->
+    <p-card styleClass="large-kpi-card dark:border-[1px] dark:border-gray-700">
+      @if (isLoading()) {
+        <div class="p-4">
+          <p-skeleton width="100%" height="200px" />
+        </div>
+      } @else {
+        <div class="text-center py-8">
+          <i class="pi pi-shopping-cart text-6xl mb-4 text-gray-400"></i>
+          <div class="text-5xl font-bold mb-3 text-gray-900 dark:text-white">
+            {{ formatNumber(customersWithoutPurchases()) }}
+          </div>
+          <div class="text-lg text-gray-600 dark:text-gray-400 font-medium">Clientes sin compra</div>
+        </div>
+      }
+    </p-card>
+
+    <!-- Clientes con compra -->
+    <p-card styleClass="large-kpi-card dark:border-[1px] dark:border-gray-700">
+      @if (isLoading()) {
+        <div class="p-4">
+          <p-skeleton width="100%" height="200px" />
+        </div>
+      } @else {
+        <div class="text-center py-8">
+          <i class="pi pi-check-circle text-6xl mb-4 text-primary-500"></i>
+          <div class="text-5xl font-bold mb-3 text-gray-900 dark:text-white">
+            {{ formatNumber(customersWithPurchases()) }}
+          </div>
+          <div class="text-lg text-gray-600 dark:text-gray-400 font-medium">Clientes con compra</div>
+        </div>
+      }
+    </p-card>
+
+    <!-- Clientes Con Orden por ciudad -->
+    <p-card styleClass="dark:border-[1px] dark:border-gray-700">
+      <ng-template pTemplate="header">
+        <div class="px-4 pt-4 pb-2">
+          <h3 class="text-lg font-semibold m-0 text-gray-900 dark:text-white flex items-center gap-2">
+            <i class="pi pi-map-marker text-primary-500"></i>
+            Clientes Con Orden por ciudad
+          </h3>
+        </div>
+      </ng-template>
+
+      @if (isLoading()) {
+        <div class="p-4">
+          <p-skeleton width="100%" height="300px" />
+        </div>
+      } @else {
+        <p-table
+          [value]="customersByCity()"
+          [paginator]="true"
+          [rows]="6"
+          styleClass="p-datatable-sm"
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              <th class="text-left">Ciudad</th>
+              <th class="text-right">Total de Clientes</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-city>
+            <tr>
+              <td>{{ city.cityName }}</td>
+              <td class="text-right font-semibold">{{ formatNumber(city.totalClientes) }}</td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="footer">
+            <tr class="font-bold bg-gray-50 dark:bg-gray-800">
+              <td>Total:</td>
+              <td class="text-right text-primary-600 dark:text-primary-400">
+                {{ formatNumber(totalCustomersWithOrders()) }}
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="2" class="text-center p-4 text-gray-500">
+                No hay datos disponibles
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      }
+    </p-card>
+  </div>
+</div>

@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, signal, computed, inject, OnInit } from '@angular/core';
-import { CommonModule, DecimalPipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CardModule } from 'primeng/card';
 import { SkeletonModule } from 'primeng/skeleton';
@@ -8,9 +8,15 @@ import { SelectModule } from 'primeng/select';
 import { DatePickerModule } from 'primeng/datepicker';
 import { ChartModule } from 'primeng/chart';
 import { ButtonModule } from 'primeng/button';
+import { PaginatorModule } from 'primeng/paginator';
+import { Chart } from 'chart.js';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { GlobalDataService } from '@core/services/global-data.service';
 import { OrdersDashboardService } from '../../services';
-import { OrdersFilters, PeriodType, PeriodOption, OrderStatusKpi, OrdersByStatusItem, OrdersDashboardData } from '../../models';
+import { OrdersFilters, PeriodType, PeriodOption, OrderStatusKpi, OrdersByStatusItem, OrdersDashboardData, ChannelKpi } from '../../models';
+
+// Registrar el plugin de datalabels globalmente
+Chart.register(ChartDataLabels);
 
 /**
  * OrdersGeneralComponent
@@ -22,6 +28,9 @@ import { OrdersFilters, PeriodType, PeriodOption, OrderStatusKpi, OrdersByStatus
  * - Tabla de órdenes por estado
  * - Donut chart de órdenes por estado
  * - KPIs adicionales (Promedio por hora, Clientes recurrentes)
+ * - 4 KPIs de canales (Domicilio, Restaurante, Para Llevar, *5000)
+ * - Tabla de detalle por canal
+ * - Tabla de detalle por marca
  */
 @Component({
   selector: 'app-orders-general',
@@ -35,7 +44,7 @@ import { OrdersFilters, PeriodType, PeriodOption, OrderStatusKpi, OrdersByStatus
     DatePickerModule,
     ChartModule,
     ButtonModule,
-    DecimalPipe
+    PaginatorModule
   ],
   templateUrl: './orders-general.component.html',
   styleUrls: ['./orders-general.component.scss'],
@@ -85,6 +94,93 @@ export class OrdersGeneralComponent implements OnInit {
   readonly recurrentCustomers = computed(() => this.dashboardData()?.recurrentCustomers ?? 0);
   readonly ordersByUnit = computed(() => this.dashboardData()?.ordersByUnit ?? []);
   readonly ordersByCity = computed(() => this.dashboardData()?.ordersByCity ?? []);
+  readonly ordersByChannel = computed(() => this.dashboardData()?.ordersByChannel ?? []);
+  readonly ordersByBrand = computed(() => this.dashboardData()?.ordersByBrand ?? []);
+  readonly avgTicketGlobal = computed(() => this.dashboardData()?.avgTicketGlobal ?? 0);
+  readonly avgTicketByBrand = computed(() => this.dashboardData()?.avgTicketByBrand ?? []);
+
+  // Computed totals for sales table
+  readonly totalSales = computed(() =>
+    this.ordersByBrand().reduce((sum, item) => sum + item.totalMoney, 0)
+  );
+
+  readonly totalSalesDelivered = computed(() =>
+    this.ordersByBrand().reduce((sum, item) => sum + (item.totalSalesDelivered ?? 0), 0)
+  );
+
+  // New computed signals for additional charts
+  readonly avgTicketByChannel = computed(() => this.dashboardData()?.avgTicketByChannel ?? []);
+  readonly avgTicketByPaymentMethod = computed(() => this.dashboardData()?.avgTicketByPaymentMethod ?? []);
+  readonly shippingCostsByDay = computed(() => this.dashboardData()?.shippingCostsByDay ?? []);
+
+  // Shipping ranges and statistics
+  readonly shippingRanges = computed(() => this.dashboardData()?.shippingRanges ?? []);
+  readonly shippingStatistics = computed(() => this.dashboardData()?.shippingStatistics ?? {
+    promedioPagosEnvio: 0,
+    promedioCostoEnvio: 0,
+    costoMaximoEnvio: 0,
+    totalCostosEnvio: 0,
+    totalPagosEnvio: 0
+  });
+
+  // Totales calculados para la tabla de rangos
+  readonly totalRangesCostos = computed(() =>
+    this.shippingRanges().reduce((sum, item) => sum + item.totalCostoEnvios, 0)
+  );
+
+  readonly totalRangesPagos = computed(() =>
+    this.shippingRanges().reduce((sum, item) => sum + item.totalPagosEnvios, 0)
+  );
+
+  // Channel KPIs computed from ordersByChannel data
+  // Siempre muestra los 4 canales principales, incluso si no hay datos (mostrará 0)
+  readonly channelKpis = computed((): ChannelKpi[] => {
+    const channelsFromApi = this.ordersByChannel();
+
+    // Definir los 4 canales principales que siempre queremos mostrar
+    const predefinedChannels = [
+      {
+        key: 'Domicilio',
+        channelName: 'Domicilio',
+        icon: 'pi-send',
+        color: 'primary-500'
+      },
+      {
+        key: 'Restaurante',
+        channelName: 'Restaurante',
+        icon: 'pi-building',
+        color: 'primary-600'
+      },
+      {
+        key: 'Para Llevar',
+        channelName: 'Para Llevar',
+        icon: 'pi-shopping-bag',
+        color: 'primary-400'
+      },
+      {
+        key: '*5000',
+        channelName: '*5000',
+        icon: 'pi-phone',
+        color: 'primary-300'
+      }
+    ];
+
+    // Mapear los datos de la API a los canales predefinidos
+    return predefinedChannels.map(predefined => {
+      // Buscar si hay datos para este canal (considerando variaciones de nombre)
+      const channelData = channelsFromApi.find(c =>
+        c.channelDescription === predefined.key ||
+        (predefined.key === 'Domicilio' && c.channelDescription === 'Delivery')
+      );
+
+      return {
+        channelName: predefined.channelName,
+        count: channelData?.totalOrders ?? 0,
+        icon: predefined.icon,
+        color: predefined.color
+      };
+    });
+  });
 
   // Chart data
   readonly donutChartData = computed(() => {
@@ -128,6 +224,29 @@ export class OrdersGeneralComponent implements OnInit {
           font: {
             size: 12
           }
+        }
+      },
+      tooltip: {
+        callbacks: {
+          label: (context: any) => {
+            const label = context.label || '';
+            const value = context.parsed || 0;
+            const total = context.dataset.data.reduce((acc: number, curr: number) => acc + curr, 0);
+            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+            return `${label}: ${this.formatNumber(value)} (${percentage}%)`;
+          }
+        }
+      },
+      datalabels: {
+        color: '#fff',
+        font: {
+          weight: 'bold' as const,
+          size: 14
+        },
+        formatter: (value: number, context: any) => {
+          const total = context.dataset.data.reduce((acc: number, curr: number) => acc + curr, 0);
+          const percentage = total > 0 ? (value / total) * 100 : 0;
+          return percentage > 5 ? `${percentage.toFixed(1)}%` : ''; // Solo mostrar si es mayor a 5%
         }
       }
     }
@@ -201,9 +320,266 @@ export class OrdersGeneralComponent implements OnInit {
       }
     },
     responsive: true,
-    maintainAspectRatio: false,
-    barThickness: 40,  // Grosor de las barras (más alto = más gruesas)
-    maxBarThickness: 60  // Grosor máximo
+    maintainAspectRatio: true,
+  };
+
+  // Bar chart data for average ticket by brand
+  readonly avgTicketBarChartData = computed(() => {
+    const tickets = this.avgTicketByBrand();
+    if (tickets.length === 0) return null;
+
+    // Mismo patrón de colores que el donut chart
+    const colors = [
+      '#FB0021',  // primary-500 - Brand red
+      '#F7395B',  // primary-400 - Medium red
+      '#E9001C',  // primary-600 - Dark red
+      '#FA8D9F',  // primary-200 - Light red
+      '#FCC4CD',  // primary-100 - Very light red
+      '#F85D78',  // primary-300 - Light-medium red
+      '#FB0021',  // Repeat pattern if more than 6 bars
+      '#F7395B',
+      '#E9001C',
+      '#FA8D9F'
+    ];
+
+    const borderColors = [
+      '#E9001C',  // primary-600
+      '#F85D78',  // primary-300
+      '#D10019',  // primary-700
+      '#F7395B',  // primary-400
+      '#FA8D9F',  // primary-200
+      '#F7395B',  // primary-400
+      '#E9001C',
+      '#F85D78',
+      '#D10019',
+      '#F7395B'
+    ];
+
+    return {
+      labels: tickets.map(t => t.brandShortName),
+      datasets: [{
+        label: 'Ticket Promedio',
+        data: tickets.map(t => t.avgSubTotal),
+        backgroundColor: colors,
+        borderColor: borderColors,
+        borderWidth: 1
+      }]
+    };
+  });
+
+  // Bar chart options for average ticket
+  readonly avgTicketBarChartOptions = {
+    plugins: {
+      legend: {
+        display: false
+      },
+      tooltip: {
+        callbacks: {
+          label: (context: any) => {
+            const item = this.avgTicketByBrand()[context.dataIndex];
+            return `Promedio: L. ${this.formatNumber(item.avgSubTotal)}`;
+          }
+        }
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          callback: (value: number | string) => `L. ${this.formatNumber(Number(value))}`
+        }
+      }
+    },
+    responsive: true,
+    maintainAspectRatio: true
+  };
+
+  // Bar chart data for average ticket by channel
+  readonly avgTicketByChannelChartData = computed(() => {
+    const tickets = this.avgTicketByChannel();
+    if (tickets.length === 0) return null;
+
+    const colors = [
+      '#FB0021',  // primary-500
+      '#F7395B',  // primary-400
+      '#E9001C',  // primary-600
+      '#FA8D9F',  // primary-200
+      '#FCC4CD',  // primary-100
+      '#F85D78',  // primary-300
+      '#FB0021',
+      '#F7395B',
+      '#E9001C',
+      '#FA8D9F'
+    ];
+
+    const borderColors = [
+      '#E9001C',  // primary-600
+      '#F85D78',  // primary-300
+      '#D10019',  // primary-700
+      '#F7395B',  // primary-400
+      '#FA8D9F',  // primary-200
+      '#F7395B',  // primary-400
+      '#E9001C',
+      '#F85D78',
+      '#D10019',
+      '#F7395B'
+    ];
+
+    return {
+      labels: tickets.map(t => t.channelDescription),
+      datasets: [{
+        label: 'Ticket Promedio',
+        data: tickets.map(t => t.avgSubTotal),
+        backgroundColor: colors,
+        borderColor: borderColors,
+        borderWidth: 1
+      }]
+    };
+  });
+
+  // Bar chart options for average ticket by channel
+  readonly avgTicketByChannelChartOptions = {
+    plugins: {
+      legend: {
+        display: false
+      },
+      tooltip: {
+        callbacks: {
+          label: (context: any) => {
+            const item = this.avgTicketByChannel()[context.dataIndex];
+            return `Promedio: L. ${this.formatNumber(item.avgSubTotal)}`;
+          }
+        }
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          callback: (value: number | string) => `L. ${this.formatNumber(Number(value))}`
+        }
+      }
+    },
+    responsive: true,
+    maintainAspectRatio: true
+  };
+
+  // Bar chart data for average ticket by payment method
+  readonly avgTicketByPaymentMethodChartData = computed(() => {
+    const tickets = this.avgTicketByPaymentMethod();
+    if (tickets.length === 0) return null;
+
+    const colors = [
+      '#FB0021',  // primary-500
+      '#F7395B',  // primary-400
+      '#E9001C',  // primary-600
+      '#FA8D9F',  // primary-200
+      '#FCC4CD',  // primary-100
+      '#F85D78',  // primary-300
+      '#FB0021',
+      '#F7395B',
+      '#E9001C',
+      '#FA8D9F'
+    ];
+
+    const borderColors = [
+      '#E9001C',  // primary-600
+      '#F85D78',  // primary-300
+      '#D10019',  // primary-700
+      '#F7395B',  // primary-400
+      '#FA8D9F',  // primary-200
+      '#F7395B',  // primary-400
+      '#E9001C',
+      '#F85D78',
+      '#D10019',
+      '#F7395B'
+    ];
+
+    return {
+      labels: tickets.map(t => t.paymentMethodName),
+      datasets: [{
+        label: 'Ticket Promedio',
+        data: tickets.map(t => t.avgSubTotal),
+        backgroundColor: colors,
+        borderColor: borderColors,
+        borderWidth: 1
+      }]
+    };
+  });
+
+  // Bar chart options for average ticket by payment method
+  readonly avgTicketByPaymentMethodChartOptions = {
+    plugins: {
+      legend: {
+        display: false
+      },
+      tooltip: {
+        callbacks: {
+          label: (context: any) => {
+            const item = this.avgTicketByPaymentMethod()[context.dataIndex];
+            return `Promedio: L. ${this.formatNumber(item.avgSubTotal)}`;
+          }
+        }
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          callback: (value: number | string) => `L. ${this.formatNumber(Number(value))}`
+        }
+      }
+    },
+    responsive: true,
+    maintainAspectRatio: true
+  };
+
+  // Line chart data for shipping costs by day
+  readonly shippingCostsLineChartData = computed(() => {
+    const costs = this.shippingCostsByDay();
+    if (costs.length === 0) return null;
+
+    return {
+      labels: costs.map(c => {
+        const date = new Date(c.deliveredDateDay);
+        return date.toLocaleDateString('es-HN', { month: 'short', day: 'numeric' });
+      }),
+      datasets: [{
+        label: 'Costos de Envío',
+        data: costs.map(c => c.totalCostoEnvios),
+        borderColor: '#FB0021',  // primary-500
+        backgroundColor: 'rgba(251, 0, 33, 0.1)',  // primary-500 with alpha
+        tension: 0.4,  // Smooth curve
+        fill: true
+      }]
+    };
+  });
+
+  // Line chart options for shipping costs
+  readonly shippingCostsLineChartOptions = {
+    plugins: {
+      legend: {
+        display: false
+      },
+      tooltip: {
+        callbacks: {
+          label: (context: any) => {
+            const item = this.shippingCostsByDay()[context.dataIndex];
+            return `Costo: L. ${this.formatNumber(item.totalCostoEnvios)}`;
+          }
+        }
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          callback: (value: number | string) => `L. ${this.formatNumber(Number(value))}`
+        }
+      }
+    },
+    responsive: true,
+    maintainAspectRatio: true
   };
 
   ngOnInit(): void {
