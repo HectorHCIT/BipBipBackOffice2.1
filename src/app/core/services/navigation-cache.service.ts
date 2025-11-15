@@ -33,7 +33,6 @@ export class NavigationCacheService {
     companyId?: string
   ): Promise<void> {
     // TODO: Implementar con IndexedDB
-    console.log('Saving routes to cache (placeholder):', userId);
   }
 
   /**
@@ -41,7 +40,6 @@ export class NavigationCacheService {
    */
   async getUserRoutes(userId: string): Promise<NavigationItem[] | null> {
     // TODO: Implementar con IndexedDB
-    console.log('Getting routes from cache (placeholder):', userId);
     return null;
   }
 
@@ -50,7 +48,6 @@ export class NavigationCacheService {
    */
   async deleteUserRoutes(userId: string): Promise<void> {
     // TODO: Implementar con IndexedDB
-    console.log('Deleting user routes (placeholder):', userId);
   }
 
   /**
@@ -58,7 +55,6 @@ export class NavigationCacheService {
    */
   async clearAllCache(): Promise<void> {
     // TODO: Implementar con IndexedDB
-    console.log('Clearing all cache (placeholder)');
   }
 
   /**

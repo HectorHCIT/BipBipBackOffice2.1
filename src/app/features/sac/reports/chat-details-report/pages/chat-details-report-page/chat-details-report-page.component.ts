@@ -208,12 +208,10 @@ export class ChatDetailsReportPageComponent implements OnInit {
       nameUser
     };
 
-    console.log('📊 [CHAT-DETAILS-REPORT] Generando reporte:', params);
     this.isLoading.set(true);
 
     this.reportService.generateReport(params).subscribe({
       next: (response) => {
-        console.log('✅ [CHAT-DETAILS-REPORT] Respuesta:', response);
 
         try {
           const base64 = response.data || response;

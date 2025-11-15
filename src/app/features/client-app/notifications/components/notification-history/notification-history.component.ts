@@ -174,17 +174,15 @@ export class NotificationHistoryComponent {
    */
   onRowSelect(notification: DataPush): void {
     // Open details dialog or navigate to edit
-    console.log('Selected notification:', notification);
   }
 
   onEdit(notification: DataPush): void {
     // Navigate to edit form
-    console.log('Edit notification:', notification);
   }
 
   onDelete(notification: DataPush): void {
     // Show confirmation dialog
-    console.log('Delete notification:', notification);
+
   }
 
   /**

@@ -384,9 +384,6 @@ export class RoleFormComponent {
       // Update existing role
       const roleData = this.role()!;
 
-      console.log('Updating role with ID:', roleData.roleId);
-      console.log('Permissions to add:', this.permissionsToAdd());
-      console.log('Permissions to remove:', this.permissionsToRemove());
 
       this.roleService.updateRole(roleData.roleId, {
         roleName: formValue.roleName,
@@ -420,7 +417,6 @@ export class RoleFormComponent {
       // Create new role - collect all active permission IDs
       const activePermissions = this.collectActivePermissionIds();
 
-      console.log('Creating new role with permissions:', activePermissions);
 
       this.roleService.createRole({
         roleName: formValue.roleName,

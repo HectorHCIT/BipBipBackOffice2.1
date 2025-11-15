@@ -165,7 +165,6 @@ export class CredentialsTabComponent implements OnDestroy {
 
     this.credentialService.toggleCredentialStatus(credential.userId, newStatus).subscribe({
       next: () => {
-        console.log(`Usuario ${newStatus ? 'activado' : 'desactivado'} exitosamente`);
         // TODO: Show success message to user
       },
       error: (error) => {

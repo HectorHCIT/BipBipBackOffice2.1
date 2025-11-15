@@ -113,7 +113,6 @@ export class SaaoComponent implements OnInit {
    * Manejar aplicación de filtros desde el componente hijo
    */
   onFiltersApplied(params: SaaoReportParams): void {
-    console.log('🔥 Filtros aplicados desde componente hijo:', params);
     this.loadFromApi(params);
   }
 
@@ -121,7 +120,6 @@ export class SaaoComponent implements OnInit {
    * Manejar limpieza de filtros desde el componente hijo
    */
   onFiltersCleared(): void {
-    console.log('🧹 Filtros limpiados desde componente hijo');
     this.saaoService.clear();
     this.searchTerm.set('');
   }
@@ -135,7 +133,6 @@ export class SaaoComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          console.log('✅ Reporte SAAO cargado exitosamente');
         },
         error: error => {
           console.error('❌ Error cargando reporte SAAO:', error);

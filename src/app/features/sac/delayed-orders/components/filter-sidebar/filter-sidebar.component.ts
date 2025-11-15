@@ -56,16 +56,7 @@ export class FilterSidebarComponent implements OnInit {
     this.globalDataService.isLoadingCities()
   );
 
-  constructor() {
-    // Effect para detectar cambios en visible
-    effect(() => {
-      const isVisible = this.visible();
-      console.log('🎯 [FILTER-SIDEBAR] visible cambió a:', isVisible);
-    });
-  }
-
   ngOnInit(): void {
-    console.log('🎯 [FILTER-SIDEBAR] ngOnInit - visible inicial:', this.visible());
     this.initForm();
     this.loadData();
   }
@@ -100,7 +91,6 @@ export class FilterSidebarComponent implements OnInit {
    * Maneja cambios en la visibilidad del drawer
    */
   onVisibleChange(isVisible: boolean): void {
-    console.log('🎯 [FILTER-SIDEBAR] onVisibleChange llamado con:', isVisible);
     if (!isVisible) {
       this.close();
     }
@@ -110,7 +100,6 @@ export class FilterSidebarComponent implements OnInit {
    * Cierra el sidebar
    */
   close(): void {
-    console.log('🎯 [FILTER-SIDEBAR] close() llamado');
     this.onClose.emit();
   }
 

@@ -20,7 +20,8 @@
       "Bash(dir:*)",
       "Bash(npm uninstall:*)",
       "Bash(exit 0)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(test:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

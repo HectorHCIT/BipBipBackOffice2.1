@@ -142,7 +142,6 @@ export class SaaoService {
 
     return this.http.get<SaaoOrder[]>(this.apiUrl + 'report', { params: httpParams }).pipe(
       tap(orders => {
-        console.log('✅ Órdenes SAAO cargadas desde API:', orders.length);
         this.ordersSignal.set(orders);
         this.loadingSignal.set(false);
         this.calculateStats(orders);
@@ -355,7 +354,6 @@ export class SaaoService {
    */
   exportData(formato: 'excel' | 'csv' | 'pdf', orders: SaaoOrder[]): void {
     // Implementar lógica de exportación
-    console.log(`📊 Exportando ${orders.length} órdenes en formato ${formato}`);
     // TODO: Implementar exportación real
   }
 

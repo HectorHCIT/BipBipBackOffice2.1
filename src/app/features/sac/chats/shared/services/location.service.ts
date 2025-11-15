@@ -43,7 +43,6 @@ export class LocationService {
    */
   async loadLocations(): Promise<void> {
     try {
-      console.log('[LocationService] Cargando países y ciudades...');
 
       const [countriesData, citiesData] = await Promise.all([
         firstValueFrom(this.dataService.get$<Country[]>('Location/CountryList')),
@@ -52,11 +51,6 @@ export class LocationService {
 
       this.countries.set(countriesData);
       this.cities.set(citiesData);
-
-      console.log('[LocationService] Datos cargados:', {
-        countries: countriesData.length,
-        cities: citiesData.length
-      });
     } catch (error) {
       console.error('[LocationService] Error al cargar ubicaciones:', error);
       throw error;

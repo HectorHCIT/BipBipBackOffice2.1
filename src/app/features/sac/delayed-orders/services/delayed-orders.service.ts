@@ -65,8 +65,6 @@ export class DelayedOrdersService {
 
   /**
    * Filtra órdenes por países, ciudades y rango de fechas
-   * Nota: Este endpoint requiere parámetros duplicados (CountryIds, CityIds)
-   * que no son soportados por el DataService, por lo que usamos HttpParams directamente
    */
   filterDelayedOrders(
     countries: number[],
@@ -78,33 +76,25 @@ export class DelayedOrdersService {
   ): Observable<DelayedOrdersResponse> {
     this.isLoading.set(true);
 
-    // Construir manualmente los parámetros con arrays
-    let params = new HttpParams()
-      .set('StartDate', startDate)
-      .set('EndDate', endDate)
-      .set('pageNumb', page.toString())
-      .set('pageSize', pageSize.toString());
-
-    // Agregar múltiples CountryIds
-    countries.forEach(countryId => {
-      params = params.append('CountryIds', countryId.toString());
-    });
-
-    // Agregar múltiples CityIds
-    cities.forEach(cityId => {
-      params = params.append('CityIds', cityId.toString());
-    });
-
-    // Para este caso especial, necesitamos acceso directo a HttpClient
-    // Por ahora, convertimos los arrays a strings separados por comas como workaround
-    return this.dataService.get$<DelayedOrdersResponse>('DelayedOrders/DelayedOrdersByFilters', {
+    // Construir parámetros solo con valores presentes
+    const params: any = {
       StartDate: startDate,
       EndDate: endDate,
       pageNumb: page,
-      pageSize: pageSize,
-      CountryIds: countries.join(','),
-      CityIds: cities.join(',')
-    }).pipe(
+      pageSize: pageSize
+    };
+
+    // Solo agregar CountryIds si hay países seleccionados
+    if (countries.length > 0) {
+      params.CountryIds = countries.join(',');
+    }
+
+    // Solo agregar CityIds si hay ciudades seleccionadas
+    if (cities.length > 0) {
+      params.CityIds = cities.join(',');
+    }
+
+    return this.dataService.get$<DelayedOrdersResponse>('DelayedOrders/DelayedOrdersByFilters', params).pipe(
       tap({
         next: (response) => {
           this.delayedOrders.set(response);

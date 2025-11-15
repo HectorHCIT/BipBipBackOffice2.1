@@ -1,0 +1,81 @@
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.sac-driver-page {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+// Breadcrumb sin fondo
+::ng-deep .p-breadcrumb {
+  background-color: transparent;
+  border: none;
+  padding: 0;
+}
+
+// Contenido principal: 2 columnas iguales con grid
+.page-content {
+  flex: 1;
+  display: grid;
+  gap: 0;
+  overflow: hidden;
+  grid-template-columns: 380px 1fr;
+  height: calc(100vh - 80px);
+
+  // Responsive - Breakpoints para diferentes tamaños de pantalla
+  @media (max-width: 1440px) {
+    grid-template-columns: 350px 1fr;
+  }
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 320px 1fr;
+  }
+
+  // Mobile: Una sola columna, estilo WhatsApp
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+
+    // Lista de chats ocupa todo el ancho en móvil
+    .mobile-chat-list {
+      width: 100%;
+      border-right: none !important;
+    }
+
+    // Vista de chat ocupa todo el ancho en móvil
+    .mobile-chat-view {
+      width: 100%;
+    }
+
+    // Ocultar elementos según estado (estilo WhatsApp)
+    .mobile-hidden {
+      display: none !important;
+    }
+  }
+}
+
+// Breadcrumb: ocultar en pantallas muy pequeñas
+@media (max-width: 640px) {
+  .sac-driver-page > div:first-child {
+    display: none;
+  }
+
+  .page-content {
+    height: 100vh;
+    border-radius: 0 !important;
+    border-left: none !important;
+    border-right: none !important;
+  }
+}
+
+// Ajustes para pantallas muy pequeñas (≤390px)
+@media (max-width: 390px) {
+  .page-content {
+    border: none !important;
+    margin: 0 !important;
+  }
+}

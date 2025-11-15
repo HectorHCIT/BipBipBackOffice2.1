@@ -1,0 +1,303 @@
+<div class="p-6">
+  <!-- Breadcrumb -->
+  <div class="mb-4">
+    <p-breadcrumb
+      [model]="breadcrumbItems"
+      [home]="home"
+    />
+  </div>
+
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-2xl font-semibold text-gray-800 dark:text-gray-200">
+        Historial de Chats
+      </h1>
+      <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+        Consulta el historial de conversaciones entre SAC y clientes/drivers
+      </p>
+    </div>
+    <div class="flex gap-2">
+      <p-button
+        icon="pi pi-download"
+        [text]="true"
+        [rounded]="true"
+        (onClick)="exportData()"
+        label="Exportar"
+        [disabled]="!hasChats()"
+      />
+      <p-button
+        icon="pi pi-refresh"
+        [text]="true"
+        [rounded]="true"
+        (onClick)="refreshData()"
+        label="Actualizar"
+        [loading]="loading()"
+      />
+    </div>
+  </div>
+
+  <!-- Filters Panel (Always Visible) -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg p-4 mb-6 border border-gray-200 dark:border-gray-700">
+      <form [formGroup]="filterForm" class="space-y-4">
+        <!-- Tipo de filtro de fecha -->
+        <div class="flex gap-2 mb-4">
+          <p-button
+            label="Rango de Fechas"
+            [outlined]="dateFilterType() !== 'range'"
+            [severity]="dateFilterType() === 'range' ? 'primary' : 'secondary'"
+            (onClick)="setDateFilterType('range')"
+            size="small"
+          />
+          <p-button
+            label="Fecha Única"
+            [outlined]="dateFilterType() !== 'single'"
+            [severity]="dateFilterType() === 'single' ? 'primary' : 'secondary'"
+            (onClick)="setDateFilterType('single')"
+            size="small"
+          />
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Rango de Fechas o Fecha Única -->
+          @if (dateFilterType() === 'range') {
+            <div class="flex flex-col gap-2">
+              <label class="font-medium text-sm text-gray-700 dark:text-gray-300">
+                <i class="pi pi-calendar mr-1"></i>
+                Rango de Fechas
+              </label>
+              <p-datepicker
+                formControlName="dateRange"
+                selectionMode="range"
+                [showIcon]="true"
+                dateFormat="dd/mm/yy"
+                placeholder="Seleccione rango"
+              />
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Por defecto últimos 7 días
+              </p>
+            </div>
+          } @else {
+            <div class="flex flex-col gap-2">
+              <label class="font-medium text-sm text-gray-700 dark:text-gray-300">
+                <i class="pi pi-calendar mr-1"></i>
+                Fecha Específica
+              </label>
+              <p-datepicker
+                formControlName="singleDate"
+                [showIcon]="true"
+                dateFormat="dd/mm/yy"
+                placeholder="Seleccione fecha"
+              />
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Buscar por fecha de creación
+              </p>
+            </div>
+          }
+
+          <!-- Teléfono del Cliente -->
+          <div class="flex flex-col gap-2">
+            <label class="font-medium text-sm text-gray-700 dark:text-gray-300">
+              <i class="pi pi-phone mr-1"></i>
+              Teléfono del Cliente
+            </label>
+            <p-iconfield iconPosition="left">
+              <p-inputicon styleClass="pi pi-search" />
+              <input
+                pInputText
+                formControlName="customerPhone"
+                class="w-full"
+                placeholder="Ej: 99887766"
+              />
+            </p-iconfield>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Requiere llamada al backend
+            </p>
+          </div>
+
+          <!-- Búsqueda General (filtro local) -->
+          <div class="flex flex-col gap-2">
+            <label class="font-medium text-sm text-gray-700 dark:text-gray-300">
+              <i class="pi pi-search mr-1"></i>
+              Búsqueda General
+            </label>
+            <p-iconfield iconPosition="left">
+              <p-inputicon styleClass="pi pi-search" />
+              <input
+                pInputText
+                formControlName="searchText"
+                  class="w-full"
+                placeholder="Orden, cliente, tipo..."
+                (input)="onLocalFilterChange()"
+              />
+            </p-iconfield>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Filtro local en datos cargados
+            </p>
+          </div>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="flex gap-2 justify-end pt-3 border-t border-gray-200 dark:border-gray-700">
+          <p-button
+            label="Limpiar"
+            icon="pi pi-times"
+            [outlined]="true"
+            severity="secondary"
+            (onClick)="clearFilters()"
+          />
+          <p-button
+            label="Aplicar Filtros"
+            icon="pi pi-check"
+            (onClick)="applyFilters()"
+          />
+        </div>
+      </form>
+    </div>
+
+  <!-- Content Area -->
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+    <!-- Loading State -->
+    @if (loading()) {
+      <div class="flex flex-col items-center justify-center py-20">
+        <p-progressSpinner />
+        <span class="mt-4 text-gray-600 dark:text-gray-400">Cargando historial de chats...</span>
+      </div>
+    } @else if (!hasChats()) {
+      <!-- Empty State -->
+      <div class="flex flex-col items-center justify-center py-20">
+        <i class="pi pi-comments text-6xl text-gray-300 mb-4"></i>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">No hay chats registrados</h3>
+        <p class="text-sm text-gray-600 dark:text-gray-400">Los chats finalizados aparecerán aquí</p>
+      </div>
+    } @else {
+      <!-- PrimeNG Table -->
+      <p-table
+        [value]="dataSource"
+        [tableStyle]="{ 'min-width': '50rem' }"
+        styleClass="p-datatable-sm"
+        responsiveLayout="scroll"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Tipo</th>
+            <th>Orden ID</th>
+            <th>Agente</th>
+            <th>Cliente ID</th>
+            <th class="text-center">Mensajes</th>
+            <th>Duración</th>
+            <th>Fecha Asignación</th>
+            <th class="text-center">Acciones</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-chat>
+          <tr>
+            <!-- Tipo -->
+            <td>
+              <p-tag
+                [value]="getChatTypeLabel(chat.tipoChat)"
+                [severity]="getChatTypeSeverity(chat.tipoChat)"
+                [icon]="chat.tipoChat === 'SC' ? 'pi pi-user' : 'pi pi-car'"
+              />
+            </td>
+            <!-- Orden ID -->
+            <td>
+              @if (chat.orderId) {
+                <span class="font-mono text-sm">#{{ chat.orderId }}</span>
+              } @else {
+                <span class="text-gray-400">N/A</span>
+              }
+            </td>
+            <!-- Agente -->
+            <td>
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                  <span class="text-xs font-semibold text-white">
+                    {{ chat.userChat?.charAt(0).toUpperCase() || '?' }}
+                  </span>
+                </div>
+                <span class="text-sm font-medium">{{ chat.userChat || 'N/A' }}</span>
+              </div>
+            </td>
+            <!-- Cliente ID -->
+            <td>
+              <span class="font-mono text-sm">#{{ chat.idCustomer }}</span>
+            </td>
+            <!-- Mensajes -->
+            <td class="text-center">
+              <p-tag
+                [value]="getMessageCount(chat).toString()"
+                severity="info"
+                [rounded]="true"
+              />
+            </td>
+            <!-- Duración -->
+            <td>
+              <span class="text-sm">{{ chat.duration || 'N/A' }}</span>
+            </td>
+            <!-- Fecha Asignación -->
+            <td>
+              <span class="text-sm">{{ formatDate(chat.assignedAt) }}</span>
+            </td>
+            <!-- Acciones -->
+            <td class="text-center">
+              <p-button
+                icon="pi pi-eye"
+                [text]="true"
+                [rounded]="true"
+                (onClick)="viewChat(chat)"
+                severity="info"
+                pTooltip="Ver chat completo"
+                tooltipPosition="left"
+              />
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="8">
+              <div class="flex flex-col items-center py-12 px-6">
+                <i class="pi pi-inbox text-4xl text-gray-300 mb-3"></i>
+                <p class="text-center font-medium text-gray-600">
+                  No se encontraron chats con los filtros aplicados.
+                </p>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    }
+  </div>
+
+  <!-- Paginator -->
+  @if (totalRecords > 0) {
+    <p-paginator
+      [rows]="pageSize()"
+      [totalRecords]="totalRecords"
+      [first]="pageIndex * pageSize()"
+      [rowsPerPageOptions]="[5, 10, 20, 50]"
+      (onPageChange)="onPaginateChange($event)"
+      class="mt-3"
+    />
+  }
+</div>
+
+<!-- Drawer para vista previa del chat -->
+<p-drawer
+  [(visible)]="showDrawer"
+  position="right"
+  [style]="{ width: '700px' }"
+  (onHide)="closeDrawer()"
+>
+  <ng-template pTemplate="header">
+    <div class="flex items-center gap-2">
+      <i class="pi pi-comments text-xl"></i>
+      <span class="font-semibold">Vista Previa del Chat</span>
+    </div>
+  </ng-template>
+
+  <app-chat-preview
+    [chat]="selectedChat()"
+    (closed)="closeDrawer()"
+  />
+</p-drawer>

@@ -75,19 +75,15 @@ export class ChannelFormComponent implements OnInit {
       const isVisible = this.visible();
       const id = this.channelId();
 
-      console.log('🔍 [ChannelForm Effect] visible:', isVisible, 'channelId:', id);
 
       // Use untracked to prevent infinite loops
       untracked(() => {
         this.visibleModel = isVisible;
-        console.log('📝 [ChannelForm Effect] visibleModel set to:', this.visibleModel);
 
         if (isVisible) {
           if (id) {
-            console.log('✏️ [ChannelForm Effect] Loading channel data for ID:', id);
             this.loadChannelData(id);
           } else {
-            console.log('➕ [ChannelForm Effect] Resetting form for new channel');
             this.resetForm();
           }
         }
@@ -103,7 +99,6 @@ export class ChannelFormComponent implements OnInit {
    * Handle visible change from drawer
    */
   onVisibleChange(visible: boolean): void {
-    console.log('🚪 [ChannelForm onVisibleChange] visible:', visible);
     this.visibleModel = visible;
     this.visibleChange.emit(visible);
   }
@@ -148,12 +143,10 @@ export class ChannelFormComponent implements OnInit {
    * Load channel data for editing
    */
   private loadChannelData(channelId: number): void {
-    console.log('📥 [ChannelForm loadChannelData] Loading channel ID:', channelId);
     this.isLoading.set(true);
 
     this.channelService.getChannelDetail(channelId).subscribe({
       next: (channel) => {
-        console.log('✅ [ChannelForm loadChannelData] Channel loaded:', channel);
         this.patchFormWithChannel(channel);
         this.isLoading.set(false);
       },
@@ -173,7 +166,6 @@ export class ChannelFormComponent implements OnInit {
    * Patch form with channel data
    */
   private patchFormWithChannel(channel: Channel): void {
-    console.log('📝 [ChannelForm patchFormWithChannel] Channel data received:', channel);
 
     this.channelForm.patchValue({
       channelName: channel.descriptionChannel,
@@ -185,8 +177,6 @@ export class ChannelFormComponent implements OnInit {
       isVisibleChannel: channel.isVisibleChannel,
       iconUrlChannel: channel.iconUrlChannel
     });
-
-    console.log('📝 [ChannelForm patchFormWithChannel] Form values after patch:', this.channelForm.value);
 
     // Set preview URL
     if (channel.iconUrlChannel) {
@@ -206,7 +196,6 @@ export class ChannelFormComponent implements OnInit {
       }));
 
       this.brands.set(updatedBrands);
-      console.log('📝 [ChannelForm patchFormWithChannel] Updated brands:', updatedBrands);
     }
   }
 
@@ -273,7 +262,6 @@ export class ChannelFormComponent implements OnInit {
     this.uploadingIcon.set(true);
     this.channelService.uploadIcon(file).subscribe({
       next: (iconUrl) => {
-        console.log('✅ [ChannelForm onFileSelect] Image uploaded successfully:', iconUrl);
         // Set the URL in the form
         this.channelForm.patchValue({ iconUrlChannel: iconUrl });
         this.uploadingIcon.set(false);
@@ -338,8 +326,6 @@ export class ChannelFormComponent implements OnInit {
         .filter(b => b.isSelected)
         .map(b => b.idBrand)
     };
-
-    console.log('📤 [ChannelForm onSubmit] Payload:', payload);
 
     // Create or update
     const operation = this.channelId()

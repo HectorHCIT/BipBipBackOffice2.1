@@ -248,7 +248,6 @@ export class PaymentCalendarComponent implements OnInit, OnDestroy {
    */
   private ensureCitiesLoaded(): void {
     if (this.globalData.cities().length === 0) {
-      console.log('🏙️ Cities not loaded, triggering loadAll()');
       this.globalData.loadAll();
     }
   }

@@ -352,7 +352,7 @@
             [outlined]="true"
             size="small"
             [disabled]="currentPage() === 1"
-            (onClick)="onPageChange({ page: currentPage() - 2, rows: rowsPerPage() })"
+            (onClick)="onPageChange({ first: (currentPage() - 2) * rowsPerPage(), rows: rowsPerPage() })"
           />
           <p-button
             icon="pi pi-chevron-right"
@@ -360,7 +360,7 @@
             [outlined]="true"
             size="small"
             [disabled]="currentPage() * rowsPerPage() >= totalRecords()"
-            (onClick)="onPageChange({ page: currentPage(), rows: rowsPerPage() })"
+            (onClick)="onPageChange({ first: currentPage() * rowsPerPage(), rows: rowsPerPage() })"
           />
         </div>
       </div>

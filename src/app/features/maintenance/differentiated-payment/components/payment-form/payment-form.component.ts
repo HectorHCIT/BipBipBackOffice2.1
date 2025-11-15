@@ -188,7 +188,6 @@ export class PaymentFormComponent implements OnInit {
   // Cities from global data
   readonly cityOptions = computed(() => {
     const cities = this.globalData.cities();
-    console.log('🏙️ Cities from GlobalData:', cities);
     return cities.map(city => ({
       id: city.id,
       name: city.name

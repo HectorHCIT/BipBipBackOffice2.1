@@ -220,15 +220,9 @@ export class SacClientePageComponent implements OnInit {
   });
 
   async ngOnInit(): Promise<void> {
-    console.log('[SacClientePage] ngOnInit - Iniciando componente');
-    console.log('[SacClientePage] Usuario actual:', this.authService.currentUser());
-    console.log('[SacClientePage] User ID:', this.authService.getUserId());
-    console.log('[SacClientePage] User Name:', this.authService.userName());
-
     // Cargar datos de ubicación primero
     try {
       await this.locationService.loadLocations();
-      console.log('[SacClientePage] Datos de ubicación cargados');
     } catch (error) {
       console.error('[SacClientePage] Error al cargar ubicaciones:', error);
       this.messageService.add({
@@ -266,9 +260,6 @@ export class SacClientePageComponent implements OnInit {
    * Inicializa las subscripciones a Firebase
    */
   private initializeSubscriptions(): void {
-    console.log('[SacClientePage] Inicializando suscripciones...');
-    console.log('[SacClientePage] userId():', this.userId());
-    console.log('[SacClientePage] userName():', this.userName());
 
     // ✅ Suscribirse al estado del agente
     this.agentStatusService.getAgentData(this.userId())
@@ -277,7 +268,6 @@ export class SacClientePageComponent implements OnInit {
         next: (agent) => {
           if (agent) {
             this.agentStatus.set(agent.currentStatus);
-            console.log('[SacClientePage] Estado del agente actualizado:', agent.currentStatus);
           }
         },
         error: (error) => {
@@ -291,7 +281,6 @@ export class SacClientePageComponent implements OnInit {
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: (chats) => {
-            console.log('[SacClientePage] Chats no asignados recibidos:', chats.length, chats);
             this.unassignedChats.set(chats);
           },
           error: (error) => {
@@ -315,7 +304,6 @@ export class SacClientePageComponent implements OnInit {
         takeUntilDestroyed(this.destroyRef),
         // Para cada chat asignado, subscribirse a sus mensajes
         switchMap(chats => {
-          console.log('[SacClientePage] Chats asignados recibidos:', chats.length, chats);
           this.assignedChats.set(chats);
 
           // Subscribirse a mensajes de todos los chats
@@ -493,7 +481,6 @@ export class SacClientePageComponent implements OnInit {
           )
         );
 
-        console.log('✅ Imagen subida exitosamente:', imageUrl);
       }
 
       // Enviar a Firebase
@@ -523,7 +510,6 @@ export class SacClientePageComponent implements OnInit {
             }
           )
         );
-        console.log('✅ Notificación push enviada al cliente:', chat.customerId);
       } catch (pushError) {
         console.warn('⚠️ No se pudo enviar la notificación push:', pushError);
         // No mostrar error al usuario, no es crítico

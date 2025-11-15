@@ -87,13 +87,11 @@ export class CancellationRequestsPageComponent implements OnInit {
    * Carga todas las solicitudes de cancelación
    */
   loadCancellationRequests(): void {
-    console.log('📋 [CANCELLATION-REQUESTS] loadCancellationRequests');
 
     this.isLoading.set(true);
 
     this.orderTrackingService.getCancellationRequests().subscribe({
       next: (response) => {
-        console.log('✅ [CANCELLATION-REQUESTS] Response:', response);
         this.allCancellationRequests.set(response.data || response || []);
         this.isLoading.set(false);
       },

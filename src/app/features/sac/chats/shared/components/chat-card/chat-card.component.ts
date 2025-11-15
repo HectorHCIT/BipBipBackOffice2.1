@@ -45,18 +45,18 @@ export class ChatCardComponent {
 
   /**
    * Items del menú de acciones
+   * NOTA: Inicializamos el array UNA SOLA VEZ para evitar problemas con PrimeNG Menu
+   * El problema era que el getter se ejecutaba en cada detección de cambios,
+   * creando nuevas funciones y causando que el menú necesite 2 clicks
    */
-  get menuItems(): MenuItem[] {
-    return [
-      {
-        label: 'Finalizar',
-        icon: 'pi pi-times',
-        command: () => this.onFinalizarClick(),
-        styleClass: 'text-red-600 hover:bg-red-50',
-        disabled: this.disableFinalizeButton  // ✅ Deshabilitar si no está online
-      }
-    ];
-  }
+  readonly menuItems: MenuItem[] = [
+    {
+      label: 'Finalizar',
+      icon: 'pi pi-times',
+      command: () => this.onFinalizarClick(),
+      styleClass: 'text-red-600 hover:bg-red-50'
+    }
+  ];
 
   /**
    * Obtiene la inicial del cliente

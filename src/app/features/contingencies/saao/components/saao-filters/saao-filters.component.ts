@@ -134,7 +134,6 @@ export class SaaoFiltersComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(storeId => {
         if (storeId) {
-          console.log('🔥 Restaurante cambió a:', storeId, '- Cargando drivers activos...');
           this.loadActiveDriversForStore(storeId);
         } else {
           this.activeDriversCount.set(null);
@@ -171,7 +170,7 @@ export class SaaoFiltersComponent implements OnInit {
       return;
     }
 
-    console.log('📊 Cargando drivers y stores para ciudad:', cityId);
+    // Cargar drivers y stores para la ciudad seleccionada
 
     // Cargar drivers por ciudad
     this.loadingDrivers.set(true);
@@ -253,7 +252,6 @@ export class SaaoFiltersComponent implements OnInit {
       orderIds: orderIds && orderIds.length > 0 ? orderIds : undefined
     };
 
-    console.log('🔥 Aplicando todos los filtros:', params);
     this.filtersApplied.emit(params);
   }
 
@@ -261,8 +259,6 @@ export class SaaoFiltersComponent implements OnInit {
    * Limpiar TODOS los filtros y resetear a estado inicial
    */
   clearFilters(): void {
-    console.log('🧹 Limpiando todos los filtros...');
-
     // Resetear formulario completo
     this.filtersForm.reset({
       cityId: null,
@@ -306,7 +302,6 @@ export class SaaoFiltersComponent implements OnInit {
         next: response => {
           this.activeDriversCount.set(response.activeDrivers);
           this.loadingActiveDrivers.set(false);
-          console.log(`✅ Drivers activos para restaurante ${storeId}:`, response.activeDrivers);
         },
         error: error => {
           console.error('❌ Error cargando drivers activos:', error);
@@ -341,7 +336,6 @@ export class SaaoFiltersComponent implements OnInit {
           if (driverData) {
             this.searchedDriver.set(driverData);
             this.driverNotFound.set(false);
-            console.log('🔥 Driver encontrado:', driverData);
 
             // Auto-aplicar filtros con el driver encontrado
             this.applyDriverFilter(driverId, driverData);
@@ -387,7 +381,6 @@ export class SaaoFiltersComponent implements OnInit {
       driverId: driverId
     };
 
-    console.log('🎯 Aplicando auto-filtros con driver:', params);
     this.filtersApplied.emit(params);
   }
 

@@ -167,8 +167,13 @@ export class DelayedOrdersPageComponent implements OnInit, OnDestroy {
    * Maneja el cambio de paginación
    */
   onPageChange(event: any): void {
-    this.currentPage.set(event.page + 1);
-    this.rowsPerPage.set(event.rows);
+    // PrimeNG Table lazy load event: { first, rows, sortField, sortOrder, filters }
+    // event.first es el índice del primer registro (0-based)
+    // Calculamos la página dividiendo first / rows y sumando 1
+    const page = event.first !== undefined ? Math.floor(event.first / event.rows) + 1 : 1;
+
+    this.currentPage.set(page);
+    this.rowsPerPage.set(event.rows || this.rowsPerPage());
     this.loadOrders();
   }
 
@@ -176,10 +181,7 @@ export class DelayedOrdersPageComponent implements OnInit, OnDestroy {
    * Abre el sidebar de filtros
    */
   openFilters(): void {
-    console.log('🔍 [DEBUG] openFilters() llamado');
-    console.log('🔍 [DEBUG] showFilterSidebar antes:', this.showFilterSidebar());
     this.showFilterSidebar.set(true);
-    console.log('🔍 [DEBUG] showFilterSidebar después:', this.showFilterSidebar());
   }
 
   /**

@@ -51,7 +51,6 @@ export class FirebaseChatService {
 
     return (collectionData(q, { idField: 'uid' }) as Observable<FirebaseChatDocument[]>).pipe(
       map(chats => {
-        console.log('[FirebaseChatService] Chats no asignados:', chats.length, chats);
         return chats;
       })
     );
@@ -62,7 +61,6 @@ export class FirebaseChatService {
    * @param userId ID del usuario
    */
   getUserChats(userId: string): Observable<FirebaseChatDocument[]> {
-    console.log('[FirebaseChatService] Cargando chats para usuario:', userId);
 
     // Query con SOLO userId para debuggear
     // TODO: Restaurar filtro de finished después de verificar
@@ -74,11 +72,7 @@ export class FirebaseChatService {
 
     return (collectionData(q, { idField: 'uid' }) as Observable<FirebaseChatDocument[]>).pipe(
       map(chats => {
-        console.log('[FirebaseChatService] Chats asignados (TODOS):', chats.length, chats);
-        console.log('[FirebaseChatService] Chats NO finalizados:', chats.filter(c => !c.finished).length);
-        console.log('[FirebaseChatService] Chats finalizados:', chats.filter(c => c.finished).length);
-
-        // Por ahora retornar solo los NO finalizados manualmente
+       // Por ahora retornar solo los NO finalizados manualmente
         return chats.filter(c => !c.finished);
       })
     );
@@ -89,7 +83,6 @@ export class FirebaseChatService {
    * @returns Observable con todos los chats asignados, sin importar el usuario
    */
   getAllAssignedChats(): Observable<FirebaseChatDocument[]> {
-    console.log('[FirebaseChatService] Cargando TODOS los chats asignados (admin view)');
 
     const q = query(
       collection(this.firestore, FIREBASE_COLLECTIONS.SAC),
@@ -98,7 +91,6 @@ export class FirebaseChatService {
 
     return (collectionData(q, { idField: 'uid' }) as Observable<FirebaseChatDocument[]>).pipe(
       map(chats => {
-        console.log('[FirebaseChatService] Todos los chats asignados:', chats.length);
         // Filtrar solo los NO finalizados
         return chats.filter(c => !c.finished);
       })
@@ -113,7 +105,6 @@ export class FirebaseChatService {
     const subId = getSubcollectionId(chatId);
     const messagesPath = `${FIREBASE_COLLECTIONS.SAC}/${chatId}/${subId}`;
 
-    console.log('[FirebaseChatService] Cargando mensajes del chat:', chatId, 'Path:', messagesPath);
 
     const q = query(
       collection(this.firestore, messagesPath),
@@ -129,7 +120,6 @@ export class FirebaseChatService {
           dateTime: msg['Datetime'] || msg['dateTime']
         })) as FirebaseChatMessage[];
 
-        console.log('[FirebaseChatService] Mensajes cargados:', chatId, mapped.length, mapped);
         return mapped;
       })
     );
@@ -169,7 +159,7 @@ export class FirebaseChatService {
       ...(!isFromCustomer && userName && { userName: userName })
     };
 
-    console.log('[FirebaseChatService] Enviando mensaje:', chatId, messageData);
+
 
     await addDoc(collection(this.firestore, messagesPath), messageData);
   }
@@ -258,7 +248,6 @@ export class FirebaseChatService {
       finished: true
     });
 
-    console.log('[FirebaseChatService] Chat finalizado:', chatId);
   }
 
   /**
@@ -284,7 +273,7 @@ export class FirebaseChatService {
 
     await batch.commit();
 
-    console.log('[FirebaseChatService] Mensajes marcados como leídos:', chatId, messageIds.length);
+
   }
 
   /**
@@ -295,7 +284,6 @@ export class FirebaseChatService {
 
     return (collectionData(configRef) as Observable<any[]>).pipe(
       map(configs => {
-        console.log('[FirebaseChatService] Configuración SAC:', configs);
         if (configs.length > 0) {
           return configs[0] as SacConfiguration;
         }

@@ -123,20 +123,16 @@ export class ChannelsPageComponent implements OnInit {
    * Open form modal for new channel
    */
   openNewChannelModal(): void {
-    console.log('➕ [ChannelsPage] Opening new channel modal');
     this.selectedChannelId.set(null);
     this.showFormModal.set(true);
-    console.log('📊 [ChannelsPage] showFormModal:', this.showFormModal(), 'selectedChannelId:', this.selectedChannelId());
   }
 
   /**
    * Open form modal for editing channel
    */
   editChannel(channel: ChannelListUI): void {
-    console.log('✏️ [ChannelsPage] Opening edit modal for channel:', channel.idChannel);
     this.selectedChannelId.set(channel.idChannel);
     this.showFormModal.set(true);
-    console.log('📊 [ChannelsPage] showFormModal:', this.showFormModal(), 'selectedChannelId:', this.selectedChannelId());
   }
 
   /**
@@ -163,7 +159,6 @@ export class ChannelsPageComponent implements OnInit {
    * Handle visibility change from drawer
    */
   onDrawerVisibilityChange(visible: boolean): void {
-    console.log('🚪 [ChannelsPage] Drawer visibility changed to:', visible);
     if (!visible) {
       this.showFormModal.set(false);
       this.selectedChannelId.set(null);

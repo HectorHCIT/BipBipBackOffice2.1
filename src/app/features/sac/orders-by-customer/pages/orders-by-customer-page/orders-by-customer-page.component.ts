@@ -89,7 +89,6 @@ export class OrdersByCustomerPageComponent implements OnInit {
     const timeFilter = this.selectedTimeFilter();
     const search = this.searchTerm().trim();
 
-    console.log('📊 [ORDERS-BY-CUSTOMER] loadOrders:', { page, pageSize, timeFilter, search });
 
     this.orderTrackingService.searchOrders({
       pageNumber: page,
@@ -135,14 +134,9 @@ export class OrdersByCustomerPageComponent implements OnInit {
    * Maneja el cambio de paginación
    */
   onPageChange(event: any): void {
-    console.log('📊 [ORDERS-BY-CUSTOMER] onPageChange event:', event);
-
-    // PrimeNG lazy table envía el índice de página empezando en 0
+      // PrimeNG lazy table envía el índice de página empezando en 0
     const page = (event.page ?? 0) + 1;
     const rows = event.rows ?? 5;
-
-    console.log('📊 [ORDERS-BY-CUSTOMER] Calculado - page:', page, 'rows:', rows);
-
     this.currentPage.set(page);
     this.rowsPerPage.set(rows);
     this.loadOrders();

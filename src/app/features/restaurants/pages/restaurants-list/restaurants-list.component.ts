@@ -119,7 +119,6 @@ export class RestaurantsListComponent implements OnInit {
 
     this.restaurantService.getRestaurants(filters).subscribe({
       next: () => {
-        console.log('✅ Restaurants loaded and table updated');
       },
       error: (error) => {
         console.error('Error loading restaurants:', error);

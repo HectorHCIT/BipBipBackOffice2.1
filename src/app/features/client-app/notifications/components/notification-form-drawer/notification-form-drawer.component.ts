@@ -235,7 +235,6 @@ export class NotificationFormDrawerComponent {
 
   loadNotification(id: number): void {
     // TODO: Implement load notification by ID
-    console.log('Load notification:', id);
   }
 
   resetForm(): void {

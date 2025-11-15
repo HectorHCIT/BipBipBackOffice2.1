@@ -392,7 +392,6 @@ export class RolesTabComponent implements OnDestroy {
 
     this.roleService.toggleRoleStatus(role.roleId, newStatus).subscribe({
       next: () => {
-        console.log(`Rol ${newStatus ? 'activado' : 'desactivado'} exitosamente`);
         // TODO: Show success message to user
       },
       error: (error) => {

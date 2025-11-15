@@ -512,7 +512,7 @@ export class BrandsComponent implements OnInit {
     const brand = this.currentBrand();
     if (!brand) return;
     // TODO: Abrir dialog de vista (implementar más adelante)
-    console.log('Ver marca:', brand);
+
   }
 
   editBrand(): void {
@@ -545,7 +545,6 @@ export class BrandsComponent implements OnInit {
       accept: () => {
         this.brandService.enableBrand(brand.idBrand, newStatus).subscribe({
           next: () => {
-            console.log(`Marca ${action}da exitosamente`);
           },
           error: (error) => {
             console.error(`Error al ${action} marca:`, error);

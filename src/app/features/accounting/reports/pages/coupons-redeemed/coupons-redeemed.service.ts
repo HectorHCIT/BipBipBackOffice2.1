@@ -65,7 +65,6 @@ export class CouponsRedeemedService extends ReportBaseService {
     }).pipe(
       tap(() => {
         this.isLoading.set(false);
-        console.log('Coupons Redeemed report generated successfully');
       }),
       catchError((error) => {
         this.isLoading.set(false);

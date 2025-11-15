@@ -8,16 +8,19 @@
   <ng-template #header>
     <div class="flex items-center gap-3">
       <i class="pi pi-filter text-2xl text-blue-600"></i>
-      <h2 class="text-xl font-bold text-gray-900">Filtros Avanzados</h2>
+      <div>
+        <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Filtros Avanzados</h2>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Personaliza la búsqueda de órdenes</p>
+      </div>
     </div>
   </ng-template>
 
   <!-- Content -->
-  <div class="space-y-6 py-2">
+  <div class="space-y-6 py-4">
     <form [formGroup]="form" class="space-y-6">
       <!-- Filtro de Fecha -->
       <div class="flex flex-col gap-3">
-        <label class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+        <label class="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
           <i class="pi pi-calendar text-blue-600"></i>
           Rango de Fechas
         </label>
@@ -42,7 +45,7 @@
 
       <!-- Filtro de Países -->
       <div class="flex flex-col gap-3">
-        <label class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+        <label class="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
           <i class="pi pi-globe text-blue-600"></i>
           Países
         </label>
@@ -71,7 +74,7 @@
 
       <!-- Filtro de Ciudades -->
       <div class="flex flex-col gap-3">
-        <label class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+        <label class="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
           <i class="pi pi-map-marker text-blue-600"></i>
           Ciudades
         </label>

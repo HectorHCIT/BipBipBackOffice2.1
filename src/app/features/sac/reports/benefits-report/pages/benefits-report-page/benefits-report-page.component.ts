@@ -110,7 +110,6 @@ export class BenefitsReportPageComponent implements OnInit {
       fechaFinal: formatDateISO(endDate)
     };
 
-    console.log('📊 [BENEFITS-REPORT] Generando reporte:', { params, reportType });
     this.isLoading.set(true);
 
     // Seleccionar servicio según tipo de reporte
@@ -120,7 +119,6 @@ export class BenefitsReportPageComponent implements OnInit {
 
     serviceCall.subscribe({
       next: (response) => {
-        console.log('✅ [BENEFITS-REPORT] Respuesta:', response);
 
         try {
           const base64 = response.data || response;

@@ -10,7 +10,7 @@
 export interface SaveChatHistory {
   tipoChat: 'SC' | 'SD';        // SC = SAC-Cliente, SD = SAC-Driver
   userChat: string;             // Nombre del agente
-  idCustomer: number;           // ID del cliente
+  idCustomer: number;           // ID del cliente (0 para drivers sin ID numérico)
   orderId: number | null;       // ID de la orden (null si es chat de ayuda)
   chat: ChatBox[];              // Array de mensajes transformados
   assignedAt?: string;          // ISO DateTime cuando se asignó

@@ -9,17 +9,18 @@ import {
   BACKEND_CHAT_TYPES
 } from '../models';
 import { LocationService } from '../../shared/services';
+import { SaveChatHistory, ChatBox } from '../../shared/models';
 
 /**
  * Interfaz para datos de tarjeta de chat (componente chat-card)
  */
 export interface ChatCardData {
   id: string;                     // Chat UID
-  customerId: number;            // ID del cliente
+  customerId: number | string;   // ID del cliente (number) o driver (string)
   customerName: string;          // Nombre del cliente (o "Cliente {id}")
   agentName: string;             // Nombre del agente
   chatType: 'help' | 'order';    // Tipo de chat
-  orderNumber?: number;          // Número de orden (si aplica)
+  orderNumber?: number | string; // Número de orden (si aplica)
   createdAt: Date;               // Fecha de creación
   assignedAt?: Date;             // Fecha de asignación
   unreadCount: number;           // Contador de mensajes no leídos
@@ -56,23 +57,9 @@ export interface ChatMessageDisplay {
 }
 
 /**
- * Interfaz para guardar chat en backend
+ * NOTA: SaveChatHistory y ChatBox ahora se importan desde shared/models
+ * para evitar duplicación y conflictos de tipos
  */
-export interface SaveChatHistory {
-  tipoChat: 'SC' | 'SD';
-  userChat: string;
-  idCustomer: number;
-  orderId: number | null;
-  assignedAt?: string;
-  createdAt?: string;
-  chat: ChatBox[];
-}
-
-export interface ChatBox {
-  message: string;
-  dateMessage: string;
-  sendBy: string;  // "Cliente" | "SAC"
-}
 
 /**
  * Servicio para adaptar datos de Firebase a formatos de UI

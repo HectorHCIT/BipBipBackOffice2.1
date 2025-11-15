@@ -218,7 +218,6 @@ export class FiscalCorrelativeService {
     }).subscribe({
       next: () => {
         // Los signals ya se actualizaron en cada tap()
-        console.log('Fiscal Correlatives - Reference data loaded');
       },
       error: (error) => {
         console.error('Error loading reference data:', error);

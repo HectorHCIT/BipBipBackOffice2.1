@@ -103,12 +103,10 @@ export class AssignmentsReportPageComponent implements OnInit {
       fechaFinal: formatDateISO(endDate)
     };
 
-    console.log('📊 [ASSIGNMENTS-REPORT] Generando reporte:', params);
     this.isLoading.set(true);
 
     this.reportService.generateReport(params).subscribe({
       next: (response) => {
-        console.log('✅ [ASSIGNMENTS-REPORT] Respuesta:', response);
 
         try {
           // El backend puede retornar el base64 directamente o en una propiedad

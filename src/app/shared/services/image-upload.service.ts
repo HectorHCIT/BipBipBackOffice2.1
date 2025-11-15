@@ -100,7 +100,6 @@ export class ImageUploadService {
         if (optimize && this.isImageFile(file)) {
           this.optimizeImage(file, { maxWidth, maxHeight, quality, format, maxSizeKB })
             .then((optimizedFile) => {
-              console.log(`Image optimized: ${file.size} bytes → ${optimizedFile.size} bytes (${((1 - optimizedFile.size/file.size) * 100).toFixed(1)}% reduction)`);
               processUpload(optimizedFile);
             })
             .catch((error) => {
@@ -369,7 +368,6 @@ export class ImageUploadService {
 
       // If size is acceptable or we've reached minimum quality, return blob
       if (sizeKB <= maxSizeKB || quality <= minQuality) {
-        console.log(`Optimized to ${sizeKB.toFixed(1)}KB with quality ${quality}`);
         return blob;
       }
 

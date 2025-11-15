@@ -112,12 +112,10 @@ export class DeliveryTimeReportPageComponent implements OnInit {
       format
     };
 
-    console.log('📊 [DELIVERY-TIME-REPORT] Generando reporte:', params);
     this.isLoading.set(true);
 
     this.reportService.generateReport(params).subscribe({
       next: (response) => {
-        console.log('✅ [DELIVERY-TIME-REPORT] Respuesta:', response);
 
         try {
           // La respuesta viene directamente como string base64

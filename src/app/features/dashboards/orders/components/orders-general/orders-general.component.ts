@@ -605,7 +605,6 @@ export class OrdersGeneralComponent implements OnInit {
     };
 
     const dates = this.calculateDateRange();
-    console.log('📅 buildFilters - calculateDateRange result:', dates);
 
     if (dates.startDate) {
       filters.startDate = dates.startDate;
@@ -614,7 +613,6 @@ export class OrdersGeneralComponent implements OnInit {
       filters.endDate = dates.endDate;
     }
 
-    console.log('✅ buildFilters - final filters:', filters);
     return filters;
   }
 
@@ -626,8 +624,6 @@ export class OrdersGeneralComponent implements OnInit {
     const now = new Date();
     let startDate: Date;
     let endDate: Date;
-
-    console.log('🗓️ calculateDateRange - period:', this.selectedPeriod());
 
     switch (this.selectedPeriod()) {
       case PeriodType.Today:
@@ -655,7 +651,6 @@ export class OrdersGeneralComponent implements OnInit {
 
       case PeriodType.Custom:
         const range = this.dateRange();
-        console.log('📆 calculateDateRange - Custom range from signal:', range);
         startDate = range[0] ?? new Date();
         endDate = range[1] ?? new Date();
         break;
@@ -669,7 +664,6 @@ export class OrdersGeneralComponent implements OnInit {
       startDate: this.formatDateOnly(startDate),
       endDate: this.formatDateOnly(endDate)
     };
-    console.log('🕐 calculateDateRange - result:', result);
 
     return result;
   }
@@ -726,7 +720,6 @@ export class OrdersGeneralComponent implements OnInit {
    */
   onDateRangeSelect(): void {
     this.selectedPeriod.set(PeriodType.Custom);
-    console.log('📅 Date range manually selected, switching to Custom period');
   }
 
   /**
@@ -749,9 +742,6 @@ export class OrdersGeneralComponent implements OnInit {
         return;
       }
     }
-
-    console.log('🔍 applyFilters - selectedPeriod:', this.selectedPeriod());
-    console.log('🔍 applyFilters - dateRange:', this.dateRange());
 
     this.loadDashboardData();
   }
