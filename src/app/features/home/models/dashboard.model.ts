@@ -44,6 +44,14 @@ export interface HomeTotalOrdersByStatusDto {
   totalOrders: number;
 }
 
+export interface ShippingCostsStatisticsDto {
+  promedioPagosEnvio: number;
+  promedioCostoEnvio: number;
+  costoMaximoEnvio: number;
+  totalCostosEnvio: number;
+  totalPagosEnvio: number;
+}
+
 /**
  * Dashboard Data interfaces (usadas en el componente)
  */
@@ -85,6 +93,13 @@ export interface DashboardData {
   ordersByChannel: OrdersByChannel[];
   ordersByBrand: OrdersByBrand[];
   ordersByCity: OrdersByCity[];
+  shippingCosts: {
+    averageShippingPayment: number;
+    averageShippingCost: number;
+    maxShippingCost: number;
+    totalShippingCosts: number;
+    totalShippingPayments: number;
+  };
 }
 
 /**

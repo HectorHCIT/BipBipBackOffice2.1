@@ -1,29 +1,40 @@
 [
   [
-    "toggleswitch",
+    "select",
     {
       "data": {
-        "name": "toggleswitch",
-        "description": "ToggleSwitch is used to select a boolean value.",
-        "importStatement": "import { Toggleswitch } from 'primeng/toggleswitch';",
-        "moduleImport": "import { ToggleswitchModule } from 'primeng/toggleswitch';",
-        "basicUsage": "import { ToggleSwitchModule } from 'primeng/toggleswitch';",
+        "name": "select",
+        "description": "Select is used to choose an item from a collection of options.",
+        "importStatement": "import { Select } from 'primeng/select';",
+        "moduleImport": "import { SelectModule } from 'primeng/select';",
+        "basicUsage": "import { SelectModule } from 'primeng/select';",
         "examples": [
-          "import { ToggleSwitchModule } from 'primeng/toggleswitch';",
-          "<p-toggleswitch [(ngModel)]=\"checked\" />",
-          "<p-toggleswitch [(ngModel)]=\"checked\" />",
-          "<p-toggleswitch [(ngModel)]=\"checked\">\n    <ng-template #handle let-checked=\"checked\">\n        <i [ngClass]=\"['!text-xs', 'pi', checked ? 'pi-check' : 'pi-times']\"></i>\n    </ng-template>\n</p-toggleswitch>",
-          "<p-toggleswitch [(ngModel)]=\"checked\" [disabled]=\"true\" />",
-          "<p-toggleswitch [(ngModel)]=\"checked\" [invalid]=\"!checked\" />",
-          "<form #exampleForm=\"ngForm\" (ngSubmit)=\"onSubmit(exampleForm)\" class=\"flex flex-col gap-4 w-48\">\n    <div class=\"flex flex-col items-center gap-2\">\n        <p-toggleswitch #model=\"ngModel\" [(ngModel)]=\"checked\" name=\"activation\" [invalid]=\"model.invalid && exampleForm.submitted\" required />\n        @if (model.invalid && exampleForm.submitted) {\n            <p-message severity=\"error\" size=\"small\" variant=\"simple\">Activation is required.</p-message>\n        }\n    </div>\n    <button pButton severity=\"secondary\" type=\"submit\"><span pButtonLabel>Submit</span></button>\n</form>",
-          "<div class=\"card flex justify-center\">\n    <form [formGroup]=\"exampleForm\" (ngSubmit)=\"onSubmit()\" class=\"flex flex-col gap-4 w-48\">\n        <div class=\"flex flex-col items-center gap-2\">\n            <p-toggleswitch name=\"activation\" formControlName=\"activation\" [invalid]=\"isInvalid('activation')\" />\n            @if (isInvalid('activation')) {\n                <p-message severity=\"error\" size=\"small\" variant=\"simple\">Activation is required.</p-message>\n            }\n        </div>\n        <button pButton severity=\"secondary\" type=\"submit\"><span pButtonLabel>Submit</span></button>\n    </form>\n</div>",
-          "<label for=\"switch1\">Remember Me</label>\n<p-toggleswitch inputId=\"switch1\" />\n\n<span id=\"switch2\">Remember Me</span>\n<p-toggleswitch ariaLabelledBy=\"switch2\" />\n\n<p-toggleswitch ariaLabel=\"Remember Me\" />"
+          "import { SelectModule } from 'primeng/select';",
+          "<p-select [options]=\"cities\" [(ngModel)]=\"selectedCity\" optionLabel=\"name\" placeholder=\"Select a City\" class=\"w-full md:w-56\" />",
+          "<p-select [options]=\"cities\" [(ngModel)]=\"selectedCity\" [checkmark]=\"true\" optionLabel=\"name\" [showClear]=\"true\" placeholder=\"Select a City\" class=\"w-full md:w-56\" />",
+          "<p-select [options]=\"cities\" [(ngModel)]=\"selectedCity\" placeholder=\"Select a City\" [editable]=\"true\" optionLabel=\"name\" class=\"w-full md:w-56\" />",
+          "<p-select [options]=\"groupedCities\" [(ngModel)]=\"selectedCity\" placeholder=\"Select a City\" [group]=\"true\" class=\"w-full md:w-56\">\n    <ng-template let-group #group>\n        <div class=\"flex items-center\">\n            <img src=\"https://primefaces.org/cdn/primeng/images/demo/flag/flag_placeholder.png\" [class]=\"'mr-2 flag flag-' + group.value\" style=\"width: 20px\" />\n            <span>{{ group.label }}</span>\n        </div>\n    </ng-template>\n</p-select>",
+          "<p-select [options]=\"countries\" [(ngModel)]=\"selectedCountry\" optionLabel=\"name\" [filter]=\"true\" filterBy=\"name\" [showClear]=\"true\" placeholder=\"Select a Country\" class=\"w-full md:w-56\">\n    <ng-template #selectedItem let-selectedOption>\n        <div class=\"flex items-center gap-2\">\n            <img src=\"https://primefaces.org/cdn/primeng/images/demo/flag/flag_placeholder.png\" [class]=\"'flag flag-' + selectedCountry.code.toLowerCase()\" style=\"width: 18px\" />\n            <div>{{ selectedOption.name }}</div>\n        </div>\n    </ng-template>\n    <ng-template let-country #item>\n        <div class=\"flex items-center gap-2\">\n            <img src=\"https://primefaces.org/cdn/primeng/images/demo/flag/flag_placeholder.png\" [class]=\"'flag flag-' + country.code.toLowerCase()\" style=\"width: 18px\" />\n            <div>{{ country.name }}</div>\n        </div>\n    </ng-template>\n</p-select>",
+          "<p-select [options]=\"cities\" [(ngModel)]=\"selectedCity\" [loading]=\"true\" optionLabel=\"name\" placeholder=\"Loading...\" class=\"w-full md:w-56\" />",
+          "<p-select [options]=\"items\" [(ngModel)]=\"selectedItem\" placeholder=\"Select Item\" [virtualScroll]=\"true\" [virtualScrollItemSize]=\"38\" class=\"w-full md:w-56\" />",
+          "<p-select [options]=\"items\" [(ngModel)]=\"selectedItem\" placeholder=\"Select Item\" [virtualScroll]=\"true\" [virtualScrollItemSize]=\"38\" [virtualScrollOptions]=\"options\" class=\"w-full md:w-56\" />",
+          "<p-select [options]=\"cities\" [(ngModel)]=\"selectedCity\" variant=\"filled\" optionLabel=\"name\" placeholder=\"Select a City\" class=\"w-full md:w-56\" />",
+          "<p-floatlabel class=\"w-full md:w-56\">\n    <p-select [(ngModel)]=\"value1\" inputId=\"over_label\" [options]=\"cities\" optionLabel=\"name\" class=\"w-full\" />\n    <label for=\"over_label\">Over Label</label>\n</p-floatlabel>\n\n<p-floatlabel class=\"w-full md:w-56\" variant=\"in\">\n    <p-select [(ngModel)]=\"value2\" inputId=\"in_label\" [options]=\"cities\" optionLabel=\"name\" class=\"w-full\" variant=\"filled\" />\n    <label for=\"in_label\">In Label</label>\n</p-floatlabel>\n\n<p-floatlabel class=\"w-full md:w-56\" variant=\"on\">\n    <p-select [(ngModel)]=\"value3\" inputId=\"on_label\" [options]=\"cities\" optionLabel=\"name\" class=\"w-full\" />\n    <label for=\"on_label\">On Label</label>\n</p-floatlabel>",
+          "<p-iftalabel class=\"w-full md:w-56\">\n    <p-select [(ngModel)]=\"selectedCity\" inputId=\"dd-city\" [options]=\"cities\" optionLabel=\"name\" class=\"w-full\" />\n    <label for=\"dd-city\">City</label>\n</p-iftalabel>",
+          "<p-select [options]=\"cities\" [(ngModel)]=\"selectedCity\" optionLabel=\"name\" placeholder=\"Select a City\" class=\"w-full md:w-56\" [showClear]=\"true\" />",
+          "<p-select [(ngModel)]=\"value1\" [options]=\"cities\" optionLabel=\"name\" size=\"small\" placeholder=\"Small\" class=\"w-full md:w-56\" />\n<p-select [(ngModel)]=\"value2\" [options]=\"cities\" optionLabel=\"name\" placeholder=\"Normal\" class=\"w-full md:w-56\" />\n<p-select [(ngModel)]=\"value3\" [options]=\"cities\" optionLabel=\"name\" size=\"large\" placeholder=\"Large\" class=\"w-full md:w-56\" />",
+          "<p-select [options]=\"cities\" [(ngModel)]=\"selectedCity\" optionLabel=\"name\" placeholder=\"Select a City\" class=\"w-full md:w-56\" />",
+          "<p-select [options]=\"cities\" [(ngModel)]=\"selectedCity\" placeholder=\"Select a City\" optionLabel=\"name\" [disabled]=\"true\" class=\"w-full md:w-56\" />",
+          "<p-select [options]=\"cities\" [(ngModel)]=\"selectedCity1\" optionLabel=\"name\" [showClear]=\"true\" [invalid]=\"value1\" placeholder=\"Select a City\" class=\"w-full md:w-56\" />\n<p-select [options]=\"cities\" [(ngModel)]=\"selectedCity2\" optionLabel=\"name\" [showClear]=\"true\" [invalid]=\"value2\" placeholder=\"Select a City\" class=\"w-full md:w-56\" variant=\"filled\"/>",
+          "<form #exampleForm (ngSubmit)=\"onSubmit(exampleForm)\" class=\"flex flex-col gap-4 w-full sm:w-56\">\n    <div class=\"flex flex-col gap-1\">\n        <p-select #city=\"ngModel\" [(ngModel)]=\"selectedCity\" [options]=\"cities\" [invalid]=\"city.invalid && (city.touched || exampleForm.submitted)\" optionLabel=\"name\" placeholder=\"Select a City\" class=\"w-full md:w-56\" required />\n        @if (city.invalid && (city.touched || exampleForm.submitted)) {\n            <p-message severity=\"error\" size=\"small\" variant=\"simple\">City is required.</p-message>\n        }\n    </div>\n    <button pButton severity=\"secondary\" type=\"submit\"><span pButtonLabel>Submit</span></button>\n</form>",
+          "<form [formGroup]=\"exampleForm\" (ngSubmit)=\"onSubmit()\" class=\"flex flex-col gap-4 w-full sm:w-56\">\n    <div class=\"flex flex-col gap-1\">\n        <p-select formControlName=\"selectedCity\" [options]=\"cities\" [invalid]=\"isInvalid('city')\" optionLabel=\"name\" placeholder=\"Select a City\" class=\"w-full md:w-56\" />\n        @if (isInvalid('city')) {\n            <p-message severity=\"error\" size=\"small\" variant=\"simple\">City is required.</p-message>\n        }\n    </div>\n    <button pButton severity=\"secondary\" type=\"submit\"><span pButtonLabel>Submit</span></button>\n</form>",
+          "<span id=\"dd1\">Options</span>\n<p-select ariaLabelledBy=\"dd1\"/>\n\n<p-select ariaLabel=\"Options\"/>"
         ],
         "properties": [],
         "events": [],
         "methods": []
       },
-      "timestamp": 1762889440306,
+      "timestamp": 1763226679340,
       "ttl": 86400000
     }
   ]

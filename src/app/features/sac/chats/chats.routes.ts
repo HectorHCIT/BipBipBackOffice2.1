@@ -25,6 +25,12 @@ export const CHATS_ROUTES: Routes = [
       import('./chat-history/chat-history.routes').then((m) => m.CHAT_HISTORY_ROUTES),
     title: 'Historial de Chats'
   },
+  {
+    path: 'SAC-config',
+    loadChildren: () =>
+      import('./settings/settings.routes').then((m) => m.SETTINGS_ROUTES),
+    title: 'Ajustes SAC'
+  },
   // TODO FASE 10: Agregar rutas para cliente-driver
   // {
   //   path: 'cliente-driver',

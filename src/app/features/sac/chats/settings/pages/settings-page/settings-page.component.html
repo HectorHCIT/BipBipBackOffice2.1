@@ -1,0 +1,388 @@
+<div class="p-6">
+  <!-- Breadcrumb -->
+  <div class="mb-4">
+    <p-breadcrumb
+      [model]="breadcrumbItems"
+      [home]="home"
+    />
+  </div>
+
+  <!-- Header -->
+  <div class="mb-6">
+    <div class="flex justify-between items-start">
+      <div>
+        <h1 class="text-2xl font-semibold text-gray-800 dark:text-gray-200">
+          Ajustes SAC
+        </h1>
+        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+          Configuración del sistema de chats y gestión de agentes
+        </p>
+      </div>
+      @if (hasChanges()) {
+        <div class="flex items-center gap-2 bg-yellow-50 dark:bg-yellow-900/20 px-4 py-2 rounded-lg border border-yellow-200 dark:border-yellow-800">
+          <i class="pi pi-exclamation-triangle text-yellow-600 dark:text-yellow-400"></i>
+          <span class="text-sm font-medium text-yellow-800 dark:text-yellow-300">
+            Cambios sin guardar
+          </span>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Tabs Container -->
+  <p-tabs value="0">
+    <p-tablist>
+      <p-tab value="0">
+        <i class="pi pi-cog mr-2"></i>
+        Configuraciones
+      </p-tab>
+      <p-tab value="1">
+        <i class="pi pi-users mr-2"></i>
+        Agentes ({{ totalAgents() }})
+      </p-tab>
+    </p-tablist>
+
+    <p-tabpanels>
+      <!-- Tab 1: Configuraciones -->
+      <p-tabpanel value="0">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+          <form [formGroup]="form" class="space-y-6">
+            <!-- Asignación Automática -->
+            <div class="p-5 border border-gray-200 dark:border-gray-700 rounded-xl hover:border-blue-400 dark:hover:border-blue-600 transition-all">
+              <div class="flex justify-between items-start gap-4">
+                <div class="flex-1">
+                  <div class="flex items-center gap-2 mb-2">
+                    <i class="pi pi-sync text-blue-600 dark:text-blue-400"></i>
+                    <label class="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      Asignación Automática
+                    </label>
+                    <i class="pi pi-info-circle text-gray-400 cursor-help text-sm"
+                       pTooltip="Cuando está activo, los nuevos chats se asignan automáticamente a los agentes disponibles"
+                       tooltipPosition="top"></i>
+                  </div>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">
+                    Los chats se distribuyen automáticamente entre agentes disponibles
+                  </p>
+                </div>
+                <p-toggleSwitch formControlName="automaticAssignment" />
+              </div>
+            </div>
+
+            <!-- Asignar a SSAC -->
+            <div class="p-5 border border-gray-200 dark:border-gray-700 rounded-xl hover:border-purple-400 dark:hover:border-purple-600 transition-all">
+              <div class="flex justify-between items-start gap-4">
+                <div class="flex-1">
+                  <div class="flex items-center gap-2 mb-2">
+                    <i class="pi pi-shield text-purple-600 dark:text-purple-400"></i>
+                    <label class="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      Asignar a Supervisores (SSAC)
+                    </label>
+                    <i class="pi pi-info-circle text-gray-400 cursor-help text-sm"
+                       pTooltip="Los chats también pueden ser asignados a usuarios con rol de Supervisor SAC"
+                       tooltipPosition="top"></i>
+                  </div>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">
+                    Permitir que los supervisores reciban asignación de chats
+                  </p>
+                </div>
+                <p-toggleSwitch formControlName="assignChatToSsacRole" />
+              </div>
+            </div>
+
+            <!-- Máximo de Chats -->
+            <div class="p-5 border border-gray-200 dark:border-gray-700 rounded-xl hover:border-green-400 dark:hover:border-green-600 transition-all">
+              <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div class="flex-1">
+                  <div class="flex items-center gap-2 mb-2">
+                    <i class="pi pi-hashtag text-green-600 dark:text-green-400"></i>
+                    <label class="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      Máximo de Chats por Agente
+                    </label>
+                    <i class="pi pi-info-circle text-gray-400 cursor-help text-sm"
+                       pTooltip="Número máximo de conversaciones simultáneas que puede atender un agente"
+                       tooltipPosition="top"></i>
+                  </div>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">
+                    Límite de conversaciones simultáneas por agente
+                  </p>
+                </div>
+                <p-inputNumber
+                  formControlName="maximumAmountChatsPerAgent"
+                  [min]="1"
+                  [max]="20"
+                  [step]="1"
+                  [showButtons]="true"
+
+                />
+              </div>
+            </div>
+
+            <!-- Tiempo de Inactividad -->
+            <div class="p-5 border border-gray-200 dark:border-gray-700 rounded-xl hover:border-orange-400 dark:hover:border-orange-600 transition-all">
+              <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div class="flex-1">
+                  <div class="flex items-center gap-2 mb-2">
+                    <i class="pi pi-clock text-orange-600 dark:text-orange-400"></i>
+                    <label class="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      Tiempo de Inactividad
+                    </label>
+                    <i class="pi pi-info-circle text-gray-400 cursor-help text-sm"
+                       pTooltip="Después de este tiempo sin actividad, el chat se marcará como inactivo automáticamente"
+                       tooltipPosition="top"></i>
+                  </div>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">
+                    Horas de inactividad antes del cierre automático
+                  </p>
+                </div>
+                <p-inputNumber
+                  formControlName="inactiveThresholdHours"
+                  [min]="1"
+                  [max]="72"
+                  [step]="1"
+                  [showButtons]="true"
+                  suffix=" hrs"
+                />
+              </div>
+            </div>
+
+            <!-- Mensaje Automático -->
+            <div class="p-5 border border-gray-200 dark:border-gray-700 rounded-xl hover:border-blue-400 dark:hover:border-blue-600 transition-all">
+              <div class="flex items-center gap-2 mb-3">
+                <i class="pi pi-comment text-blue-600 dark:text-blue-400"></i>
+                <label class="text-base font-semibold text-gray-900 dark:text-gray-100">
+                  Mensaje Automático de Bienvenida
+                </label>
+                <i class="pi pi-info-circle text-gray-400 cursor-help text-sm"
+                   pTooltip="Este mensaje se enviará automáticamente cuando se inicie un nuevo chat"
+                   tooltipPosition="top"></i>
+              </div>
+              <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                Mensaje que recibirán los usuarios al iniciar una conversación
+              </p>
+              <textarea
+                pInputTextarea
+                formControlName="automaticMessage"
+                rows="5"
+                class="w-full"
+                placeholder="Ej: ¡Hola! Gracias por contactarnos. Un agente te atenderá en breve..."
+              ></textarea>
+              @if (form.get('automaticMessage')?.value) {
+                <div class="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                  <p class="text-xs font-medium text-blue-800 dark:text-blue-300 mb-1">Vista previa:</p>
+                  <p class="text-sm text-blue-700 dark:text-blue-200">{{ form.get('automaticMessage')?.value }}</p>
+                </div>
+              }
+            </div>
+
+            <!-- Botones de Acción -->
+            <div class="flex gap-3 pt-6 border-t border-gray-200 dark:border-gray-700">
+              <p-button
+                label="Cancelar"
+                icon="pi pi-times"
+                severity="secondary"
+                [outlined]="true"
+                styleClass="flex-1"
+                (onClick)="cancelOperations()"
+              />
+              <p-button
+                label="Guardar Cambios"
+                icon="pi pi-check"
+                [disabled]="!hasChanges()"
+                styleClass="flex-1"
+                (onClick)="saveChanges()"
+              />
+            </div>
+          </form>
+        </div>
+      </p-tabpanel>
+
+      <!-- Tab 2: Gestión de Agentes -->
+      <p-tabpanel value="1">
+        <div class="space-y-6">
+          <!-- KPIs Mejorados -->
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <!-- Total Agentes -->
+            <div class="bg-gradient-to-br from-red-400 to-red-500 text-white rounded-xl p-5 shadow-md hover:shadow-lg transition-shadow">
+              <div class="flex items-center justify-between mb-2">
+                <i class="pi pi-users text-3xl opacity-90"></i>
+                <span class="text-xs font-semibold bg-white/25 px-2.5 py-1 rounded-full">Total</span>
+              </div>
+              <div class="text-3xl font-bold mb-1">{{ totalAgents() }}</div>
+              <div class="text-sm opacity-95">Agentes registrados</div>
+            </div>
+
+            <!-- Agentes Online -->
+            <div class="bg-gradient-to-br from-emerald-400 to-emerald-500 text-white rounded-xl p-5 shadow-md hover:shadow-lg transition-shadow">
+              <div class="flex items-center justify-between mb-2">
+                <i class="pi pi-check-circle text-3xl opacity-90"></i>
+                <span class="text-xs font-semibold bg-white/25 px-2.5 py-1 rounded-full">En línea</span>
+              </div>
+              <div class="text-3xl font-bold mb-1">{{ onlineAgents() }}</div>
+              <div class="text-sm opacity-95">
+                {{ totalAgents() > 0 ? ((onlineAgents() / totalAgents()) * 100).toFixed(0) : 0 }}% disponibilidad
+              </div>
+            </div>
+
+            <!-- Agentes Offline -->
+            <div class="bg-gradient-to-br from-slate-400 to-slate-500 text-white rounded-xl p-5 shadow-md hover:shadow-lg transition-shadow">
+              <div class="flex items-center justify-between mb-2">
+                <i class="pi pi-times-circle text-3xl opacity-90"></i>
+                <span class="text-xs font-semibold bg-white/25 px-2.5 py-1 rounded-full">Offline</span>
+              </div>
+              <div class="text-3xl font-bold mb-1">{{ totalAgents() - onlineAgents() }}</div>
+              <div class="text-sm opacity-95">No disponibles</div>
+            </div>
+
+            <!-- Top Agent -->
+            @if (topAgent()) {
+              <div class="bg-gradient-to-br from-rose-400 to-rose-500 text-white rounded-xl p-5 shadow-md hover:shadow-lg transition-shadow">
+                <div class="flex items-center justify-between mb-2">
+                  <i class="pi pi-star-fill text-3xl opacity-90"></i>
+                  <span class="text-xs font-semibold bg-white/25 px-2.5 py-1 rounded-full">Top</span>
+                </div>
+                <div class="text-xl font-bold mb-1 truncate" [title]="topAgent()!.name">
+                  {{ topAgent()!.name || topAgent()!.username }}
+                </div>
+                <div class="text-sm opacity-95">{{ topAgent()!.activeChatRooms }} chats activos</div>
+              </div>
+            } @else {
+              <div class="bg-gradient-to-br from-gray-300 to-gray-400 text-gray-700 rounded-xl p-5 shadow-md">
+                <div class="flex items-center justify-between mb-2">
+                  <i class="pi pi-star text-3xl opacity-70"></i>
+                  <span class="text-xs font-semibold bg-white/40 px-2.5 py-1 rounded-full">Top</span>
+                </div>
+                <div class="text-xl font-bold mb-1">Sin datos</div>
+                <div class="text-sm opacity-80">No hay agentes activos</div>
+              </div>
+            }
+          </div>
+
+          <!-- Filtros y Búsqueda -->
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5">
+            <div class="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between mb-4">
+              <!-- Búsqueda -->
+              <div class="flex-1 max-w-md">
+                <p-iconfield iconPosition="left">
+                  <p-inputicon styleClass="pi pi-search" />
+                  <input
+                    pInputText
+                    type="text"
+                    class="w-full"
+                    placeholder="Buscar por nombre o usuario..."
+                    (input)="onSearchChange($event)"
+                  />
+                </p-iconfield>
+              </div>
+
+              <!-- Filtros de Estado -->
+              <div class="flex gap-2 flex-wrap">
+                @for (filter of statusFilters(); track filter.id) {
+                  <p-button
+                    [label]="filter.name + ' (' + filter.qty + ')'"
+                    [outlined]="activeFilter() !== filter.id"
+                    [severity]="activeFilter() === filter.id ? 'primary' : 'secondary'"
+                    size="small"
+                    (onClick)="filterAgents(filter.id)"
+                  />
+                }
+              </div>
+            </div>
+
+            <p class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2 mb-4">
+              <i class="pi pi-info-circle"></i>
+              Haz clic en un agente para actualizar su estado
+            </p>
+
+            <!-- Lista de Agentes -->
+            <div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+              <!-- Header -->
+              <div class="grid grid-cols-10 bg-surface-50 dark:bg-surface-900 p-4 text-sm font-semibold text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700">
+                <div class="col-span-4">Agente</div>
+                <div class="col-span-3">Estado</div>
+                <div class="col-span-3 text-right">Chats Activos</div>
+              </div>
+
+              <!-- Lista -->
+              <div class="divide-y divide-gray-200 dark:divide-gray-700 max-h-[500px] overflow-y-auto">
+                @for (agent of filteredAgents(); track agent.uid) {
+                  <div
+                    class="grid grid-cols-10 items-center p-4 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all cursor-pointer border-l-4 border-transparent hover:border-blue-500"
+                    (click)="openStatusDialog(agent)"
+                  >
+                    <!-- Agente -->
+                    <div class="col-span-4 flex items-center gap-3">
+                      <div class="relative">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                          <span class="text-sm font-bold text-white">
+                            {{ (agent.name || agent.username || 'U').charAt(0).toUpperCase() }}
+                          </span>
+                        </div>
+                        <span class="absolute -bottom-1 -right-1 flex h-4 w-4">
+                          <span
+                            class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
+                            [ngClass]="getStatusClass(agent.currentStatus)"
+                          ></span>
+                          <span
+                            class="relative inline-flex rounded-full h-4 w-4 border-2 border-white dark:border-gray-800"
+                            [ngClass]="getStatusClass(agent.currentStatus)"
+                          ></span>
+                        </span>
+                      </div>
+                      <div class="min-w-0">
+                        <div class="font-semibold text-gray-900 dark:text-gray-100 truncate">
+                          {{ agent.name || agent.username || 'Sin nombre' }}
+                        </div>
+                        <div class="text-sm text-gray-500 dark:text-gray-400 truncate">
+                          @{{ agent.username || 'sin-usuario' }}
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Estado -->
+                    <div class="col-span-3">
+                      <p-tag
+                        [value]="agent.currentStatus"
+                        [severity]="getStatusSeverity(agent.currentStatus)"
+                        styleClass="capitalize font-semibold"
+                      />
+                    </div>
+
+                    <!-- Chats Activos -->
+                    <div class="col-span-3 flex justify-end">
+                      @if (agent.activeChatRooms > 0) {
+                        <span class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white flex items-center justify-center font-bold shadow-lg">
+                          {{ agent.activeChatRooms }}
+                        </span>
+                      } @else {
+                        <span class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 flex items-center justify-center font-medium">
+                          0
+                        </span>
+                      }
+                    </div>
+                  </div>
+                } @empty {
+                  <div class="p-12 text-center text-gray-500 dark:text-gray-400">
+                    <i class="pi pi-inbox text-6xl mb-4 block text-gray-300 dark:text-gray-600"></i>
+                    <p class="text-lg font-medium mb-1">No hay agentes que mostrar</p>
+                    <p class="text-sm">Intenta ajustar los filtros de búsqueda</p>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      </p-tabpanel>
+    </p-tabpanels>
+  </p-tabs>
+</div>
+
+<!-- Diálogo de Estado -->
+<app-agent-status-dialog
+  [visible]="showDialog()"
+  [agent]="selectedAgent()"
+  (visibleChange)="showDialog.set($event)"
+  (confirm)="onStatusUpdate($event)"
+/>
+
+<!-- Toast -->
+<p-toast />

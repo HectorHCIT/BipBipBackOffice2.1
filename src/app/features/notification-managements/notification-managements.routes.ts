@@ -12,6 +12,7 @@ import { Routes } from '@angular/router';
  * - Loyalty Program (Programa de Lealtad) ✅
  * - Personalized Alerts (Alertas Personalizadas) ✅
  * - App Link (Enlaces Dinámicos) ✅
+ * - Products in Promotions (Productos en Promoción) ✅
  */
 export const NOTIFICATION_MANAGEMENTS_ROUTES: Routes = [
   {
@@ -43,5 +44,10 @@ export const NOTIFICATION_MANAGEMENTS_ROUTES: Routes = [
     path: 'app-link',
     loadChildren: () => import('./app-link/app-link.routes').then(m => m.APP_LINK_ROUTES),
     title: 'App Link'
+  },
+  {
+    path: 'products-in-promotions',
+    loadChildren: () => import('./products-in-promotions/products-in-promotions.routes').then(m => m.PRODUCTS_IN_PROMOTIONS_ROUTES),
+    title: 'Productos en Promoción'
   }
 ];

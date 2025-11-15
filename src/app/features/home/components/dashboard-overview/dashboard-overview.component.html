@@ -75,8 +75,9 @@
     }
   </div>
 
-  <!-- KPIs -->
+  <!-- KPIs de Órdenes -->
   <div class="kpis-section mb-4">
+    <h3 class="text-lg font-semibold mb-3">Resumen de Órdenes</h3>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
       @if (isLoading()) {
         @for (i of [1, 2, 3]; track i) {
@@ -93,11 +94,11 @@
           </p-card>
         }
       } @else {
-        @for (kpi of kpis(); track kpi.label) {
+        @for (kpi of orderKpis(); track kpi.label) {
           <p-card styleClass="kpi-card">
             <div class="flex justify-between items-center">
               <div>
-                <p class="text-sm text-gray-500 mb-1">{{ kpi.label }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">{{ kpi.label }}</p>
                 <p class="text-3xl font-bold">{{ formatNumber(kpi.value) }}</p>
               </div>
               @if (kpi.icon) {
@@ -105,6 +106,39 @@
                   <i [class]="kpi.icon + ' text-4xl text-primary-500'"></i>
                 </div>
               }
+            </div>
+          </p-card>
+        }
+      }
+    </div>
+  </div>
+
+  <!-- KPIs de Costos de Envío -->
+  <div class="kpis-section mb-4">
+    <h3 class="text-lg font-semibold mb-3">Métricas de Envío</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      @if (isLoading()) {
+        @for (i of [1, 2, 3, 4, 5]; track i) {
+          <p-card styleClass="kpi-card">
+            <div class="flex justify-between items-center">
+              <div class="flex-1">
+                <p-skeleton width="80%" height="0.875rem" styleClass="mb-2" />
+                <p-skeleton width="60%" height="1.5rem" />
+              </div>
+            </div>
+          </p-card>
+        }
+      } @else {
+        @for (kpi of shippingKpis(); track kpi.label) {
+          <p-card styleClass="kpi-card">
+            <div class="flex flex-col">
+              <div class="flex items-center gap-2 mb-2">
+                @if (kpi.icon) {
+                  <i [class]="kpi.icon + ' text-lg text-primary-500'"></i>
+                }
+                <p class="text-xs text-gray-500 dark:text-gray-400">{{ kpi.label }}</p>
+              </div>
+              <p class="text-2xl font-bold">{{ formatCurrency(kpi.value) }}</p>
             </div>
           </p-card>
         }

@@ -86,8 +86,8 @@ export class DashboardOverviewComponent implements OnInit {
     { label: 'Últimos 90 días', value: 'last90days' }
   ]);
 
-  // Computed - KPIs
-  readonly kpis = computed<DashboardKPI[]>(() => {
+  // Computed - KPIs de órdenes
+  readonly orderKpis = computed<DashboardKPI[]>(() => {
     const data = this.dashboardData();
     if (!data) return [];
 
@@ -106,6 +106,40 @@ export class DashboardOverviewComponent implements OnInit {
         label: 'Total Ordenes En Proceso',
         value: data.ordersInProgress,
         icon: 'pi pi-clock'
+      }
+    ];
+  });
+
+  // Computed - KPIs de costos de envío
+  readonly shippingKpis = computed<DashboardKPI[]>(() => {
+    const data = this.dashboardData();
+    if (!data) return [];
+
+    return [
+      {
+        label: 'Promedio de Pagos de Envío',
+        value: data.shippingCosts.averageShippingPayment,
+        icon: 'pi pi-wallet'
+      },
+      {
+        label: 'Promedio de Costo de Envío',
+        value: data.shippingCosts.averageShippingCost,
+        icon: 'pi pi-dollar'
+      },
+      {
+        label: 'Costo Máximo de Envío',
+        value: data.shippingCosts.maxShippingCost,
+        icon: 'pi pi-arrow-up'
+      },
+      {
+        label: 'Total de Costos de Envío',
+        value: data.shippingCosts.totalShippingCosts,
+        icon: 'pi pi-money-bill'
+      },
+      {
+        label: 'Total Pago de Envío',
+        value: data.shippingCosts.totalShippingPayments,
+        icon: 'pi pi-credit-card'
       }
     ];
   });
@@ -432,6 +466,18 @@ export class DashboardOverviewComponent implements OnInit {
   formatNumber(value: number): string {
     return new Intl.NumberFormat('es-HN', {
       maximumFractionDigits: 0
+    }).format(value);
+  }
+
+  /**
+   * Formatea valores monetarios en formato de moneda
+   */
+  formatCurrency(value: number): string {
+    return new Intl.NumberFormat('es-HN', {
+      style: 'currency',
+      currency: 'HNL',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2
     }).format(value);
   }
 

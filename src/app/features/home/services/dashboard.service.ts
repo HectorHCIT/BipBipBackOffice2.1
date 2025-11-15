@@ -11,7 +11,8 @@ import type {
   HomeByBrandsDto,
   HomeByPaymentMethodDto,
   HomeByChannelDto,
-  HomeTotalOrdersByStatusDto
+  HomeTotalOrdersByStatusDto,
+  ShippingCostsStatisticsDto
 } from '../models/dashboard.model';
 import { environment } from '@environments/environment';
 
@@ -132,6 +133,27 @@ export class DashboardService {
   }
 
   /**
+   * Obtiene estadísticas de costos de envío
+   */
+  getShippingCostsStatistics(filters: DashboardFilters): Observable<ShippingCostsStatisticsDto> {
+    const params = this.buildParams(filters);
+    return this.http.get<ApiResponse<ShippingCostsStatisticsDto>>(`${this.apiUrl}orders/shipping-costs/statistics`, { params })
+      .pipe(
+        map(response => response.data || {
+          promedioPagosEnvio: 0,
+          promedioCostoEnvio: 0,
+          costoMaximoEnvio: 0,
+          totalCostosEnvio: 0,
+          totalPagosEnvio: 0
+        }),
+        catchError(error => {
+          console.error('Error al obtener estadísticas de costos de envío:', error);
+          return throwError(() => error);
+        })
+      );
+  }
+
+  /**
    * Obtiene todos los datos del dashboard en una sola llamada
    * Combina múltiples endpoints para construir DashboardData completo
    */
@@ -168,6 +190,7 @@ export class DashboardService {
     const ordersByChannel$ = this.getOrdersByChannel(filters);
     const ordersByBrand$ = this.getOrdersByBrand(filters);
     const ordersByCity$ = this.getOrdersByCity(filters);
+    const shippingCostsStats$ = this.getShippingCostsStatistics(filters);
 
     // Combinar todas las llamadas
     return forkJoin({
@@ -176,7 +199,8 @@ export class DashboardService {
       ordersByPaymentMethod: ordersByPaymentMethod$,
       ordersByChannel: ordersByChannel$,
       ordersByBrand: ordersByBrand$,
-      ordersByCity: ordersByCity$
+      ordersByCity: ordersByCity$,
+      shippingCosts: shippingCostsStats$
     }).pipe(
       map(data => {
         // Transformar datos de la API al formato del dashboard
@@ -210,7 +234,14 @@ export class DashboardService {
             cityId: 0, // No viene en la API, pero podríamos mapearlo
             cityName: item.cityName,
             total: item.totalOrders
-          }))
+          })),
+          shippingCosts: {
+            averageShippingPayment: data.shippingCosts.promedioPagosEnvio,
+            averageShippingCost: data.shippingCosts.promedioCostoEnvio,
+            maxShippingCost: data.shippingCosts.costoMaximoEnvio,
+            totalShippingCosts: data.shippingCosts.totalCostosEnvio,
+            totalShippingPayments: data.shippingCosts.totalPagosEnvio
+          }
         };
       }),
       catchError(error => {

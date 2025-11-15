@@ -1,0 +1,256 @@
+<div class="p-6">
+  <!-- Breadcrumb -->
+  <div class="mb-4">
+    <p-breadcrumb
+      [model]="breadcrumbItems"
+      [home]="home"
+    />
+  </div>
+
+  <!-- Header -->
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+    <div>
+      <h1 class="text-2xl font-semibold text-gray-800 dark:text-gray-200">
+        Productos en Promoción
+      </h1>
+      <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+        Gestiona los tags promocionales que se muestran en los productos
+      </p>
+    </div>
+
+    <p-button
+      label="Crear Nuevo Producto"
+      icon="pi pi-plus"
+      (onClick)="createNewProduct()"
+    />
+  </div>
+
+  <!-- Búsqueda y KPIs -->
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 mb-6">
+    <div class="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between mb-4">
+      <!-- Búsqueda -->
+      <div class="flex-1 max-w-md">
+        <p-iconfield iconPosition="left">
+          <p-inputicon styleClass="pi pi-search" />
+          <input
+            pInputText
+            type="text"
+            [formControl]="searchControl"
+            class="w-full"
+            placeholder="Buscar por ID, texto, posición o marca..."
+          />
+        </p-iconfield>
+      </div>
+
+      <!-- Botón refresh -->
+      <p-button
+        icon="pi pi-refresh"
+        [text]="true"
+        [rounded]="true"
+        (onClick)="refreshProducts()"
+        [loading]="isLoading()"
+        pTooltip="Actualizar lista"
+        tooltipPosition="left"
+      />
+    </div>
+
+  </div>
+
+  <!-- Tabla -->
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+    <!-- Loading State -->
+    @if (isLoading()) {
+      <div class="flex flex-col items-center justify-center py-20">
+        <p-progressSpinner />
+        <span class="mt-4 text-gray-600 dark:text-gray-400">Cargando productos...</span>
+      </div>
+    } @else if (totalRecords() === 0) {
+      <!-- Empty State -->
+      <div class="flex flex-col items-center justify-center py-20">
+        <i class="pi pi-inbox text-6xl text-gray-300 mb-4"></i>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+          No hay productos en promoción
+        </h3>
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+          {{ searchTerm() ? 'No se encontraron resultados para tu búsqueda' : 'Comienza creando tu primer producto promocional' }}
+        </p>
+        @if (!searchTerm()) {
+          <p-button
+            label="Crear Producto"
+            icon="pi pi-plus"
+            (onClick)="createNewProduct()"
+          />
+        }
+      </div>
+    } @else {
+      <!-- PrimeNG Table -->
+      <p-table
+        [value]="paginatedProducts()"
+        [tableStyle]="{ 'min-width': '50rem' }"
+        styleClass="p-datatable-sm"
+        responsiveLayout="scroll"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            <th>ID Producto</th>
+            <th>Marca</th>
+            <th>Texto</th>
+            <th>Posición</th>
+            <th>Precio Anterior</th>
+            <th class="text-center">Acciones</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-product>
+          <tr>
+            <!-- Product ID -->
+            <td>
+              <span class="font-medium text-gray-900 dark:text-gray-100">
+                {{ product.productId }}
+              </span>
+            </td>
+
+            <!-- Brand -->
+            <td>
+              <div class="flex items-center gap-2">
+                <img
+                  [src]="getBrandLogo(product.brandId)"
+                  [alt]="getBrandName(product.brandId)"
+                  class="w-8 h-8 rounded-full object-cover bg-gray-100"
+                  (error)="onImageError($event)"
+                />
+                <span class="text-sm">
+                  {{ product.brandId !== 'string' ? getBrandName(product.brandId) : '' }}
+                </span>
+              </div>
+            </td>
+
+            <!-- Text (Tag preview) -->
+            <td>
+              <div class="flex items-center gap-2">
+                <div
+                  class="inline-block px-3 py-1 rounded-md text-xs font-bold shadow-sm"
+                  [style.background-color]="product.backgroundColor"
+                  [style.color]="product.textColor"
+                >
+                  {{ product.text }}
+                </div>
+              </div>
+            </td>
+
+            <!-- Position -->
+            <td>
+              <div class="flex items-center gap-2">
+                <i [class]="'pi ' + getPositionIcon(product.position)" class="text-gray-600"></i>
+                <span class="text-sm">{{ getPositionLabel(product.position) }}</span>
+              </div>
+            </td>
+
+            <!-- Old Price -->
+            <td>
+              @if (product.oldPrice) {
+                <span class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                  L. {{ product.oldPrice }}
+                </span>
+              } @else {
+                <span class="text-sm text-gray-400">-</span>
+              }
+            </td>
+
+            <!-- Actions -->
+            <td class="text-center">
+              <p-button
+                icon="pi pi-ellipsis-v"
+                [text]="true"
+                [rounded]="true"
+                severity="secondary"
+                (onClick)="actionsMenu.toggle($event)"
+                pTooltip="Acciones"
+                tooltipPosition="top"
+              />
+              <p-popover #actionsMenu>
+                <div class="flex flex-col gap-2 p-2 min-w-[150px]">
+                  <button
+                    class="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors text-left"
+                    (click)="editProduct(product); actionsMenu.hide()"
+                  >
+                    <i class="pi pi-pencil text-blue-600"></i>
+                    <span>Editar</span>
+                  </button>
+                  <button
+                    class="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors text-left"
+                    (click)="openDeleteDialog(product); actionsMenu.hide()"
+                  >
+                    <i class="pi pi-trash text-red-600"></i>
+                    <span>Eliminar</span>
+                  </button>
+                </div>
+              </p-popover>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    }
+  </div>
+
+  <!-- Paginator -->
+  @if (totalRecords() > 0) {
+    <p-paginator
+      [rows]="pageSize()"
+      [totalRecords]="totalRecords()"
+      [first]="pageIndex() * pageSize()"
+      [rowsPerPageOptions]="[5, 10, 15, 20]"
+      (onPageChange)="onPageChange($event)"
+      class="mt-3"
+    />
+  }
+</div>
+
+<!-- Delete Confirmation Dialog -->
+<p-dialog
+  header="Confirmar Eliminación"
+  [(visible)]="showDeleteDialog"
+  [modal]="true"
+  [style]="{ width: '32rem' }"
+  [closable]="!isDeleting()"
+  [closeOnEscape]="!isDeleting()"
+>
+  <div class="flex flex-col gap-4">
+    <div class="flex items-start gap-3">
+      <i class="pi pi-exclamation-triangle text-3xl text-yellow-500"></i>
+      <div class="flex-1">
+        <p class="text-gray-900 dark:text-gray-100 mb-2">
+          ¿Estás seguro de que deseas eliminar este producto en promoción?
+        </p>
+        @if (productToDelete()) {
+          <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 text-sm">
+            <p><strong>Producto:</strong> {{ productToDelete()!.productId }}</p>
+            <p><strong>Marca:</strong> {{ getBrandName(productToDelete()!.brandId) }}</p>
+            <p><strong>Texto:</strong> "{{ productToDelete()!.text }}"</p>
+          </div>
+        }
+        <p class="text-gray-600 dark:text-gray-400 mt-2 text-sm">
+          Esta acción no se puede deshacer.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <p-button
+      label="Cancelar"
+      severity="secondary"
+      [outlined]="true"
+      (onClick)="closeDeleteDialog()"
+      [disabled]="isDeleting()"
+    />
+    <p-button
+      label="Eliminar"
+      severity="danger"
+      (onClick)="confirmDelete()"
+      [loading]="isDeleting()"
+    />
+  </ng-template>
+</p-dialog>
+
+<!-- Toast -->
+<p-toast />
